@@ -1,6 +1,3 @@
-#linux-> /etc/hosts-> sudo chmod 644 /etc/hosts
-#windows->/windows/system32/drivers/etc/hosts
-
 #SmartHosts START
 
 #Google Services START
