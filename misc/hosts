@@ -1,21 +1,6 @@
 #linux-> /etc/hosts-> sudo chmod 644 /etc/hosts
 #windows->/windows/system32/drivers/etc/hosts
 
-#ifdef linux
-#192.168.x.xxx	sudolee-workspace	# Added by NetworkManager
-#127.0.0.1	localhost.localdomain	localhost
-#::1	sudolee-workspace	localhost6.localdomain6	localhost6
-#127.0.1.1	sudolee-workspace
-
-# The following lines are desirable for IPv6 capable hosts
-#::1     localhost ip6-localhost ip6-loopback
-#fe00::0 ip6-localnet
-#ff00::0 ip6-mcastprefix
-#ff02::1 ip6-allnodes
-#ff02::2 ip6-allrouters
-#ff02::3 ip6-allhosts
-#endif
-
 #SmartHosts START
 
 #Google Services START
