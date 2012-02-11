@@ -13,4 +13,4 @@ Linux:
 	http://www.google.com.hk/sitemap.html
 
 Windows:
-	http://www.msfn.org/	## Microsoft Software Forum Network
+	www.msfn.org	## Microsoft Software Forum Network
