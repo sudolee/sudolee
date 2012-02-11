@@ -1,4 +1,4 @@
-Linux:
+# Linux
 	www.kernel.org
 	lwn.net
 	lxr.linux.no
@@ -12,5 +12,5 @@ Linux:
 	distrowatch.com			##linux release...
 	http://www.google.com.hk/sitemap.html
 
-Windows:
+# Windows
 	http://www.msfn.org/	## Microsoft Software Forum Network
