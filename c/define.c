@@ -10,9 +10,9 @@ void callee(char *str)
 
 int main(int argc, char *argv[])
 {
-	char *str = "Hello world...";
+	char *string = "Hello world...";
 
-	callee(str);
+	callee(string);
 
 	return 0;
 }
