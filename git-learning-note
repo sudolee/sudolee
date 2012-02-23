@@ -1,0 +1,18 @@
+/*
+ * Note of learning cool git
+ *
+ */
+
+** push new-branch to origin remote **
+-> git push origin new-branch
+
+** delete branch on origin remote **
+-> git push origin :new-branch	/* del remote branch */
+-> git branch -d new-branch		/* del the branch locally */
+
+** cleanup  **
+-> git gc
+
+
+-----------------------
+INFO: gitready.com
