@@ -1,30 +1,46 @@
+/*
+ * Show how mass stroage work from mmc/sdcard in android.
+ *
+ */
 1 board.c-> init_mmc()-> msm_add_sdcc()-> devices-msm7x27.c
 sysfs: devices/platform/msm_sdcc.[1~4]/mmc_host/mmc*
 [1] for BT storage.
 
 2 driver/mmc/: /dev/block/mmcblkxxx(partition)
 
-3 system notify the event of new device, then mount the device in vold:
--> void/main.cpp-> process_config()
-Get and analysis the rules in "system/vold/vold.fstab":
+2 vold get the notify of new device and analysis the rules in "system/vold/vold.fstab", then mount mmc on given node.
+-> vold/main.cpp-> process_config()
 
--> dev_mount <label> <mount_point> <part> <sysfs_path1...>
- @label: Just a label
- @mount_point: where to mount on?
- @part: which partition of the block device
- @sysfs_path: the path to search for
+## Format: dev_mount <label> <mount_point> <part> <sysfs_path1...> 
+## label        - Label for the volume
+## mount_point  - Where the volume will be mounted
+## part         - Partition # (1 based), or 'auto' for first usable partition.
+## <sysfs_path> - List of sysfs paths to source devices
+e.g
+## Example of a standard sdcard mount for the emulator / Dream
+# Mounts the first usable partition of the specified device
+	dev_mount sdcard /mnt/sdcard auto /devices/platform/goldfish_mmc.0 /devices/platform/msm_sdcc.2/mmc_host/mmc1
+
+## Example of a dual card setup
+# dev_mount left_sdcard  /sdcard1  auto /devices/platform/goldfish_mmc.0 /devices/platform/msm_sdcc.2/mmc_host/mmc1
+# dev_mount right_sdcard /sdcard2  auto /devices/platform/goldfish_mmc.1 /devices/platform/msm_sdcc.3/mmc_host/mmc1
+
+## Example of specifying a specific partition for mounts
+# dev_mount sdcard /sdcard 2 /devices/platform/goldfish_mmc.0 /devices/platform/msm_sdcc.2/mmc_host/mmc1
 
 
-4 when enable the mass storage, vold umount the device. Then share it with PC.
+
+4 when mass storage is enabled, vold umount the mmc/sdcard and then share it with PC.
 VolumeManager.cpp-> VolumeManager::shareVolume()
-write the path "/dev/block/vold/%d:%d <- (MAJOR, MINOR)" to "/sys/devices/platform/usb_mass_storage/lun%d/file"(const char *LUN_FILES[]).
+write the path "/dev/block/vold/%d:%d(major, minor)" to "/sys/devices/platform/usb_mass_storage/lun%d/file" in "char *LUN_FILES[]";
 
 p.s
-Each event of device is handled like this.
-"/sys/devices/platform/usb_mass_storage/lun%d/file" is created by "f_mass_storage.c",
-as well as "/sys/devices/platform/usb_mass_storage/lun%d/ro"(used for cdrom or ro fs).
+	Each event of device is handled like this.
+	The node "/sys/devices/platform/usb_mass_storage/lun%d/file" is created within "f_mass_stroage.c",
+	as well as "/sys/devices/platform/usb_mass_storage/lun%d/ro"(used for cdrom OR ro fs)
 
-5 fsg_store_file() open and store the info(inode+filp) of "/dev/block/vold/%d:%d" into "struct fsg_lun", then we can operate it in "f_mass_storage.c".
+5 fsg_store_file() open and store the info(inode+filp) of block device into "struct fsg_lun",
+  Then we can operate.
 
-6 when data request is coming, USB pass the request to mass storage.
-mass storage analysis the scsi CMD and read/write via vfs of block device.
+6 when gadget recieves request from PC, the scsi CMD pass by USB to mass storage.
+mass storage get and analysis the scsi CMD and read/write data via VFS.
