@@ -1,0 +1,101 @@
+QA:
+	http://gcc.gnu.org/install/
+
+--request software--
+DETIALS: gcc-4.6.3/INSTALL/prerequisites.html
+
+sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
+zip unzip autoconf m4 automake gettext gperf dejagnu expect tcl autogen \
+guile-2.0 flex texinfo subversion ssh diff patch ecj libtool byacc bison fixincludes \
+git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib axel
+
+
+--important--
+
+-1-
+必须在source以外的目录编译的软件包：binutils, glibc, gcc
+e.g
+rm -rf glibc_build_dir
+mkdir glibc_build_dir
+cd glibc_build_dir/
+../glibc-2.x.x_src/configure ... (with glibc-ports-2.x.x)
+make -j$JOBS
+
+-2-
+ppl-0.11.2, current version(0.12) without Parma Watchdog Library(pwl).
+glibc-2.13, the first version add embeded attr in, so choose 2.14.1 which may be more stable(i think).
+
+-3-
+为了便于将所有的文件打包，我把glibc安装到了交叉编译器内部的一个目录（$PREFIX/$TARGET/sys-root/usr)，
+其实真正原因是：我一直纠结，把arm 的glibc安装本地系统的/usr会不会有问题？
+我没有找到一个合适的选项用来指定gcc要使用的include(default /usr/include)的搜索路径，所以没有把include
+和lib安装到usr/以外的地方。
+http://www.linuxfromscratch.org/提供了一个方案可以把kernel_include和glibc安装到别的地方(不是/usr
+或者sys-root/usr)，但是需要修改linux64.h linux.h sysv4.h里STANDARD_INCLUDE_DIR，STANDARD_STARTFILE_PREFIX_1，
+STANDARD_STARTFILE_PREFIX_2的路径，考虑到兼容性，我没有这么做。
+使用--with-sysroot=$PREFIX/$TARGET/sys-root就可以找安装的glibc...
+--with-sysroot=DIR Search for usr/lib, usr/include, et al, within DIR.(gcc-x.x.x/gcc/configure)
+
+--with-local-prefix=dirname
+仅代表本来在/usr/local/include搜索的文件换作在dirname/include里搜索.
+
+--bugs--
+
+-1-
+glibc的一些编译问题可以通过在TARGET名字中包含eabi来解决，这样不用修改代码，比较安全。
+比如：原来TARGET=arm-none-linux-gnu编译有问题，换做TARGET=arm-none-linux-gnueabi就没有问题了。
+
+-2-找不到 libc*.so + libpthread*.so 的bug.
+glibc 安装时prefix=/usr, install_root=$SYSROOT可以解决找不到so库的问题.
+
+-3-最后编译出来的编译器，一旦移动目录就不能找到几个so (e.g libgmp.so, libcloog.so.0...)
+在编译gcc时--disable-shared, 这样就在编译时直接把静态库编译进去，而不是在运行是加载动态库.
+
+-4-
+安装ppl和cloog时,会用一个2进制文件bin覆盖$PREFIX/bin/这个目录.
+可能是file的问题，所以不能使用系统自带的.
+
+-5-
+lto-compress.c:28:18: fatal error: zlib.h: No such file or directory
+--> install zlib1g zlib1g-dev
+
+-6-
+./arm-linux-gnueabi-gcc: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.14' not found (required by ./arm-linux-gnueabi-gcc)
+
+
+--gcc final--
+11.2
+checking for objdir... .libs
+checking for the correct version of gmp.h... yes
+checking for the correct version of mpfr.h... yes
+checking for the correct version of mpc.h... yes
+checking for the correct version of the gmp/mpfr/mpc libraries... yes
+checking for PWL_handle_timeout in -lpwl... yes
+checking for version 0.11 (revision 0 or later) of PPL... yes
+checking for installed CLooG PPL Legacy... PPL Legacy
+checking for version 0.15.5 (or later revision) of CLooG... yes
+*** This configuration is not supported in the following subdirectories:
+     gnattools target-libada target-libgfortran target-libgo target-libffi target-zlib target-libjava target-libobjc target-boehm-gc
+    (Any other directories should still work fine.)
+
+
+
+--packages--
+
+# binutils gcc glibc gmp m4 mpfr ncurses
+ftp://ftp.gnu.org/gnu/
+
+# mpc
+http://www.multiprecision.org/
+
+# PPL
+http://bugseng.com/products/ppl/
+ftp://ftp.cs.unipr.it/pub/ppl/releases/
+
+# file
+http://www.darwinsys.com/file
+ftp://ftp.astron.com/pub/file/
+
+# ClooG-PPL
+http://cloog.org
+ftp://gcc.gnu.org/pub/gcc/infrastructure

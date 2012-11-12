@@ -1,0 +1,11 @@
+== 继承 ==
+public派生类A内(A的成员)无法访问: 基类B的private成员.
+public派生类A的对象无法访问: 基类B的private + protected成员, A的private + protected成员.
+
+public成员:		外部可以访问
+protected成员:	外部不可访问
+private成员:	外部不可访问
+
+public继承, 基类B的public作为派生类A的public成员, 基类B的protected作为派生类A的protected成员.
+protected继承, 基类B的public和基类B的protected成员作为派生类A的protected成员.
+private继承, 基类B的public和基类B的protected成员作为派生类A的private成员.

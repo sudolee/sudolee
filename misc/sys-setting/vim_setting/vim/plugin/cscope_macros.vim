@@ -20,7 +20,7 @@
 "
 " Happy cscoping,
 "
-" Jason Duell       jduell@alumni.princeton.edu     2002/3/7
+" Jason Duell       jduell@alumni.princeton.edu     9/12/2001
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
@@ -43,10 +43,10 @@ if has("cscope")
     " else add the database pointed to by environment variable 
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
-    endif
+	endif
 
     " show msg when any other cscope db added
-    set cscopeverbose  
+	set cscopeverbose  
 
 
     """"""""""""" My cscope/vim key mappings
@@ -76,10 +76,6 @@ if has("cscope")
     " (which also maps to CTRL-/, which is easier to type).  By default it is
     " used to switch between Hebrew and English keyboard mode.
     "
-    " All of the maps involving the <cfile> macro use '^<cfile>$': this is so
-    " that searches over '#include <time.h>" return only references to
-    " 'time.h', and not 'sys/time.h', etc. (by default cscope will return all
-    " files that contain 'time.h' as part of their name).
 
 
     " To do the first type of search, hit 'CTRL-\', followed by one of the
@@ -94,7 +90,7 @@ if has("cscope")
     nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>	
     nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>	
     nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>	
-    nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+    nmap <C-\>i :cs find i <C-R>=expand("<cfile>")<CR><CR>	
     nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>	
 
 
@@ -112,24 +108,21 @@ if has("cscope")
     nmap <C-@>t :scs find t <C-R>=expand("<cword>")<CR><CR>	
     nmap <C-@>e :scs find e <C-R>=expand("<cword>")<CR><CR>	
     nmap <C-@>f :scs find f <C-R>=expand("<cfile>")<CR><CR>	
-    nmap <C-@>i :scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>	
+    nmap <C-@>i :scs find i <C-R>=expand("<cfile>")<CR><CR>	
     nmap <C-@>d :scs find d <C-R>=expand("<cword>")<CR><CR>	
 
 
     " Hitting CTRL-space *twice* before the search type does a vertical 
     " split instead of a horizontal one (vim 6 and up only)
-    "
-    " (Note: you may wish to put a 'set splitright' in your .vimrc
-    " if you prefer the new window on the right instead of the left
 
-    nmap <C-@><C-@>s :vert scs find s <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-@><C-@>g :vert scs find g <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-@><C-@>c :vert scs find c <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-@><C-@>t :vert scs find t <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-@><C-@>e :vert scs find e <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-@><C-@>s :vert scs find s <C-R>=expand("<cword>")<CR><CR>	
+    nmap <C-@><C-@>g :vert scs find g <C-R>=expand("<cword>")<CR><CR>	
+    nmap <C-@><C-@>c :vert scs find c <C-R>=expand("<cword>")<CR><CR>	
+    nmap <C-@><C-@>t :vert scs find t <C-R>=expand("<cword>")<CR><CR>	
+    nmap <C-@><C-@>e :vert scs find e <C-R>=expand("<cword>")<CR><CR>	
     nmap <C-@><C-@>f :vert scs find f <C-R>=expand("<cfile>")<CR><CR>	
-    nmap <C-@><C-@>i :vert scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>	
-    nmap <C-@><C-@>d :vert scs find d <C-R>=expand("<cword>")<CR><CR>
+    nmap <C-@><C-@>i :vert scs find i <C-R>=expand("<cfile>")<CR><CR>	
+    nmap <C-@><C-@>d :vert scs find d <C-R>=expand("<cword>")<CR><CR>	
 
 
     """"""""""""" key map timeouts
@@ -154,10 +147,12 @@ if has("cscope")
     "set ttimeout 
     "
     " personally, I find a tenth of a second to work well for key code
-    " timeouts. If you experience problems and have a slow terminal or network
-    " connection, set it higher.  If you don't set ttimeoutlen, the value for
-    " timeoutlent (default: 1000 = 1 second, which is sluggish) is used.
+    " timeouts. If you experience problems and have a slow terminal or
+    " network connection, set it higher.  If you don't set ttimeoutlen, the
+    " value for timeoutlent (default: 1000) is used.
     "
     "set ttimeoutlen=100
 
 endif
+
+
