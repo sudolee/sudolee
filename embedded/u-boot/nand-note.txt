@@ -1,0 +1,37 @@
+
+1, Clock						   1.8v,3.3v
+CLE setup time				Tcls	21 ~ 12		= TACLS + TWRPH0	>= 12
+CLE hold time				Tclh	5  ~ 5		= TWRPH1	>= 5
+CE setup time				Tcs		25 ~ 20
+CE hold time				Tch		5  ~ 5
+ALE setup time				Tals	21 ~ 12		= TACLS + TWRPH0
+ALE hold time				Talh	5  ~ 5		= TWRPH1	>= 5
+data setup time				Tds		20 ~ 12		= TWRPH0	>= 12
+data hold time				Tdh		5  ~ 5		= TWRPH1	>= 5
+WE pulse width				Twp		21 ~ 12		= TWRPH0	>= 12
+WE high hold time			Twh		15 ~ 10		= TWRPH1	>= 10
+write cycle time			Twc		42 ~ 25		= Twp + Twh	>= 22	(TWRPH0 + TWRPH1)
+addr to data loading time	Tadl	100~ 100				>= 100
+(从地址周期的最后一个WE上升沿到数据周期的第一个WE上升沿)
+
+p.s.
+read pulse time >= 15
+发完地址需要等待100ns, 再检测RnB信号.
+ready后等待20ns.
+
+
+
+TACLS, TWRPH0, TWRPH1 = a, b, c
+a + b >= 12
+c >= 5
+b >= 15
+c >= 10
+b + c >= 22
+Result:
+a >= 0
+b >= 15
+c >= 10
+
+Vcc = 3.3v
+Fclk:Hclk:Pclk = 1:2:4
+Fclk = MPLL = 532MHz

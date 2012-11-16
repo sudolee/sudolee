@@ -1,0 +1,79 @@
+
+deb http://security.debian.org/ wheezy/updates main #contrib non-free
+
+字段说明：
+
+第一字段，指示包类型。
+取值只有「deb」「deb-src」两个，分别对应二进制包和源码包。通常只有二进制包对我们有用。
+
+第二字段，指示镜像站点，即「源」！
+URL 通常需要定位到某个目录，一般是打开该目录就能看到有「dists」「pool」两个子目录。看看 http://ftp.cn.debian.org/debian 或 http://ftp.sjtu.edu.cn/ubuntu/。
+
+第三字段，指示包的「版本」，姑且称为「仓库」。
+打开一个源，再进入「dists」子目录可见该「源」中有哪些「版本」可用，就是那些子目录。通常都是大小版本用减号（-）连在一起命名。
+很明显大版本号即系统的版本名称，比如「squeeze」「wheezy」。没有减号连接小版本的就是主版本。
+Debian 的小版本名称自 squeeze 起与 Ubuntu 基本相同。除主版本外，小版本有
+「security」，Ubuntu 用于指安全性更新。即影响系统安全的 bug 修补。对此，Debian 特殊一些，见下文。
+「updates」，非安全性更新。即不影响到系统安全的 bug 修补。
+「proposed-updates」，预更新。小 beta 版。过后会进入「updates」或「security」。Ubuntu 仅用「proposed」，无后缀「updates」。
+「backports」，后备。某系统版本自正式发行后，其所有软件便会冻结版本号（按原始软件发布时间论），所有软件只修 bug，不增加任何功能。但有些人可能需要更新的版本所提供的新功能，甚至某些较新的软件根本就没有。该仓库正因此而设，但欠官方维护。此仓库版本处于第二优先顺序，除非特别指明或原来没有的软件，否则不会被安装。其余版本都处于第一优先顺序。
+
+后续字段，指示包许可类型。
+后续字段排名不分先后，最终结果取其并集。
+按包本身的许可及所直接依赖的包的许可划分。打开一个源，进入「dists」子目录，然后再进入某个版本目录，又可见几个子目录。
+Debian 最多有三种
+「main」，本身是自由软件，且所有直接依赖的包也都是自由软件。
+「contrib」，本身是自由软件，但直接依赖的包中有某个是非自由软件。
+「non-free」，本身并非自由软件，无论依赖如何。当然，该软件本身是可以免费使用的。
+Ubuntu 最多有四种
+「main」，官方维护的自由软件。
+「universe」，社区维护的自由软件。
+「restricted」，设备专有驱动。
+「multiverse」，同 Debian 的「non-free」。
+
+
+特别之处：
+
+Debian 的安全性更新
+不像 Ubuntu 放在[security]仓库，而是放在单独一个源中。各大镜像站通常都把一般的包放在根下来一级的[debian]目录中，而安全性更新则会放在[debian-security]目录中，如果有的话。
+Debian 官方建议，所有安全性更新，只从官方（http://security.debian.org/debian-security）更新，不要用其它的镜像站，除非你对它非常放心。
+安全性更新的第三字段形式固定为[版本名/updates]，比如[squeeze/updates][wheezy/updates]。
+e.g. deb http://security.debian.org/ wheezy/updates main #contrib non-free
+
+Debian 的多媒体源
+一些多媒体软件因牵涉到版权问题，Debian 官方并未收录，有一网站专门填补该空缺，见 http://www.deb-multimedia.org。
+
+
+最后忠告：
+不要启用太多的源，同一[版本]的源启用一个即可，否则容易引起混乱。
+
+=========================
+1, 使用apt-spy生成源
+e.g.  sudo apt-spy -d wheezy -a Asia
+
+
+2, 查看有哪些源
+ftp://ftp.cn.debian.org/debian/README.mirrors.txt
+
+
+3, my /etc/apt/sources.list
+#
+## 163
+deb http://mirrors.163.com/debian wheezy main contrib non-free
+deb http://mirrors.163.com/debian wheezy-proposed-updates main contrib non-free
+deb-src http://mirrors.163.com/debian wheezy main non-free contrib
+deb-src http://mirrors.163.com/debian wheezy-proposed-updates main contrib non-free
+
+## china
+#deb http://ftp.cn.debian.org/debian/ wheezy main contrib non-free
+#deb-src http://ftp.cn.debian.org/debian/ wheezy main contrib non-free
+
+# debian security updates
+deb http://security.debian.org/ wheezy/updates main contrib non-free
+deb-src http://security.debian.org/ squeeze/updates main contrib non-free
+
+# multimedia
+deb http://deb-multimedia.org wheezy main non-free
+
+# virtualbox
+deb http://download.virtualbox.org/virtualbox/debian wheezy contrib

@@ -1,0 +1,183 @@
+== platform devices ==
+platform devices是系统中典型的独立实例。通常都是通过CPU总线直接寻址的。
+偶尔地,platform device也会连接到某些总线，但是他们的寄存器始终是可以直接寻址的。
+
+platform devices通过给定的名字绑定驱动和一个资源list，e.g. addresses and IRQs。
+
+struct platform_device {
+  const char *name;
+  u32 id;
+  struct device dev;
+  u32 num_resources;
+  struct resource *resource;
+ };
+ 
+ 
+ == platform drivers ==
+ platform drivers遵循标准驱动模型的惯例，发现和枚举都是驱动以外完成的，and驱动提供probe()和remove()方法。
+ 他们支持电源管理和关闭通知。
+ 
+ struct platform_driver {
+    int (*probe)(struct platform_device *); 
+    int (*remove)(struct platform_device *); 
+    void (*shutdown)(struct platform_device *); 
+    int (*suspend)(struct platform_device *, pm_message_t state);
+    int (*suspend_late)(struct platform_device *, pm_message_t state);
+    int (*resume_early)(struct platform_device *); 
+    int (*resume)(struct platform_device *); 
+    struct device_driver driver;
+};
+
+Note:probe()应该核实指定硬件设备确实存在;探测过程可以使用设备的资源，包括时钟和 platform_data.
+
+platform drviers 通常的注册方法：
+  int platform_driver_register(struct platform_driver *drv);
+  
+或者，通常设备是已知的不会被热插拔，probe()可以放在init部分(减少运行时空间)：
+  int platform_driver_probe(struct platform_driver *drv, int (*probe)(struct platform_device *((;
+  
+== device enumeration ==
+通常，特定平台(通常是开发板)的初始化代码会注册platform devices:
+  int platform_device_register(struct platform_device *pdev);
+  int platform_add_devices(struct platform_device **pdevs, int ndev);
+  
+许多情形，内存(地址)和IRQ资源结合platform device不足以使设备的驱动工作。开发板初始化代码还要通过platform_data提供额外的信息.
+
+== Legacy drivers: 设备探测 ==
+None the less, there are some APIs to support such legacy drivers.  Avoid
+using these calls except with such hotplug-deficient drivers.
+
+    struct platform_device *platform_device_alloc(
+            const char *name, int id);  (只分配了结构的内存，设备的注册由后面那个函数完成。)
+
+You can use platform_device_alloc() to dynamically allocate a device, which
+you will then initialize with resources and platform_device_register().
+A better solution is usually:
+
+    struct platform_device *platform_device_register_simple(
+            const char *name, int id,
+            struct resource *res, unsigned int nres);
+
+You can use platform_device_register_simple() as a one-step call to allocate
+and register a device.
+
+== 设备命名和驱动绑定 ==
+platform_device.dev.bus_id是规范的设备名字。它由两部分组成：
+  platform_device.name ... 也用也匹配驱动
+  platform_device.id ... 设备实例号，如果是“-1”表示这个名字的设备只有一个。
+  
+驱动的绑定是用驱动核心代码自动完成的，并且，在发现匹配的device和driver后调用probe()方法。
+3种方式可以触发设备和驱动的批评动作：
+  - 当一个设备被注册，设备所在的总线驱动将完成match。platform devices应该在系统启动过程中尽可能早的被注册。
+  - 当一个驱动通过platform_driver_register()发放被注册，所用这个总线上未绑定驱动的设备都会被检查是否match。
+  - 用platfrom_driver_probe()注册一个驱动就像使用platform_driver_register(), 除非驱动不会被探测(probe)如果另外一个设备被注册。
+    (在用于非热插拔设备时，总能正常工作。)
+    
+== Early platform devices and drivers ==
+Early platform interfaces在系统启动过程中为设备驱动较早的提供平台相关的数据。
+代码写在early_param()命令行解析之前and可也被较早的执行。e.g. “earlyprintk”，early serial consol
+
+1， 注册early平台设备数据
+架构相关的代码通过early_platform_add_devices()注册平台设备数据。early serial console的情形应该是硬件配置的(调试)串口。
+设备的注册要稍晚于match early平台驱动。
+
+2, 分析内核命令行(参数)
+架构相关的代码调用parse_eary_param()来分析内核命令行。这将运行所用的early_param()匹配回调函数。
+用户指定的early平台设备将在这个时候被注册。对于early串口的情形，用户可以指定内核命令行参数“earlyprintk=serial.0”,
+"serial"是平台设备驱动的名字and“0”是设备id。(如果id=-1,id将被忽略)
+
+3, 安装某类early平台驱动
+架构相关的代码可能通过early_platform_driver_register_all()函数随意地强制注册所有某类platform driver。
+用户在第二步指定的设备比这个的优先级高。由于early serial驱动可能被disabled，所以这一步可能被serial驱动例程忽略，除非，
+用户在内核命令行指定了。
+
+4, early platform driver registration
+在第2或者3步，编译进内核的platform drivers利用early_platform_init()被自动注册。seria drivers例程应该使用
+early_platform_init("earlyprintk", &platform_driver).
+
+5, 探测某类early平台驱动
+架构相关的代码用earlay_platform_driver_probe()match注册的early驱动和early设备。匹配的设备将调用其probe()方法。
+这一步可以在早期启动过程的任一时刻被执行。serial port的情形应该尽可能的早一点。
+
+6, early platform driver probe()
+在早期启动过程中，驱动代码要非常小心，有其实要进行内存分配和中断注册的时候。probe()函数里的代码可以用is_early_platform_device()
+检查自己是在early platform device阶段还是普通的平台设备阶段。early serial 的日ver这个时候执行register_console().
+
+
+
+== code flow ==
+platform_driver_register()-> /
+			     | -> driver_register() /
+			     |			    | -> driver_find() 是否已被注册，是则直接返回
+			     |			    | -> bus_add_driver() / 
+			     |			    | 			  | -> driver_attach() /
+			     |			    |			  \		       | -> bus_for_each_dev() 遍历bus上的devices，并用下面方法与驱动进行匹配
+			     |			    |-> kobject_uevent()   		       | -> __driver_attach() /
+			     |			    \		           	               \		      | -> driver_match_device()-> platform_match()
+			     |			     		           	                		      | -> driver_probe_device()-> really_probe() /
+			     |			     		           	                		      |						  |-> 将driver填入device->driver
+			     |			     		           	                		      |						  |-> 如果bus有probe()就用bus的，否则就调用driver的
+			     |			     		           	                		      |						  |-> driver_bound() 把device加到driver所支持的设备链表(klist_devices)
+			     |			     		           	                		      |						  \ss
+			     \			     		          	                		      \         
+			     
+platform_add_devices() /
+		       | -> device_initialize() 初始化device的kobject和pm等域
+		       | -> platform_device_add() /
+		       \ 			  |-> 指定其(device)父设备和总线为platform总线
+						  |-> set device的名字，根据pdev的名字和id
+						  |-> 初始化device_private为当前devcie，and子设备list
+						  |-> bus_add_device() 将自己加到bus的设备klist上
+						  |-> kobject_uevent() 事件上报userspace
+						  |-> device_add-> bus_probe_device() /
+						  |			   	      | -> bus_for_each_drv() 搜索bus上已注册的所有驱动并用下面这个函数进行匹配
+						  |			   	      | -> __device_attach() /
+						  |			   	      |			  |-> driver_match_device() 用bus的match进行匹配(platform_match())
+						  |			   	      |			  |				匹配name,id,compatible
+						  |			   	      |			  |-> driver_probe_device()-> really_probe() / -> 将driver填入device->driver
+						  |			   	      |			  |					     | -> 如果bus有probe()就用bus的，否则就调用driver的
+						  |			   	      |			  |					     \ -> driver_bound() 把device加到driver所支持的设备链表(klist_devices)
+						  |			   	      \			  \
+						  |
+						  \
+p.s. platform_device的device的driver和platform_device的driver其实是一样的，前者返回后者的入口地址。
+
+== arch code ==
+struct platform_device {                                                                                                                                                
+    const char  * name;
+    int     id; 
+    bool        id_auto;
+    struct device   dev; /* dev->platform_data */
+    u32     num_resources;
+    struct resource * resource;
+
+    const struct platform_device_id *id_entry;
+    ...
+};
+
+/* include/linux/ioport.h */
+struct resource {
+    resource_size_t start;
+    resource_size_t end;
+    const char *name;
+    unsigned long flags;
+    struct resource *parent, *sibling, *child;                                                                                                                          
+};
+
+struct resource *platform_get_resource(struct platform_device *dev, unsigned int type, unsigned int num);s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

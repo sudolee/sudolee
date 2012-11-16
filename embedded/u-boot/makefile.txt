@@ -1,0 +1,108 @@
+
+
+
+== Flow ==
+1, make mini2440_config
+	@$(MKCONFIG) -A $(@:_config=)
+	i.e.
+	mkconfig -A mini2440
+
+2, 在boards.cfg中查找mini2440, 并把参数$@设置为搜到的mini2440所在的行.
+	- $1即"-A", $2 即"mini2440"
+	- line=`egrep -i "^[[:space:]]*${2}[[:space:]]" boards.cfg`
+	- set ${line} ${1}
+
+	# Target                     ARCH        CPU         Board name          Vendor         SoC         Options
+	mini2440                     arm         arm920t     mini2440            friendlyarm    s3c24x0
+
+3, 创建头文件
+	- cd ./include; rm -rf asm/
+	- ln -s ../arch/${arch}/include/asm asm
+	-
+		if [ -z "${soc}" ] ; then
+			ln -s arch-${cpu} asm/arch
+		else
+			ln -s arch-${soc} asm/arch
+		fi
+	- ln -s proc-armv asm/proc
+
+4, 创建include/config.mk
+	ARCH   = arm
+	CPU    = arm920t
+	BOARD  = mini2440
+	VENDOR = friendlyarm
+	SOC    = s3c24x0
+
+5, board dir = board/${BOARDDIR}
+	if [ -z "${vendor}" ] ; then
+	    BOARDDIR=${board}
+	else
+	    BOARDDIR=${vendor}/${board}
+	fi
+
+6, 额外头文件加到config.h
+	#define CONFIG_BOARDDIR board/$BOARDDIR
+	#include <config_cmd_defaults.h>
+	#include <config_defaults.h>
+	#include <configs/${CONFIG_NAME}.h>
+	#include <asm/config.h>
+	#include <config_fallbacks.h>
+	#include <config_uncmd_spl.h>
+
+7, 编译的文件列表
+	arch/arm/cpu/arm920t/.depend
+	arch/arm/cpu/arm920t/.depend.cpu
+	arch/arm/cpu/arm920t/.depend.start
+	arch/arm/cpu/arm920t/cpu.o
+	arch/arm/cpu/arm920t/cpu.su
+	arch/arm/cpu/arm920t/libarm920t.o
+	arch/arm/cpu/arm920t/s3c24x0/.depend
+	arch/arm/cpu/arm920t/s3c24x0/.depend.speed
+	arch/arm/cpu/arm920t/s3c24x0/.depend.timer
+	arch/arm/cpu/arm920t/s3c24x0/asm-offsets.s
+	arch/arm/cpu/arm920t/s3c24x0/libs3c24x0.o
+	arch/arm/cpu/arm920t/s3c24x0/speed.o
+	arch/arm/cpu/arm920t/s3c24x0/speed.su
+	arch/arm/cpu/arm920t/s3c24x0/timer.o
+	arch/arm/cpu/arm920t/s3c24x0/timer.su
+	arch/arm/cpu/arm920t/start.o
+	arch/arm/include/asm/arch
+	arch/arm/include/asm/proc
+	arch/arm/lib/.depend
+	arch/arm/lib/.depend._ashldi3
+	arch/arm/lib/.depend._ashrdi3
+	arch/arm/lib/.depend._divsi3
+	arch/arm/lib/.depend._lshrdi3
+	arch/arm/lib/.depend._modsi3
+	arch/arm/lib/.depend._udivsi3
+	arch/arm/lib/.depend._umodsi3
+	arch/arm/lib/.depend.board
+	arch/arm/lib/.depend.bootm
+	arch/arm/lib/.depend.cache
+	arch/arm/lib/.depend.cache-cp15
+	arch/arm/lib/.depend.div0
+	arch/arm/lib/.depend.interrupts
+	arch/arm/lib/.depend.reset
+	arch/arm/lib/board.o
+	arch/arm/lib/board.su
+	arch/arm/lib/bootm.o
+	arch/arm/lib/bootm.su
+	arch/arm/lib/cache-cp15.o
+	arch/arm/lib/cache-cp15.su
+	arch/arm/lib/cache.o
+	arch/arm/lib/cache.su
+	arch/arm/lib/eabi_compat.o
+	arch/arm/lib/eabi_compat.su
+	arch/arm/lib/interrupts.o
+	arch/arm/lib/interrupts.su
+	arch/arm/lib/libarm.o
+	arch/arm/lib/reset.o
+	arch/arm/lib/reset.su
+	board/friendlyarm/mini2440/.depend
+	board/friendlyarm/mini2440/.depend.mini2440
+	board/friendlyarm/mini2440/libmini2440.o
+	board/friendlyarm/mini2440/mini2440.o
+	board/friendlyarm/mini2440/mini2440.su
+
+8. lds
+arm-linux-gnueabi-ld.bfd  -pie -T u-boot.lds -Bstatic -Ttext 0x0 $UNDEF_LST arch/arm/cpu/arm920t/start.o --start-group api/libapi.o arch/arm/cpu/arm920t/libarm920t.o arch/arm/cpu/arm920t/s3c24x0/libs3c24x0.o arch/arm/lib/libarm.o common/libcommon.o disk/libdisk.o drivers/bios_emulator/libatibiosemu.o drivers/block/libblock.o drivers/dfu/libdfu.o drivers/dma/libdma.o drivers/fpga/libfpga.o drivers/gpio/libgpio.o drivers/hwmon/libhwmon.o drivers/i2c/libi2c.o drivers/input/libinput.o drivers/misc/libmisc.o drivers/mmc/libmmc.o drivers/mtd/libmtd.o drivers/mtd/nand/libnand.o drivers/mtd/onenand/libonenand.o drivers/mtd/spi/libspi_flash.o drivers/mtd/ubi/libubi.o drivers/net/libnet.o drivers/net/phy/libphy.o drivers/pci/libpci.o drivers/pcmcia/libpcmcia.o drivers/power/libpower.o drivers/rtc/librtc.o drivers/serial/libserial.o drivers/spi/libspi.o drivers/twserial/libtws.o drivers/usb/eth/libusb_eth.o drivers/usb/gadget/libusb_gadget.o drivers/usb/host/libusb_host.o drivers/usb/musb/libusb_musb.o drivers/usb/phy/libusb_phy.o drivers/usb/ulpi/libusb_ulpi.o drivers/video/libvideo.o drivers/watchdog/libwatchdog.o fs/cbfs/libcbfs.o fs/cramfs/libcramfs.o fs/ext4/libext4fs.o fs/fat/libfat.o fs/fdos/libfdos.o fs/jffs2/libjffs2.o fs/libfs.o fs/reiserfs/libreiserfs.o fs/ubifs/libubifs.o fs/yaffs2/libyaffs2.o fs/zfs/libzfs.o lib/libfdt/libfdt.o lib/libgeneric.o lib/lzma/liblzma.o lib/lzo/liblzo.o lib/zlib/libz.o net/libnet.o post/libpost.o test/libtest.o board/friendlyarm/mini2440/libmini2440.o --end-group /home/sudolee/open/u-boot/arch/arm/lib/eabi_compat.o  -L /opt/arm-cross-toolchain/bin/../lib/gcc/arm-linux-gnueabi/4.6.3 -lgcc -Map u-boot.map -o u-boot

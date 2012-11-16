@@ -1,0 +1,14 @@
+
+1, 把变量或者函数指定到特定的段:
+	int var __attribute__((__section__(".x.data")));
+
+	void __attribute__((__section__(".c.text"))) c_start(void)
+	{
+		asm("":::"memory");
+	}
+
+2, 内存屏障(memory barrier)
+	作用: 用于防止编译器优化代码, 打乱关键指令执行顺序.
+	__asm__ __volatile__ ("":::"memory")
+	或
+	asm volatile ("":::"memory")

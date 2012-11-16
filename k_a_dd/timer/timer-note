@@ -1,0 +1,50 @@
+== timer in kernel ==
+< hardware >
+1, RTC (Real Time Clock)
+    独立于CPU和其他芯片，采用小电池或者蓄电池供电
+    
+2, TSC (Time Stamp Counter)
+    外部时钟(CLK)信号计数器
+    
+3, PIT (Programmable Interval Timer), 全局的
+    - HZ 每秒产生时钟中断的近似个数
+    - CLOCK_TICK_RATE 1193182ul, 8254芯片内部震荡器频率
+    - LATCH ((CLOCK_TICK_RATE + HZ/2) / HZ), 用来设置PIT
+    
+4, APIC (CPU本地定时器)
+    每隔1,2,4,8,16,32,64,128总线时钟信号到来时对该定时器进行递减
+    
+5, HPET (High Precision Event Timer ,replace PIT)
+    可编程，可产生中断，将取代PIT
+
+6, ACPI (电源管理定时器)
+    内核通过访问某个I/O端口获取计数器当前值
+
+< software >
+1, jiffies 在32-bits机器上是jiffies_64的低32位，在联编时通过地址赋值
+    - kernel/timer.c-> jiffies_64
+    - kernel/time/jiffies.c-> EXPORT_SYMBOL(jiffies)
+    - arch/arm/kernel/vmlinux.lds.S
+        #ifndef __ARMEB__ /* endian big ? */
+        jiffies = jiffies_64;                                                                                                                                                   
+        #else
+        jiffies = jiffies_64 + 4;
+        #endif
+        
+        
+== 8960 ==
+1, arch/arm/mach-msm/board-8960.c
+	- MACHINE_START{.timer}
+	- arch/arm/mach-msm/timer.c-> msm_timer_init() 设置和初始化timer
+		-> clockevents_register_device()-> clockevents_do_notify()
+		-> 循环调用list clockevents_chain里的方法.
+
+2, kernel/time/tick-common.c
+	- clockevents_register_notifier()-> list clockevents_chain
+	- tick_notifier()-> tick_notify()-> tick_check_new_device()-> tick_setup_device()
+		-> tick_setup_periodic()-> tick_set_periodic_handler()-> tick_handle_periodic()
+	- Note: 中断是按CPU处理, 非全局
+
+
+
+

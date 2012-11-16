@@ -1,0 +1,62 @@
+
+
+1, 下载镜像文件: debian-testing-amd64-DVD-1.iso
+	http://cdimage.debian.org/cdimage/weekly-builds/amd64/iso-dvd/
+
+2, 制作U盘安装盘:
+	cat debian-testing-amd64-DVD-1.iso > /dev/sdx
+
+3, 默认安装的是gnome桌面, 如果想安装别的桌面环境可以在安装过程中不选择安装桌面环境.
+	只安装base系统, 完成后再安装需要的桌面环境(以kde为例).
+
+4, 安装kde:
+	- 将debian-testing-amd64-DVD-1.iso拷贝到U盘, 或者移动硬盘...
+	- 手动挂载该U盘(当然要用root), "mount /dev/sdx /media/xxx"
+	- 找到系统镜像在U盘上的位置, e.g. "/media/xxx/system-img/debian-testing-amd64-DVD-1.iso"
+	- 创建一个cdrom软链接到"/dev/", "ln -s /media/xxx/system-img/debian-testing-amd64-DVD-1.iso /dev/sr0"
+		(如果之前有sr0先将其mv为sr1)
+	- 把镜像文件作为源, "apt-cdrom add" (安装DVD里的kde而不是通过网络, 这样要快很多)
+	- apt-get update; apt-get install task-kde-desktop (kde桌面环境)
+	- 安装中文环境, 安装后就能正常显示中文, 也会安装fcitx输入法(个人感觉在debian下比ibus好用)
+			task-chinese-s - Simplified Chinese environment
+			task-chinese-s-desktop - Simplified Chinese desktop
+			task-chinese-s-kde-desktop - Simplified Chinese KDE desktop
+			kde-l10n-zhcn - Chinese Simplified (zh_CN) localization files for KDE
+	- 重启后进入kde桌面环境
+
+5, 更改更新源/etc/apt/sources.list
+	## 163
+	deb http://mirrors.163.com/debian wheezy main contrib non-free
+	deb-src http://mirrors.163.com/debian wheezy main non-free contrib
+	#deb http://mirrors.163.com/debian wheezy-proposed-updates main contrib non-free
+	#deb-src http://mirrors.163.com/debian wheezy-proposed-updates main contrib non-free
+
+	## china
+	#deb http://ftp.cn.debian.org/debian/ wheezy main contrib non-free
+	#deb-src http://ftp.cn.debian.org/debian/ wheezy main contrib non-free
+
+	# debian security updates
+	deb http://security.debian.org/ wheezy/updates main contrib
+	deb-src http://security.debian.org/ wheezy/updates main contrib
+
+	# multimedia
+	deb http://deb-multimedia.org wheezy main non-free
+
+	# virtualbox
+	deb http://download.virtualbox.org/virtualbox/debian wheezy contrib
+
+6, 修改用户
+	在文件/etc/sudoers中添加一行, 如下:
+	sudolee ALL=(ALL:ALL) ALL
+
+7, 安装邮件客户端icedove(其实就是thunderbird, 因为商标问题, 在debian下porting为这个)
+	apt-get install icedove icedove-l10n-zh-cn
+	p.s. 以前备份的thunderbird或者icedove邮件直接拷贝到~/.icedove/xxxx.default/Mail就可以了
+		我在备份的时候发现要先创建账户, 然后把自动生成的~/.icedove/xxxx.default/Mail用之前备份的替换掉才可以.
+
+8, virtualBox
+	- 上面包含了virtualbox的源, apt-get update后直接apt-get install virtualbox-4.2
+	- 修改"Default Machine Folder", 直接在 "~/.VirtualBox/VirtualBox.xml" 中修改默认路径(VirtualBox VMs)
+
+
+

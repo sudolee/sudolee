@@ -1,0 +1,16 @@
+
+== isolinux ==
+wiki - http://www.syslinux.org/wiki/index.php/ISOLINUX
+download - http://www.kernel.org/pub/linux/utils/boot/syslinux/
+
+== mkisofs ==
+CMD: mkisofs -o output.iso -b isolinux/isolinux.bin -c isolinux/boot.cat \
+		-no-emul-boot -boot-load-size 4 -boot-info-table CD_root/
+	or. boot/isolinux/isolinux.bin...
+
+== kenrel ==
+http://www.kernel.org/
+
+== initrd.img ==
+
+

@@ -1,0 +1,200 @@
+
+== initrd ==
+
+1, 打包进内核镜像的initrd.
+	1.1 cpio格式
+		usr/initramfs_data.S
+		- 用.init.ramfs段存放initramfs
+			.section .init.ramfs,"a"
+			__irf_start:
+			.incbin __stringify(INITRAMFS_IMAGE)
+			__irf_end:
+			.section .init.ramfs.info,"a"
+			.globl VMLINUX_SYMBOL(__initramfs_size)
+			VMLINUX_SYMBOL(__initramfs_size):
+
+		- __initramfs_start
+			是lds里面定义的.init.ramfs段的起始地址.
+			arch/arm/kernel/vmlinux.lds
+			__initramfs_start = .; *(.init.ramfs) . = ALIGN(8); *(.init.ramfs.info)
+
+		- populate_rootfs()-> unpack_to_rootfs()
+			判断如果__initramfs_size不为0, 则按照cpio解压到"/", 并释放之前所占内存.
+
+		- 打包进内核的方法:
+			在配置内核时指定initramfs文件即可.
+			General setup  ---> Initramfs source file(s)
+	1.2 旧的块设备
+		如果在编译内核时指定了INITRD=xxx.img
+		则xxx.img会被打包进内核镜像initrd_start开始的位置.
+
+2, 由bootloader加载的initrd [initrd_start != 0]
+	- 如果BLK_DEV_INITRD没有被定义, 那么当作cpio格式直接解压到"/".
+	- 如果BLK_DEV_INITRD被定义, 就当作旧的块设备initrd来处理.
+		(其实内核仍然会尝试按照cpio格式来解压, 然后退出<可能会失败>.)
+	- 如果上面失败了, 那么就当作旧的块设备initrd来处理.
+		先创建一个文件"/initrd.image", 然后把initrd的内容copy进去.
+
+	[Note]
+		可以通过tags list或者DT把initrd_start传给kernel.
+
+3, initrd后续处理
+	3.1 cpio
+		可以通过cmdline设置"rdinit=/sbin/init"指定用户空间的init, 否则用默认为"/init"
+		ramdisk_execute_command = "/sbin/init"/"init"
+	3.2 旧式块设备
+		如果上一步里的init不存在, 则进入旧式块设备流程prepare_namespace().
+		3.2.1
+			- 如果在cmdline指定了"root=xxx", 这个参数将在do_early_param()被保存到saved_root_name[].
+			- 这一步会对其进行解析, 并存入"root_device_name"(设置ROOT_DEV).
+		3.2.2 initrd_load()
+			- 如果在cmdline里设置noinitrd直接退出
+			- ram0: create_dev("/dev/ram", Root_RAM0);
+			- rd_load_image()
+				- identify_ramdisk_image(), 读出initrd的header, 并解析是否minix或者ext2, 返回总大小blocks.
+					1block = 1KiB(*n) is okay.
+				- 把"/initrd.imge"逐块写入"/dev/ram"
+			- handle_initrd()
+				- create_dev("/dev/root.old", Root_RAM0);
+				- mount_block_root()-> do_mount_root()
+					把initrd(ram0)挂载到"/root"
+					sys_chdir("/root");
+					s = current->fs->pwd.dentry->d_sb;
+					ROOT_DEV = s->s_dev;		????
+					mkdir /old; chdir("/old");
+				- 运行"/linuxrc"脚本
+				- sys_mount("..", ".",....);
+				- sys_chroot("..");
+				- chdir("/old"); mount(".", "/",...); chroot(".");
+4, 运行init脚本
+	- run_init_process(ramdisk_execute_command), "/init"或者"root=xxx"
+	- 如果失败就逐个尝试, /sbin/init, /etc/init, /bin/init, /bin/sh
+	- 仍然是被则panic.
+
+
+== initrd制作 ==
+1, cpio格式
+	- 制作: "."为要制作的根目录的"/":
+		find . | cpio --quiet -H newc -o | gzip -9 -n > ../imagefile.img
+	- 解压已存在的initramfs, 到当前目录.
+		gzip -cd /boot/initramfs.img | cpio -imd --quiet
+
+	p.s. 
+		内核也提供了一个制作工具, "kernel/usr/gen_init_cpio"
+
+2, 旧式块设备initrd
+	mkdir temp
+	dd if=/dev/zero of=initrd bs=300k count=1
+	mke2fs -F -m0 initrd
+	mount -t ext2 -o loop initrd ./temp/
+	cd temp; mkdir dev
+	mknod dev/console c 5 1
+	Don't forget sbin/init with "x" permissions.
+	cd ..; umount ./temp
+	gzip -9 initrd
+	
+
+
+== make bootpImage ==
+Combined zImage and initial RAM disk
+	(supply initrd image via make variable INITRD=<path>)
+
+1, arch/arm/boot/bootp/init.S
+	- 计算kernel第一条指令的地址(加载地址)
+		add lr, pc, #-0x8
+	- 计算data的地址, 并存入r13
+		adr r13, data
+		data:
+			.word   initrd_start    @ source initrd address
+			.word   initrd_phys     @ destination initrd address
+			.word   initrd_size     @ initrd size
+
+			.word   0x54410001      @ r5 = ATAG_CORE
+			.word   0x54420005      @ r6 = ATAG_INITRD2
+			.word   initrd_phys     @ r7
+			.word   initrd_size     @ r8
+			.word   params_phys     @ r9
+		[Note]:
+			1, Makefile.boot里面指定了initrd的目标地址initrd_phys
+				e.g. initrd_phys-y   := 0x70410000
+
+			2, arch/arm/boot/Makefile里把initrd_phys-y导出.
+				include $(srctree)/$(MACHINE)/Makefile.boot
+				INITRD_PHYS := $(initrd_phys-y)
+				export INITRD_PHYS
+
+			3, arch/arm/boot/bootp/Makefile里定义了initrd_phys符号, 这样代码就可以直接访问了.
+				--defsym initrd_phys=$(INITRD_PHYS)
+
+	- arch/arm/boot/bootp/initrd.S
+		initrd_start是定义在initrd.S中的一个label.
+		initrd.S中直接用.incbin把initrd二进制文件包含进来.
+	- 把data前3个words load到r4, r5, r6(initrd_start, initrd_phys, initrd_size)
+		ldmia   r13!, {r4-r6}
+	- add r4, r4, lr      @ r4 = initrd_start + load addr
+		initrd_start是initrd在内核镜像中的偏移.
+		p.s.
+			r4 = initrd在内存中的起始地址
+			r5 = initrd的目标(物理)地址
+			r6 = initrd的size
+
+2, 把initrd move到r5指定的地址
+	move:
+		/* Note: 没有#4, 所以一次拷贝1 Byte, ldmia r4!, {r7 - r10}, #4这样是4bytes */
+		ldmia   r4!, {r7 - r10}     @ move 32-bytes at a time
+        stmia   r5!, {r7 - r10}
+        ldmia   r4!, {r7 - r10}
+        stmia   r5!, {r7 - r10}
+        subs    r6, r6, #8 * 4		@ 从size里减去本次拷贝的32 bytes
+        bcs move
+	
+3, 后续move kernel args到合适的位置然后跳到kernel_start.
+	- kernel_start 是定义在kernel.S中的一个label, 及zimage的起始地址
+	- arch/arm/boot/bootp/bootp.lds把init.S, kernel.S, initrd.S链接在一起.
+	kernel.S里.incbin zimage, initrd.S里 .incbin zimage, 所以最后的镜像的布局应该是:
+	| init.S | zimage | initrd |
+
+4, zimage的入口为arch/arm/kernel/head.S-> stext()
+
+
+
+
+
+
+== start_kernel()-> vfs_caches_init() ==
+	临时根目录
+	- init_rootfs()-> register_filesystem(&rootfs_fs_type)
+	- init_mount_tree()-> do_kern_mount()-> vfs_kern_mount()-> mount_fs()-> type->mount()回调rootfs的mount().
+		-> rootfs_mount()-> mount_nodev(fs_type, flags|MS_NOUSER, data, ramfs_fill_super) -> ramfs_fill_super() -> d_make_root()
+			/*
+			static const struct qstr name = QSTR_INIT("/", 1);
+			res = __d_alloc(root_inode->i_sb, &name);
+			*/
+			p.s. fs/super.c-> mount_nodev()
+
+== start_kernel()-> rest_init() ==
+1, 创建kernel_init()线程
+	- kernel_thread(kernel_init, NULL, CLONE_FS | CLONE_SIGHAND);
+	- complete(&kthreadd_done) 唤醒kernel_init()
+	- kernel_init_freeable()
+		- wait_for_completion(&kthreadd_done);	等待唤醒.
+		- do_basic_setup()
+			- driver_init() init所有的driver.
+			- do_initcalls() 调用所有的initcall
+				e.g. rootfs_initcall()-> __define_initcall()
+				这些initcall被放到(.initcall" level ".init")代码段里.
+
+2, rootfs_initcall(populate_rootfs);就在这个时候被调用, 它探测和解压initrd.
+	- 如果initrd_start大于0则是initrd集成在内核镜像里.
+	- 否则就是单独的initrd
+
+	[Note]:
+		initrd有几种, 是老实的blk还是ramfs.
+		由bootloader加载, 还是集成在内核里面.
+				
+
+3, start_kernel()-> parse_early_param()-> parse_early_options()-> do_early_param()
+	比陪tag list里和.init.setup段里名字相同的函数.
+	.init.setup这样被注册: __setup()-> __setup_param()
+	[Note]:
+		可以通过cmdline设置"rdinit=/sbin/init"指定用户空间的init, 否则用默认为"/init"
