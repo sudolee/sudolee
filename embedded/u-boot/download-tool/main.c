@@ -15,13 +15,10 @@ init_func_t *init_tbl[] = {
 
 void c_start(void)
 {
-//	init_func_t *init_funcp;
-	int i;
+	init_func_t *init_funcp;
 
-//	for(init_funcp = init_tbl; *init_funcp; ++init_funcp)
-//		(*init_funcp)();
-	for(i = 0; init_tbl[i]; i++)
-		init_tbl[i]();
+	for(init_funcp = init_tbl; *init_funcp; ++init_funcp)
+		(*init_funcp)();
 
 	/* hang there */
 	for(;;);
