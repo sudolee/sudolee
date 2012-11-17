@@ -1,8 +1,8 @@
 
-CC=/opt/arm-cross-toolchain/bin/arm-linux-gnueabi-gcc -g -Os -msoft-float -fno-builtin -nostdinc -marm -mno-thumb-interwork -mabi=aapcs-linux -march=armv4 -Wall -fno-stack-protector -fstack-usage -fno-toplevel-reorder -c
-LD=/opt/arm-cross-toolchain/bin/arm-linux-gnueabi-ld.bfd -S
-OBJCOPY=/opt/arm-cross-toolchain/bin/arm-linux-gnueabi-objcopy
-OBJDUMP=/opt/arm-cross-toolchain/bin/arm-linux-gnueabi-objdump
+CC=arm-linux-gnueabi-gcc -g -Os -msoft-float -fno-builtin -nostdinc -marm -mno-thumb-interwork -mabi=aapcs-linux -march=armv4 -Wall -fno-stack-protector -fstack-usage -fno-toplevel-reorder -c
+LD=arm-linux-gnueabi-ld.bfd -S
+OBJCOPY=arm-linux-gnueabi-objcopy
+OBJDUMP=arm-linux-gnueabi-objdump
 
 TARGET=led
 

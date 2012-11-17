@@ -20,13 +20,13 @@ address of B [0x2800 0000 + 0x0200 0000, 0x2800 0000 + 0x0200 0000 + 7]
 2^25 = 0x0200 0000
 
 == Banks ==
-BANK0: 0x0000 0000 ~ 0x07FF FFFF
+BANK0: 0x0000 0000 ~ 0x07FF FFFF		-> Nor flash
 BANK1: 0x0800 0000 ~ 0x0FFF FFFF
 BANK2: 0x1000 0000 ~ 0x17FF FFFF
 BANK3: 0x1800 0000 ~ 0x1FFF FFFF
-BANK4: 0x2000 0000 ~ 0x27FF FFFF
+BANK4: 0x2000 0000 ~ 0x27FF FFFF		-> dm9000
 BANK5: 0x2800 0000 ~ 0x2FFF FFFF
-BANK6: 0x3000 0000 ~ 0x37FF FFFF
+BANK6: 0x3000 0000 ~ 0x37FF FFFF		-> SDRAM
 BANK7: 0x3800 0000 ~ 0x3FFF FFFF
 
 [Note]: Bank0 address 0~4KB internal SRAM init is not required.
@@ -76,6 +76,21 @@ Other:
 	SCLK		-- SCLK0(chip0) / SCLK1(chip1)
 	LDQM		-- nWBE0(chip0) / nWBE2(chip1)
 	UDQM		-- nWBE1(chip0) / nWBE3(chip1)
+--config--
+SDRAM on bank6:
+ST6[27] = 0b0, use nWBE[3:0]
+WS6[26] = disable WAIT
+DW6[25:24] = 0b01, 16-bits
+Each inner back = 8192 rows * 2048 columns
+scke = 1
+
+BWSCON=0000 0001 0000 0000 0000 0000 0000 10 0 = 0x800004
+BANKCON6=0b11
+banksize = 0b0001 0001
+mrsrb6[6:4] = 0b010
+64ms - 8192-cycle refresh
+row addr = A0 ~ A12
+column addr = A0 ~ A9
 
 == Nand flash ==
 size: 256MB (K9F2G08U0A)

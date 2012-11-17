@@ -16,6 +16,8 @@ Linux:
 	www.linuxfromscratch.org  # build cross compiler
 	http://www.win.tue.nl/~aeb/linux/
 	https://silver.arm.com
+google chrome:
+	https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 yaffs filesystem:
 	git clone git://www.aleph1.co.uk/yaffs2 #http://www.yaffs.net/node/346
 free cross toolchain:
