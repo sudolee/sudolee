@@ -12,3 +12,5 @@
 	__asm__ __volatile__ ("":::"memory")
 	或
 	asm volatile ("":::"memory")
+
+3, sp必须align 4, or 引起数据终止异常.
