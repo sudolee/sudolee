@@ -7,5 +7,7 @@
 typedef unsigned long u32;
 typedef unsigned char u8;
 
+typedef void (init_func_t)(void);
+
 
 #endif	/* __COMMON_H_ */
