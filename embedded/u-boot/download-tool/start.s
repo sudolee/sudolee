@@ -13,9 +13,18 @@
 
 _start:
 	b start_code
-	.rept 7					@ For 7 exceptions
-		b .
+	.rept 7
+		b .		@ exception handlers will be installed after init
 	.endr
+/*
+	ldr pc, _undefined_instruction
+	ldr pc, _swi_interrupt
+	ldr	pc, _prefetch_abort
+	ldr pc, _data_abort
+	nop
+	ldr pc, _irq
+	ldr pc, _fiq
+*/
 
 start_code:
 #	mrs r0, cpsr
@@ -41,10 +50,11 @@ mmu_stuff:
 	orr r0, r0, #0x00000002      @ enable: bit 1, align
 	mcr p15, 0, r0, c1, c0, 0
 
+/* set stack pointer */
 	.align
-	/* sp must align to 4Byte */
+	/* Note: sp must align to 4 byte */
 	.equ SP_ENTRY, 0x40000ffc	@ Nor flash boot
-#	.equ SP_ENTRY, 0x00000fff	@ nand flash boot
+#	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
 
 	b c_start

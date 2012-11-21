@@ -13,10 +13,12 @@ all:
 	${CC} -o main.o main.c
 	${CC} -o cpm.o cpm.c
 	${CC} -o mem.o mem.c
+	${CC} -o irq.o irq.c
+#	${CC} -o list.o list.c
 	${LD} -o ${TARGET} -TLink.lds \
-		start.o led.o main.o cpm.o mem.o
+		start.o led.o main.o cpm.o mem.o irq.o
 	${OBJCOPY} -O binary ${TARGET} ${TARGET}.bin
 	${OBJDUMP} -D ${TARGET} > objdump-D-asm
 
 clean:
-	@rm -fv *.o *.su objdump-D-asm ${TARGET}.bin ${TARGET} 
+	@rm -f *.o *.su objdump-D-asm ${TARGET}.bin ${TARGET} 

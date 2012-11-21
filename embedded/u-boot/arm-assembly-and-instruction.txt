@@ -62,7 +62,7 @@
 		msr{<cond>} CPSR_<fields>, #<immediate>/<Rm>
 		msr{<cond>} SPSR_<fields>, #<immediate>/<Rm>
 		fields列表:
-		c, cpsr_c, cpsr中的控制位[0:9]
+		c, cpsr_c, cpsr中的控制位[0:7]
 		x, cpsr_x, cpsr中的扩展位
 		s, cpsr_s, cpsr中的状态位
 		f, cpsr_f, cpsr中的标志位

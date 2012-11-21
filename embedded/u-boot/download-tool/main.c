@@ -1,7 +1,5 @@
-#include "common.h"
-#include "cpm.h"
-#include "mem.h"
-#include "led.h"
+#include "misc.h"
+#include "globl_syms.h"
 
 #if 0
 static init_func_t *init_tbl[] = {

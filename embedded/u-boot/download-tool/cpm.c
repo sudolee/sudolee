@@ -2,13 +2,16 @@
  * Clock power management.
  */
 
-#include "cpm.h"
+#include "s3c2440.h"
 
-static inline void delay(u32 loops)
+/* clock and power controller entry */
+#define CLOCK_POWER_ENTRY 0x4c000000
+
+inline void delay(u32 loops)
 {
-	__asm__ __volatile__("0:	\n\t"
-						 "subs %0, %1, #1	\n\t"
-						 "nop	\n\t"
+	__asm__ __volatile__("0:\n\t"
+						 "subs %0, %1, #1\n\t"
+						 "nop\n\t"
 						 "bne 0b":"=r"(loops):"0"(loops));
 }
 
@@ -21,26 +24,23 @@ void cpm_init(void)
 {
 	struct cpm_t *clk = get_cpm_base();
 
-	clk->locktime = 0xffffffff;		/* max pll lock time */
+	writel(&clk->locktime, 0xffffffff);		/* max pll lock time */
 
 	/* upll clock = 48 MHz, MDIV-PDIV-SDIV */
-	clk->upllcon = (0x38 << 12) | (0x2 << 4) | (0x2 << 0);
+	writel(&clk->upllcon, (0x38 << 12) | (0x2 << 4) | (0x2 << 0));
 
-	mb();
 	delay(7);
 
 	/* mpll clock = 405 MHz, MDIV-PDIV-SDIV */
-	clk->mpllcon = (0x7f << 12) | (0x2 << 4) | (0x1 << 0);
+	writel(&clk->mpllcon, (0x7f << 12) | (0x2 << 4) | (0x1 << 0));
 
-	mb();
 	delay(7);
 
 	/*
 	 * Uclk = UPLL; Fclk:Hclk:Pclk = 1:3:6;
 	 * HDIVN-PDIVN
 	 */
-	clk->clkdivn = (0x0 << 3) | (0x3 << 1) | (0x1 << 0);
+	writel(&clk->clkdivn, (0x0 << 3) | (0x3 << 1) | (0x1 << 0));
 
-	mb();
 	delay(7);
 }

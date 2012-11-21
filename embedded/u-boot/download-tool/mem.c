@@ -1,4 +1,7 @@
-#include "mem.h"
+#include "s3c2440.h"
+
+/* memory controller entry */
+#define MEMORY_ENTRY 0x48000000
 
 static inline struct mem_t *get_mem_base(void)
 {
@@ -19,17 +22,17 @@ void mem_init(void)
 	 * bank0: Nor flash
 	 *  this bank config by OM[1:0] pins.
 	 */
-	mem_config->bwscon = 0x2212D110;
+	writel(&mem_config->bwscon, 0x2212D110);
 
-	mem_config->bankcon0 = 0x00000F40;
-	mem_config->bankcon1 = 0x00002E50;
-	mem_config->bankcon2 = 0x00002E50;
-	mem_config->bankcon3 = 0x00002E50;
-	mem_config->bankcon4 = 0x00002E50;
-	mem_config->bankcon5 = 0x00002E50;
+	writel(&mem_config->bankcon[0], 0x00000F40);
+	writel(&mem_config->bankcon[1], 0x00002E50);
+	writel(&mem_config->bankcon[2], 0x00002E50);
+	writel(&mem_config->bankcon[3], 0x00002E50);
+	writel(&mem_config->bankcon[4], 0x00002E50);
+	writel(&mem_config->bankcon[5], 0x00002E50);
 
 	/*
-	 * BANKCON6
+	 * BANKCON6 - used for SDRAM
 	 * MT[16:15] = 0b11, connect to sdram
 	 * Tacs[14:13] = 0b00, address setup time before nGCS
 	 * Tcos[12:11] = 0b00, CS setup time before nOE
@@ -39,8 +42,8 @@ void mem_init(void)
 	 * Trcd[3:2] = 0b01(3clocks), RAS to CAS delay, Page18 specify Trcd=Thclk*n >= 20ns
 	 * SCAN[1:0] = 0b01, column address number is 9-bit
 	 */
-	mem_config->bankcon6 = 0x00018005;
-	mem_config->bankcon7 = 0x00018005;
+	writel(&mem_config->bankcon[6], 0x00018005);
+	writel(&mem_config->bankcon[7], 0x00018005);
 
 	/* 
 	 * REFRESH
@@ -52,7 +55,7 @@ void mem_init(void)
 	 *   refresh period = 64ms/8192 = 7.8125us
 	 *   Hclk = Fclk/3 = 135MHz
 	 */
-	mem_config->refresh = 0x009c03e3;
+	writel(&mem_config->refresh, 0x009c03e3);
 
 	/*
 	 * BANKSIZE
@@ -61,9 +64,9 @@ void mem_init(void)
 	 * SCLK_EN[4] = 1
 	 * BK76MAP[2:0] = 001, 64MB/64MB
 	 */
-	mem_config->banksize = 0xb1;
+	writel(&mem_config->banksize, 0xb1);
 
 	/* CAS latency = 3 clocks */
-	mem_config->mrsrb6 = 0x30;
-	mem_config->mrsrb7 = 0x30;
+	writel(&mem_config->mrsrb6, 0x30);
+	writel(&mem_config->mrsrb7, 0x30);
 }
