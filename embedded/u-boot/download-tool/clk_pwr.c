@@ -13,14 +13,14 @@ inline void delay(u32 loops)
 						 "bne 0b":"=r"(loops):"0"(loops));
 }
 
-static inline struct cpm_t *get_cpm_base(void)
+static inline struct clk_pwr_t *get_cpm_base(void)
 {
-	return (struct cpm_t *)CLOCK_POWER_ENTRY;
+	return (struct clk_pwr_t *)CLOCK_POWER_ENTRY;
 }
 
 void clk_pwr_init(void)
 {
-	struct cpm_t *clk = get_cpm_base();
+	struct clk_pwr_t *clk = get_cpm_base();
 
 	writel(&clk->locktime, 0xffffffff);		/* max pll lock time */
 

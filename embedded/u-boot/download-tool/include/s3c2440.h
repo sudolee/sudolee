@@ -2,12 +2,13 @@
 #define __S3C2440_H_
 
 #include "type.h"
+#define LITTLE_ENDIAN
 
 /*
  * Clock power controller
  */
 
-struct cpm_t {
+struct clk_pwr_t {
 	u32 locktime;
 	u32 mpllcon;
 	u32 upllcon;
@@ -20,7 +21,7 @@ struct cpm_t {
 /*
  * memory controller
  */
-struct mem_t {
+struct memory_t {
 	u32 bwscon;
 	u32 bankcon[8];
 	u32 refresh;
@@ -42,6 +43,34 @@ struct irq_regs_t {
 	u32 intoffset;	/* read only */
 	u32 subsrcpnd;
 	u32 intsubmsk;
+};
+
+/*
+ * uart controller
+ */
+
+struct uart_t {
+	u32 ulcon;
+	u32 ucon;
+	u32 ufcon;
+	u32 umcon;
+	u32 utrstat;
+	u32 uerstat;
+	u32 ufstat;
+	u32 umstat;
+#ifdef LITTLE_ENDIAN
+	u8 utxh;
+	u8 pad0[3];
+	u8 urxh;
+	u8 pad1[3];
+#else
+	u8 pad0[3];
+	u8 utxh;
+	u8 pad1[3];
+	u8 urxh;
+#endif /* LITTLE_ENDIAN */
+
+	u32 ubrdiv;
 };
 
 #endif /* __S3C2440_H_ */
