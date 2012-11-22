@@ -1,48 +1,15 @@
-#ifndef __S3C2440_H_
-#define __S3C2440_H_
+#ifndef __IRQ_H_
+#define __IRQ_H_
 
-#include "misc.h"
+#include "type.h"
+#include "io.h"
+#include "s3c2440.h"
 
-/*
- * Clock power controller
- */
+/* irq controller entry */
+#define IRQ_ENTRY 0x4a000000
 
-struct cpm_t {
-	u32 locktime;
-	u32 mpllcon;
-	u32 upllcon;
-	u32 clkcon;
-	u32 clkslow;
-	u32 clkdivn;
-	u32 camdivn;
-};
-
-/*
- * memory controller
- */
-struct mem_t {
-	u32 bwscon;
-	u32 bankcon[8];
-	u32 refresh;
-	u32 banksize;
-	/* Can not be reconfiged during code perform in RAM. */
-	u32 mrsrb6;
-	u32 mrsrb7;
-};
-
-/*
- * interrupts controller
- */
-struct irq_regs_t {
-	u32 srcpnd;
-	u32 intmod;
-	u32 intmsk;
-	u32 priority;
-	u32 intpnd;
-	u32 intoffset;	/* read only */
-	u32 subsrcpnd;
-	u32 intsubmsk;
-};
+#define MAX_IRQ_NUM 15
+#define MAX_SUBIRQ_NUM 15
 
 /* Bit map: srcpnd, intpnd, intmod, intoffset, intmsk */
 enum {
@@ -105,6 +72,18 @@ enum {
 	INTAC97 = 14,
 };
 
+/* Clear I bit in cpsr */
+#define __enable_irq() { \
+	__asm__ __volatile__("mrs r3, cpsr\n\t" \
+		   				 "bic r3, r3, #0x8\n\t" \
+						 "msr cpsr, r3":::"r3");}
 
+/* Set I bit in cpsr */
+#define __disable_irq() { \
+	__asm__ __volatile__("mrs r3, cpsr\n\t" \
+		   				 "orr r3, r3, #0x8\n\t" \
+						 "msr cpsr, r3":::"r3");}
 
-#endif /* __S3C2440_H_ */
+void irq_init(void);
+
+#endif /* __IRQ_H_ */

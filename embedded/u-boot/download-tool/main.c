@@ -1,5 +1,7 @@
-#include "misc.h"
-#include "globl_syms.h"
+#include "clk_pwr.h"
+#include "memory.h"
+#include "debug.h"
+
 
 #if 0
 static init_func_t *init_tbl[] = {
@@ -21,9 +23,9 @@ void c_start(void)
 		led_run(i++);
 	}
 #else
-	cpm_init();
+	clk_pwr_init();
 	led_run(0);
-	mem_init();
+	memory_init();
 	led_run(1);
 #endif
 

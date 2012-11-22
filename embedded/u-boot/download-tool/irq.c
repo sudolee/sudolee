@@ -1,11 +1,5 @@
-#include "s3c2440.h"
-#include "globl_syms.h"
+#include "irq.h"
 
-/* irq controller entry */
-#define IRQ_ENTRY 0x4a000000
-
-#define MAX_IRQ_NUM 15
-#define MAX_SUBIRQ_NUM 15
 
 static inline struct irq_regs_t *get_irq_regs_base(void)
 {

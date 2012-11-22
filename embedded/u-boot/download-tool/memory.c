@@ -1,14 +1,12 @@
-#include "s3c2440.h"
+#include "memory.h"
 
-/* memory controller entry */
-#define MEMORY_ENTRY 0x48000000
 
 static inline struct mem_t *get_mem_base(void)
 {
 	return (struct mem_t *)MEMORY_ENTRY;
 }
 
-void mem_init(void)
+void memory_init(void)
 {
 	struct mem_t *mem_config = get_mem_base();
 

@@ -47,6 +47,13 @@
 		some commands...
 		.endr
 
+3, 局部标号: 向后跳用b, 向前跳用f, 比如:
+0:
+	b 0b
+	b 1f
+1:
+	nop
+
 == ARM指令 ==
 1, bic 位清除指令
 	bic{<cond>}{S} <Rd>, <Rn>, <shifter_operand>

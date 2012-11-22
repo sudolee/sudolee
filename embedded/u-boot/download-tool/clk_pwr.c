@@ -2,10 +2,8 @@
  * Clock power management.
  */
 
-#include "s3c2440.h"
+#include "clk_pwr.h"
 
-/* clock and power controller entry */
-#define CLOCK_POWER_ENTRY 0x4c000000
 
 inline void delay(u32 loops)
 {
@@ -20,7 +18,7 @@ static inline struct cpm_t *get_cpm_base(void)
 	return (struct cpm_t *)CLOCK_POWER_ENTRY;
 }
 
-void cpm_init(void)
+void clk_pwr_init(void)
 {
 	struct cpm_t *clk = get_cpm_base();
 

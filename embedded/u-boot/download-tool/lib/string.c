@@ -1,4 +1,4 @@
-#include "common.h"
+#include "type.h"
 
 int strcmp(const u8 *str1, const u8 *str2)
 {
@@ -14,7 +14,7 @@ int strcmp(const u8 *str1, const u8 *str2)
 	return c1 - c2;
 }
 
-u8 *strcpy(u8 *dest, const u8 *src)
+u8 *strcpy(u8 *dest, u8 *src)
 {
 	u8 c;
 	u8 *s = src;

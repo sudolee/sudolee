@@ -1,7 +1,7 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
-#include "misc.h"
+#include "type.h"
 
 struct list_head {
 	struct list_head *next, *prev;
