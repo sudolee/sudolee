@@ -14,3 +14,5 @@
 	asm volatile ("":::"memory")
 
 3, sp必须align 4, or 引起数据终止异常.
+
+4, gcc -D 选项可以预定义一个宏.
