@@ -36,7 +36,7 @@ void putc(const u32 port, const char ch)
 
 void puts(const u32 port, const char *s)
 {
-	while(*s)
+	while(*s != '\0')
 		putc(port, *s++);
 }
 
@@ -57,8 +57,9 @@ __attribute__((weak)) char * gets(const u32 port)
 /* init uartlite structure */
 static void port_init(u32 port, struct uart_t *entry)
 {
-	uart_ports[port].rx = &entry->urxh;
-	uart_ports[port].tx = &entry->utxh;
+	uart_ports[port].rx = &entry->rxdata;
+	uart_ports[port].tx = &entry->txdata;
+//	uart_ports[port].status = &entry->utrstat;
 	uart_ports[port].status = &entry->ufstat;
 }
 
@@ -67,6 +68,23 @@ void uart_init(u32 index)
 	struct uart_t *uart = get_uart_base(index);
 
 	if(uart) {
+		switch(index) {
+#define GPH_UART0 (0xaa << 0)
+#define GPH_UART1 (0xa << 8)
+#define GPH_UART2 (0xa << 12)
+			case UART0_PORT:
+				set_bit((u32 *)GPHCON, GPH_UART0);
+				break;
+
+			case UART1_PORT:
+				set_bit((u32 *)GPHCON, GPH_UART1);
+				break;
+
+			case UART2_PORT:
+				set_bit((u32 *)GPHCON, GPH_UART2);
+				break;
+		}
+
 		/* uart line control register
 		 * value = 0b 010 0011
 		 * [6] 0b0: normal mode
@@ -77,11 +95,11 @@ void uart_init(u32 index)
 		writel(&uart->ulcon, ULCON);
 		
 		/* uart control register
-		 * value = 0b 0000 0000 0101
+		 * value = 0b 1000 0000 0101
 		 * [15:12] Fclk divider
-		 * [11:10] 0b00/0b10: clk select Pclk
-		 * [9] Tx int type
-		 * [8] Rx int type
+		 * [11:10] 0b10: clk select Pclk
+		 * [9] 0b1: Tx int type
+		 * [8] 0b1: Rx int type
 		 * [7] 0b0: Rx timeout int disable
 		 * [6] 0b0: Rx err int disable
 		 * [5] 0b0: normal operation
@@ -90,6 +108,7 @@ void uart_init(u32 index)
 		 * [1:0] 0b01: int or polling
 		 */
 		writel(&uart->ucon, UCON);
+//		writel(&uart->umcon, 0x10);
 
 		/* uart FIFO control register
 		 * value = 0x1
@@ -98,9 +117,10 @@ void uart_init(u32 index)
 		 * [3]
 		 * [2] 0b0: Tx FIFO reset normal
 		 * [1] 0b0: Rx FIFO reset normal
-		 * [0] 0b1: enable FIFO
+		 * [0] 0b1: enable FIFO/ 0b0
 		 */
 		writel(&uart->ufcon, UFCON);
+//		writel(&uart->ufcon, 0);
 
 		/* ubrdiv = (int)(uart clk / (buad rate * 16)) - 1
 		 * value = (int)((504Mhz/6)/(115200 * 16)) - 1 = 45.57-1 = 46-1 = 45

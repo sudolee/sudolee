@@ -23,4 +23,7 @@
 #define writew(addr, val) ({ u16 __v = val; mb(); _arch_writel(addr, __v); __v; })
 #define writel(addr, val) ({ u32 __v = val; mb(); _arch_writel(addr, __v); __v; })
 
+#define clear_bit(addr, msk) ({ writel((addr), (readl(addr) & ~(msk))); })
+#define set_bit(addr, msk) ({ writel((addr), (readl(addr) | (msk))); })
+
 #endif /* __IO_H_ */

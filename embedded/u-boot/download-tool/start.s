@@ -7,24 +7,31 @@
 .arm
 .globl _start
 
-.extern c_start
+.extern board_init
 .extern led_init
 
 
 _start:
 	b start_code
-	.rept 7
-		b .		@ exception handlers will be installed after init
-	.endr
+	b .
+	b .
+	b .
+	b .
+	nop	
+	ldr pc, __irq
+	b .
+
 /*
-	ldr pc, _undefined_instruction
-	ldr pc, _swi_interrupt
-	ldr	pc, _prefetch_abort
-	ldr pc, _data_abort
+	ldr pc, __undefined_instruction
+	ldr pc, __swi_interrupt
+	ldr	pc, __prefetch_abort
+	ldr pc, __data_abort
 	nop
-	ldr pc, _irq
-	ldr pc, _fiq
+	ldr pc, __irq
+	ldr pc, __fiq
 */
+__irq:
+	.long 0xdeadbeef @ TODO: irq_route
 
 start_code:
 #	mrs r0, cpsr
@@ -57,6 +64,6 @@ mmu_stuff:
 #	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
 
-	b c_start
+	b board_init
 
 .end

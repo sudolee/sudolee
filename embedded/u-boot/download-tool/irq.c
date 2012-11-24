@@ -66,3 +66,7 @@ void irq_init(void)
 	__enable_irq();
 	__disable_irq();
 }
+
+void irq_route(void)
+{
+}

@@ -15,6 +15,8 @@ all:
 	${CC} -o memory.o memory.c
 	${CC} -o irq.o irq.c
 	${CC} -o uart.o uart.c
+	${CC} -o timer.o timer.c
+	${CC} -o nand.o nand.c
 	${CC} -o lib/list.o lib/list.c
 	${CC} -o lib/string.o lib/string.c
 	${LD} -o ${TARGET} -TLink.lds \

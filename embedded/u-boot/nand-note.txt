@@ -33,5 +33,5 @@ b >= 15
 c >= 10
 
 Vcc = 3.3v
-Fclk:Hclk:Pclk = 1:2:4
-Fclk = MPLL = 532MHz
+Fclk:Hclk:Pclk = 1:3:6
+Fclk = MPLL = 405MHz

@@ -59,18 +59,57 @@ struct uart_t {
 	u32 ufstat;
 	u32 umstat;
 #ifdef LITTLE_ENDIAN
-	u8 utxh;
+	u8 txdata;
 	u8 pad0[3];
-	u8 urxh;
+	u8 rxdata;
 	u8 pad1[3];
 #else
+	u8 txdata;
 	u8 pad0[3];
-	u8 utxh;
+	u8 rxdata;
 	u8 pad1[3];
-	u8 urxh;
-#endif /* LITTLE_ENDIAN */
-
+#endif
 	u32 ubrdiv;
 };
+
+/*
+ * Watch dog timer
+ */
+struct watchdog_t {
+	u32 wtcon;
+	u32 wtdat;
+	u32 wtcnt;
+};
+
+/*
+ * Nand flash
+ */
+struct nand_ctrl_t {
+	u32 nfconf;
+	u32 nfcont;
+	u32 nfcmmd; //[7:0]
+	u32 nfaddr; //[7:0]
+	u32 nfdata;
+	u32 nfmeccd[2];
+	u32 nfseccd;
+	u32 nfstat;
+	u32 nfestat[2];
+	u32 nfmecc[2];  /* read only */
+	u32 nfsecc;  /* read only */
+	u32 nfsblk;
+	u32 nfeblk;
+};
+
+/*
+ * GPIO
+ */
+/* GPA0 ~ GPA24 */
+#define GPACON 0x56000000
+#define GPADAT 0x56000004
+
+/* GPH0 ~ GPH10 */
+#define GPHCON 0x56000070
+#define GPHDAT 0x56000074
+#define GPHUP  0x56000078
 
 #endif /* __S3C2440_H_ */
