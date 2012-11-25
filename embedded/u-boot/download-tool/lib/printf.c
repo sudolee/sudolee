@@ -1,32 +1,18 @@
+#include "type.h"
+#include "print.h"
 
-#ifndef _STDARG
-#define _STDARG
+#include "uart.h"
 
-/* type definitions */
-typedef char *va_list;
-/* macros */
-#define va_arg(ap, T) \
-		(* (T *)(((ap) += _Bnd(T, 3U)) - _Bnd(T, 3U)))
-#define va_end(ap) (void)0
-#define va_start(ap, A) \
-		(void)((ap) = (char *)&(A) + _Bnd(A, 3U))
-#define _Bnd(X, bnd) (sizeof (X) + (bnd) & ~(bnd))
-#endif
+#define SIGN_NUM	(1 << 0)
+#define ZERO_PAD	(1 << 1)
+#define SMALL_CASE	0x20
 
-#define ZEROPAD 1		/* pad with zero */
-#define SIGN    2		/* unsigned/signed long */
-#define PLUS    4		/* show plus */
-#define SPACE   8		/* space if plus */
-#define LEFT    16		/* left justified */
-#define SMALL   32		/* Must be 32 == 0x20 */
-#define SPECIAL 64		/* 0x */
-
-#define ADDCH(str, ch) do { \
-			if ((str) < end) \
-			*(str) = (ch); \
-			++str; \
+#define ADDCH(__str, __ch) 	do{ \
+			*(__str) = (__ch); \
+			++(__str); \
 		} while (0)
 
+/* we use this so that we can do without the ctype library */
 #define is_digit(c) ((c) >= '0' && (c) <= '9')
 
 static int skip_atoi(const char **s)
@@ -39,50 +25,97 @@ static int skip_atoi(const char **s)
 	return i;
 }
 
-static char *string(char *buf, char *end, char *s, int field_width,
-		    int precision, int flags)
+static char *string(char *buf, char *end, char *s)
 {
-	int len, i;
-
 	if (s == NULL)
 		s = "<NULL>";
 
-	len = strnlen(s, precision);
-
-	if (!(flags & LEFT))
-		while (len < field_width--)
-			ADDCH(buf, ' ');
-	for (i = 0; i < len; ++i)
+	/* the last one for '\0'  */
+	while (!((*s == '\0') || ((buf + 1) > end)))
 		ADDCH(buf, *s++);
-	while (len < field_width--)
-		ADDCH(buf, ' ');
+
 	return buf;
 }
 
-static int vsnprintf_internal(char *buf, size_t size, const char *fmt,
-			      va_list args)
+static char *itoa(char *buf, char *end, unsigned long long num, int base,
+		    int field_width, int type)
 {
-	u64 num;
-	int base;
-	char *str;
+	char temp[66];
+	int need_prefix = (base != 10);
+	int i;
+	char locase;
 
-	int flags;		/* flags to number() */
+	/* locase = 0 or 0x20. ORing digits or letters with 'locase'
+	 * produces same digits or (maybe lowercased) letters */
+	locase = (type & SMALL_CASE);
 
-	int field_width;	/* width of output field */
-	int precision;		/* min. # of digits for integers; max
-				   number of chars for from string */
-	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
-	/* 'z' support added 23/7/1999 S.H.    */
-	/* 'z' changed to 'Z' --davidm 1/25/99 */
-	/* 't' added for ptrdiff_t */
-	char *end = buf + size;
+	i = 0;
+	if (num == 0) {
+		temp[i++] = '0';
+	} else if (base != 10) {	/* 8 or 16 */
+		int mask = base - 1;
+		int shift = 3;
 
-	/* Make sure end is always >= buf - do we want this in U-Boot? */
-	if (end < buf) {
-		end = ((void *)-1);
-		size = end - buf;
+		if (base == 16)
+			shift = 4;
+
+		/* it's equal to:
+		 *      this = (num & 0xff) % base | locase;
+		 *      temp[i] = digits[this];
+		 *      num /= base;
+		 */
+		do {
+			temp[i++] =
+			    ("0123456789ABCDEF"[((unsigned char)num) & mask] |
+			     locase);
+			num >>= shift;
+		} while (num);
 	}
+#if 0
+	else {			/* base == 10, not supported so far */
+		do {
+			temp[i++] = "0123456789"[num % base];
+			num /= base;
+		} while (num);
+	}
+#endif
+
+	/* "-" prefix */
+	if (type & SIGN_NUM) {
+		if ((long long)num < 0) {
+			ADDCH(buf, '-');
+			num = -(long long)num;
+		}
+	}
+
+	/* "0x" / "0" prefix */
+	if (need_prefix) {
+		ADDCH(buf, '0');
+		if (base == 16) {
+			ADDCH(buf, ('x' | locase));
+		}
+	}
+
+	/* even more zero padding? */
+	while (i <= --field_width)
+		ADDCH(buf, '0');
+
+	/* actual digits of result */
+	while (--i >= 0)
+		ADDCH(buf, temp[i]);
+
+	return buf;
+}
+
+long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
+{
+	unsigned long long num;
+	int base, flags;
+	int field_width;
+	char *end, *str;
+
 	str = buf;
+	end = buf + size;
 
 	for (; *fmt; ++fmt) {
 		if (*fmt != '%') {
@@ -90,125 +123,56 @@ static int vsnprintf_internal(char *buf, size_t size, const char *fmt,
 			continue;
 		}
 
+		++fmt;
 		/* process flags */
 		flags = 0;
-repeat:
-		++fmt;		/* this also skips first '%' */
-		switch (*fmt) {
-		case '-':
-			flags |= LEFT;
-			goto repeat;
-		case '+':
-			flags |= PLUS;
-			goto repeat;
-		case ' ':
-			flags |= SPACE;
-			goto repeat;
-		case '#':
-			flags |= SPECIAL;
-			goto repeat;
-		case '0':
-			flags |= ZEROPAD;
-			goto repeat;
-		}
+		/* TODO: other flags */
 
 		/* get field width */
 		field_width = -1;
 		if (is_digit(*fmt))
 			field_width = skip_atoi(&fmt);
-		else if (*fmt == '*') {
-			++fmt;
-			/* it's the next argument */
-			field_width = va_arg(args, int);
-			if (field_width < 0) {
-				field_width = -field_width;
-				flags |= LEFT;
-			}
-		}
-
-		/* get the precision */
-		precision = -1;
-		if (*fmt == '.') {
-			++fmt;
-			if (is_digit(*fmt))
-				precision = skip_atoi(&fmt);
-			else if (*fmt == '*') {
-				++fmt;
-				/* it's the next argument */
-				precision = va_arg(args, int);
-			}
-			if (precision < 0)
-				precision = 0;
-		}
-
-		/* get the conversion qualifier */
-		qualifier = -1;
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' ||
-		    *fmt == 'Z' || *fmt == 'z' || *fmt == 't') {
-			qualifier = *fmt;
-			++fmt;
-			if (qualifier == 'l' && *fmt == 'l') {
-				qualifier = 'L';
-				++fmt;
-			}
-		}
 
 		/* default base */
-		base = 10;
+		base = 16;
 
 		switch (*fmt) {
 		case 'c':
-			if (!(flags & LEFT)) {
-				while (--field_width > 0)
-					ADDCH(str, ' ');
-			}
-			ADDCH(str, (unsigned char)va_arg(args, int));
-			while (--field_width > 0)
-				ADDCH(str, ' ');
+			ADDCH(str, (unsigned char)va_arg(args, char));
 			continue;
 
 		case 's':
-			str = string(str, end, va_arg(args, char *),
-				     field_width, precision, flags);
+			str = string(str, end, va_arg(args, char *));
 			continue;
 
 		case 'p':
-			str = pointer(fmt + 1, str, end,
-				      va_arg(args, void *),
-				      field_width, precision, flags);
-			/* Skip all alphanumeric pointer suffixes */
-			while (isalnum(fmt[1]))
-				fmt++;
-			continue;
-
-		case 'n':
-			if (qualifier == 'l') {
-				long *ip = va_arg(args, long *);
-				*ip = (str - buf);
-			} else {
-				int *ip = va_arg(args, int *);
-				*ip = (str - buf);
-			}
+			/* flags |= SMALL_CASE */
+			str =
+			    itoa(str, end,
+				   (unsigned long)va_arg(args, void *), 16, sizeof(void *) << 1,
+				   SMALL_CASE);
 			continue;
 
 		case '%':
 			ADDCH(str, '%');
 			continue;
 
-			/* integer number formats - set up the flags and "break" */
 		case 'o':
 			base = 8;
 			break;
 
 		case 'x':
-			flags |= SMALL;
+			flags |= SMALL_CASE;
 		case 'X':
 			base = 16;
 			break;
 
+		/* base = 10 not supported so far
+		 * All convert to HEX
+		 */
 		case 'd':
 		case 'i':
-			flags |= SIGN;
+			flags |= SIGN_NUM;
 		case 'u':
 			break;
 
@@ -220,34 +184,33 @@ repeat:
 				--fmt;
 			continue;
 		}
-		if (qualifier == 'L')	/* "quad" for 64 bit variables */
-			num = va_arg(args, unsigned long long);
-		else if (qualifier == 'l') {
-			num = va_arg(args, unsigned long);
-			if (flags & SIGN)
-				num = (signed long)num;
-		} else if (qualifier == 'Z' || qualifier == 'z') {
-			num = va_arg(args, size_t);
-		} else if (qualifier == 't') {
-			num = va_arg(args, ptrdiff_t);
-		} else if (qualifier == 'h') {
-			num = (unsigned short)va_arg(args, int);
-			if (flags & SIGN)
-				num = (signed short)num;
-		} else {
-			num = va_arg(args, unsigned int);
-			if (flags & SIGN)
-				num = (signed int)num;
-		}
-		str = number(str, end, num, base, field_width, precision,
-			     flags);
+
+		num = va_arg(args, unsigned int);
+		if (flags & SIGN_NUM)
+			num = (signed int)num;
+
+		str = itoa(str, end, num, base, field_width, flags);
 	}
 
-	if (size > 0) {
-		ADDCH(str, '\0');
-		if (str > end)
-			end[-1] = '\0';
-	}
-	/* the trailing null byte doesn't count towards the total */
+	if (size > 0)
+		*str = '\0';
+
 	return str - buf;
+}
+
+#define MAX_PRINTBUF_SIZE 128
+long printf(const char *format, ...)
+{
+	va_list args;
+	long rv;
+	char printbuffer[MAX_PRINTBUF_SIZE];
+
+	va_start(args, format);
+	rv = vsnprintf(printbuffer, sizeof(printbuffer), format, args);
+//      rv = vsnprintf(NULL, 0, format, va_list args);
+	va_end(args);
+
+	puts(UART0_PORT, printbuffer);
+
+	return rv;
 }

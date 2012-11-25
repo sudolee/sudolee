@@ -34,10 +34,10 @@ __irq:
 	.long 0xdeadbeef @ TODO: irq_route
 
 start_code:
-#	mrs r0, cpsr
-#	bic r0, r0, #0x1f
-#	orr r0, r0, #0xd3
-#	msr cpsr_c, r0
+	mrs r0, cpsr
+	bic r0, r0, #0x1f
+	orr r0, r0, #0xd3
+	msr cpsr_c, r0
 
 disable_watchdog:
 	.align
@@ -60,8 +60,8 @@ mmu_stuff:
 /* set stack pointer */
 	.align
 	/* Note: sp must align to 4 byte */
-	.equ SP_ENTRY, 0x40000ffc	@ Nor flash boot
-#	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
+#	.equ SP_ENTRY, 0x40000ffc	@ Nor flash boot
+	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
 
 	b board_init

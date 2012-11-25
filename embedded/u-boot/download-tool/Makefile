@@ -19,8 +19,9 @@ all:
 	${CC} -o nand.o nand.c
 	${CC} -o lib/list.o lib/list.c
 	${CC} -o lib/string.o lib/string.c
+	${CC} -o lib/printf.o lib/printf.c
 	${LD} -o ${TARGET} -TLink.lds \
-		start.o led.o main.o clk_pwr.o memory.o uart.o
+		start.o led.o main.o clk_pwr.o memory.o uart.o lib/printf.o
 	${OBJCOPY} -O binary ${TARGET} ${TARGET}.bin
 	${OBJDUMP} -D ${TARGET} > objdump-D-asm
 

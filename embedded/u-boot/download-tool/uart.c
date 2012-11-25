@@ -1,8 +1,11 @@
 #include "uart.h"
 
+#define RX_FIFO_EMPTY (0x3f)
+#define TX_FIFO_FULL (1 << 14)
+
 struct uartlite {
-	u8 *rx;		/* Rx buffer. [7:0] little_endian, [31:24] big_endian */
-	u8 *tx;		/* Tx buffer. The same to rx */
+	u8 *rx; /* [7:0] little-endian, [31:24] big-endian */
+	u8 *tx; /* Same to rx buffer */
 	u32 *status; /* fifo status */
 };
 
@@ -19,7 +22,7 @@ static inline struct uart_t *get_uart_base(u32 index)
 			return (struct uart_t *)UART2_ENTRY;
 		default:
 			return NULL;
-	};
+	}
 }
 
 /* Send functions */
@@ -28,7 +31,7 @@ void putc(const u32 port, const char ch)
 	if(ch == '\n')
 		putc(port, '\r');
 
-	/* tx fifo is full ? */
+	/* is tx fifo full ? */
 	while(readl(uart_ports[port].status) & TX_FIFO_FULL)
 		;
 	writeb(uart_ports[port].tx, ch);
@@ -36,14 +39,14 @@ void putc(const u32 port, const char ch)
 
 void puts(const u32 port, const char *s)
 {
-	while(*s != '\0')
+	while(*s)
 		putc(port, *s++);
 }
 
 /* Receive functions */
 char getc(const u32 port)
 {
-	/* any data in rx fifo ? */
+	/* is any data in rx fifo ? */
 	while(!(readl(uart_ports[port].status) & RX_FIFO_EMPTY))
 		;
 	return readb(uart_ports[port].rx);
@@ -59,7 +62,6 @@ static void port_init(u32 port, struct uart_t *entry)
 {
 	uart_ports[port].rx = &entry->rxdata;
 	uart_ports[port].tx = &entry->txdata;
-//	uart_ports[port].status = &entry->utrstat;
 	uart_ports[port].status = &entry->ufstat;
 }
 
@@ -68,6 +70,7 @@ void uart_init(u32 index)
 	struct uart_t *uart = get_uart_base(index);
 
 	if(uart) {
+		/* config uart function pins */
 		switch(index) {
 #define GPH_UART0 (0xaa << 0)
 #define GPH_UART1 (0xa << 8)
@@ -83,49 +86,49 @@ void uart_init(u32 index)
 			case UART2_PORT:
 				set_bit((u32 *)GPHCON, GPH_UART2);
 				break;
+			default:
+				/* Nothing to do */
+				break;
 		}
 
 		/* uart line control register
-		 * value = 0b 010 0011
-		 * [6] 0b0: normal mode
-		 * [5:3] 0b100: odd parity
-		 * [2] 0b0: 1 stop bit
-		 * [1:0] 0b11: 8-bits data
+		 * value	= 0b 010 0011
+		 * [6]		= 0b0	: normal mode
+		 * [5:3]	= 0b100	: odd parity
+		 * [2]		= 0b0	: 1 stop bit
+		 * [1:0]	= 0b11	: 8-bits data
 		 */
-		writel(&uart->ulcon, ULCON);
+		writel(&uart->ulcon, (0x3 << 0) | (0x4 << 3));
 		
 		/* uart control register
-		 * value = 0b 1000 0000 0101
-		 * [15:12] Fclk divider
-		 * [11:10] 0b10: clk select Pclk
-		 * [9] 0b1: Tx int type
-		 * [8] 0b1: Rx int type
-		 * [7] 0b0: Rx timeout int disable
-		 * [6] 0b0: Rx err int disable
-		 * [5] 0b0: normal operation
-		 * [4] 0b0: normal transmit
-		 * [3:2] 0b01: int or polling
-		 * [1:0] 0b01: int or polling
+		 * value	= 0b 0000 0000 0101
+		 * [15:12]	= not used	: Fclk divider
+		 * [11:10]	= 0b00/0b10	: clk select Pclk
+		 * [9]		= not used	: Tx int type
+		 * [8]		= not used	: Rx int type
+		 * [7]		= not used	: Rx timeout int disable
+		 * [6]		= note used	: Rx err int disable
+		 * [5]		= 0b0		: normal operation
+		 * [4]		= 0b0		: normal transmit
+		 * [3:2]	= 0b01		: int or polling
+		 * [1:0]	= 0b01		: int or polling
 		 */
-		writel(&uart->ucon, UCON);
-//		writel(&uart->umcon, 0x10);
+		writel(&uart->ucon, (0x1 << 2) | (0x1 << 0));
 
 		/* uart FIFO control register
 		 * value = 0x1
-		 * [7:6] 0b: Tx trigger lvl
-		 * [5:4] 0b: Rx trigger lvl
-		 * [3]
-		 * [2] 0b0: Tx FIFO reset normal
-		 * [1] 0b0: Rx FIFO reset normal
-		 * [0] 0b1: enable FIFO/ 0b0
+		 * [7:6]	= 0b	: Tx trigger lvl
+		 * [5:4]	= 0b	: Rx trigger lvl
+		 * [2]		= 0b0	: Tx FIFO reset normal
+		 * [1]		= 0b0	: Rx FIFO reset normal
+		 * [0]		= 0b1	: enable FIFO
 		 */
-		writel(&uart->ufcon, UFCON);
-//		writel(&uart->ufcon, 0);
+		writel(&uart->ufcon, (0x1 << 0));
 
 		/* ubrdiv = (int)(uart clk / (buad rate * 16)) - 1
-		 * value = (int)((504Mhz/6)/(115200 * 16)) - 1 = 45.57-1 = 46-1 = 45
+		 * value = (int)((405Mhz/6)/(115200 * 16)) - 1 = 0x24
 		 */
-		writel(&uart->ubrdiv, UBRDIV);
+		writel(&uart->ubrdiv, 0x24);
 
 		port_init(index, uart);
 	}

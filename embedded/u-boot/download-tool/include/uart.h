@@ -10,16 +10,6 @@
 #define UART1_ENTRY 0x50004000
 #define UART2_ENTRY 0x50008000
 
-/* controller settings */
-#define ULCON 0x23
-#define UCON 0x805
-#define UFCON 0x1
-#define UBRDIV 0x2d
-
-/* status */
-#define TX_FIFO_FULL (1 << 14)
-#define RX_FIFO_EMPTY (0x3f)
-
 /* ports name */
 #define UART0_PORT 0
 #define UART1_PORT 1
