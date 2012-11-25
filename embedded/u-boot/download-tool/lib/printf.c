@@ -199,7 +199,7 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 }
 
 #define MAX_PRINTBUF_SIZE 128
-long printf(const char *format, ...)
+long serial_printf(int port_num, const char *format, ...)
 {
 	va_list args;
 	long rv;
@@ -207,10 +207,9 @@ long printf(const char *format, ...)
 
 	va_start(args, format);
 	rv = vsnprintf(printbuffer, sizeof(printbuffer), format, args);
-//      rv = vsnprintf(NULL, 0, format, va_list args);
 	va_end(args);
 
-	puts(UART0_PORT, printbuffer);
+	puts(port_num, printbuffer);
 
 	return rv;
 }

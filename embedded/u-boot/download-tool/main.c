@@ -14,11 +14,10 @@ void board_init(void)
 	uart_init(UART0_PORT);
 
 	for(i = 0;; i++) {
-//		puts(UART0_PORT, "Hello, the cruel world...\n");
 		led_run(i);
 		delay(0x006fffff);
 		i %= 4;
-		printf("%4x, %o -- %p, %s\n", 19880402, 19880402, &i, "Hello, the cruel world...\n");
+		serial_printf(UART0_PORT, "%d, %s\n", i, "Hello, the cruel world...\n");
 	}
 
 	asm("b .");	/* hang there */
