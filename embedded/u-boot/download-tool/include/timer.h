@@ -13,5 +13,4 @@
 #define DEAULT_WTCNT 0x8000
 #define WTCON 0x5521
 
-
 #endif /* _TIMER_H_ */

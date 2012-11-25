@@ -1,6 +1,5 @@
 #include "irq.h"
 
-
 static inline struct irq_regs_t *get_irq_regs_base(void)
 {
 	return (struct irq_regs_t *)IRQ_ENTRY;
@@ -26,21 +25,21 @@ u32 clear_irq_pnd(u32 index)
 {
 	//struct irq_regs_t *base = get_irq_regs_base();
 
-	/*TODO*/
-	/*
-	which irq ?
-	if (is subirq)
-		clear subsrcpnd;
-	clear srcpnd;
-	clear intpnd;
-	*/
-	return 0;
+	 /*TODO*/
+	    /*
+	       which irq ?
+	       if (is subirq)
+	       clear subsrcpnd;
+	       clear srcpnd;
+	       clear intpnd;
+	     */
+	    return 0;
 }
 
 void irq_init(void)
 {
 	struct irq_regs_t *base = get_irq_regs_base();
-	
+
 	/* clear all bits via write "1" */
 	writel(&base->srcpnd, 0xffffffff);
 
@@ -59,9 +58,8 @@ void irq_init(void)
 	/* clear all bits via write "1" */
 	writel(&base->subsrcpnd, 0x7f);
 
-	
 	/* only enable RXD0, TXD0, ERR0 of UART0 so far */
-	writel(&base->intsubmsk, (1 << INT_RXD0) | ( 1 << INT_TXD0) | (1 << INT_ERR0));
+	writel(&base->intsubmsk, (1 << INT_RXD0) | (1 << INT_TXD0) | (1 << INT_ERR0));
 
 	__enable_irq();
 	__disable_irq();

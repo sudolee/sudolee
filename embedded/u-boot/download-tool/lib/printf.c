@@ -38,8 +38,10 @@ static char *string(char *buf, char *end, char *s)
 }
 
 static char *itoa(char *buf, char *end, unsigned long long num, int base,
-		    int field_width, int type)
+		  int field_width, int type)
 {
+	const char digits[16] = "0123456789ABCEDF";
+
 	char temp[66];
 	int need_prefix = (base != 10);
 	int i;
@@ -65,9 +67,8 @@ static char *itoa(char *buf, char *end, unsigned long long num, int base,
 		 *      num /= base;
 		 */
 		do {
-			temp[i++] =
-			    ("0123456789ABCDEF"[((unsigned char)num) & mask] |
-			     locase);
+//temp[i++] = ("0123456789ABCDEF"[((unsigned char)num) & mask] | locase);
+			temp[i++] = (digits[((unsigned char)num) & mask] | locase);
 			num >>= shift;
 		} while (num);
 	}
@@ -149,8 +150,8 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 			/* flags |= SMALL_CASE */
 			str =
 			    itoa(str, end,
-				   (unsigned long)va_arg(args, void *), 16, sizeof(void *) << 1,
-				   SMALL_CASE);
+				 (unsigned long)va_arg(args, void *), 16,
+				 sizeof(void *) << 1, SMALL_CASE);
 			continue;
 
 		case '%':
@@ -167,9 +168,9 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 			base = 16;
 			break;
 
-		/* base = 10 not supported so far
-		 * All convert to HEX
-		 */
+			/* base = 10 not supported so far
+			 * All convert to HEX
+			 */
 		case 'd':
 		case 'i':
 			flags |= SIGN_NUM;

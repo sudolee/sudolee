@@ -19,7 +19,7 @@ enum {
 	EINT3 = 3,
 	EINT4_7 = 4,
 	EINT8_23 = 5,
-	INT_CAM = 6, /* cam_c, cam_p */
+	INT_CAM = 6,		/* cam_c, cam_p */
 	nBATT_FLT = 7,
 	INT_TICK = 8,
 	INT_WDT_AC97 = 9,
@@ -28,7 +28,7 @@ enum {
 	INT_TIMER2 = 12,
 	INT_TIMER3 = 13,
 	INT_TIMER4 = 14,
-	INT_UART2 = 15, /* rxd2, txd2, err2 */
+	INT_UART2 = 15,		/* rxd2, txd2, err2 */
 	INT_LCD = 16,
 	INT_DMA0 = 17,
 	INT_DMA1 = 18,
@@ -36,15 +36,15 @@ enum {
 	INT_DMA3 = 20,
 	INT_SDI = 21,
 	INT_SPI0 = 22,
-	INT_UART1 = 23, /* rxd1, txd1, err1 */
+	INT_UART1 = 23,		/* rxd1, txd1, err1 */
 	INT_NFCON = 24,
 	INT_USBD = 25,
 	INT_USBH = 26,
 	INT_IIC = 27,
-	INT_UART0 = 28, /* rxd0, txd0, err0 */
+	INT_UART0 = 28,		/* rxd0, txd0, err0 */
 	INT_SPI1 = 29,
 	INT_RTC = 30,
-	INT_ADC = 31, /* adc_s, tc */
+	INT_ADC = 31,		/* adc_s, tc */
 };
 
 /* Bit map: subsrcpnd, intsubmsk */

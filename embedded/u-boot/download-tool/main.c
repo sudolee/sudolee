@@ -13,12 +13,12 @@ void board_init(void)
 	memory_init();
 	uart_init(UART0_PORT);
 
-	for(i = 0;; i++) {
+	for (i = 0;; i++) {
 		led_run(i);
 		delay(0x006fffff);
 		i %= 4;
 		serial_printf(UART0_PORT, "%d, %s\n", i, "Hello, the cruel world...\n");
 	}
 
-	asm("b .");	/* hang there */
+	asm("b .");		/* hang there */
 }

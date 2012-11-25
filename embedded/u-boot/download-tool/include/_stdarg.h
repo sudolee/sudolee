@@ -11,5 +11,4 @@ typedef char *va_list;
 		(void)((ap) = (char *)&(A) + _Bnd(A, 3U))
 #define va_end(ap) (void)0
 
-
 #endif /* ___STDARG_H__ */

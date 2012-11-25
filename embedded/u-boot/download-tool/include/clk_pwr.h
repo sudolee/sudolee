@@ -8,7 +8,6 @@
 /* clock and power controller entry */
 #define CLOCK_POWER_ENTRY 0x4c000000
 
-
 inline void delay(u32 loops);
 void clk_pwr_init(void);
 

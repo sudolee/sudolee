@@ -26,7 +26,7 @@ u32 list_is_last(const struct list_head *list, const struct list_head *head)
 	return (head->prev == list);
 }
 
-u32 list_empty(struct list_head *entry)
+u32 list_empty(struct list_head * entry)
 {
 	return (entry->prev == entry);
 }

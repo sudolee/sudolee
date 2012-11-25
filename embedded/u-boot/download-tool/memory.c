@@ -1,6 +1,5 @@
 #include "memory.h"
 
-
 static inline struct memory_t *get_mem_base(void)
 {
 	return (struct memory_t *)MEMORY_ENTRY;

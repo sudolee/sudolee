@@ -3,8 +3,8 @@
 struct nandchip {
 	u32 *ctrl;
 	u32 *stat;
-	u32 *cmmd; //[7:0]
-	u32 *addr; //[7:0]
+	u32 *cmmd;		//[7:0]
+	u32 *addr;		//[7:0]
 	u32 *data;
 };
 
@@ -14,6 +14,7 @@ static inline void select_chip(void)
 {
 	clear_bit(nfchip.ctrl, (0x1 << 1));
 }
+
 static inline void deselect_chip(void)
 {
 	set_bit(nfchip.ctrl, (1 << 1));
@@ -21,8 +22,7 @@ static inline void deselect_chip(void)
 
 static inline void wait_ready(void)
 {
-	while(!(readl(nfchip.stat) & NF_RNB))
-		;
+	while (!(readl(nfchip.stat) & NF_RNB)) ;
 }
 
 static inline void nand_cmd(u32 cmd)
@@ -30,24 +30,24 @@ static inline void nand_cmd(u32 cmd)
 	select_chip();
 	wait_ready();
 
-	switch(cmd) {
-		case NF_CMD_READ0:
-		case NF_CMD_READ1:
-		case NF_CMD_PGPROG0:
-		case NF_CMD_PGPROG1:
-		case NF_CMD_BLKES0:
-		case NF_CMD_BLKES1:
-		case NF_CMD_RDID:
-		case NF_CMD_RDSTATUS:
-			break;
+	switch (cmd) {
+	case NF_CMD_READ0:
+	case NF_CMD_READ1:
+	case NF_CMD_PGPROG0:
+	case NF_CMD_PGPROG1:
+	case NF_CMD_BLKES0:
+	case NF_CMD_BLKES1:
+	case NF_CMD_RDID:
+	case NF_CMD_RDSTATUS:
+		break;
 
-		case NF_CMD_RESET:
-			writel(nfchip.cmmd, NF_CMD_RESET & 0xff);
-			wait_ready();
-			break;
+	case NF_CMD_RESET:
+		writel(nfchip.cmmd, NF_CMD_RESET & 0xff);
+		wait_ready();
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 	writel(nfchip.cmmd, cmd & 0xff);
 }
@@ -62,10 +62,10 @@ static inline void send_address(u32 addr, u8 mode)
 {
 	u32 per_addr;
 
-	if(addr > NF_MAX_ADDRESS)
+	if (addr > NF_MAX_ADDRESS)
 		return;
 
-	if((mode == col_only) || (mode == both_col_row)) {
+	if ((mode == col_only) || (mode == both_col_row)) {
 		/* 1st cycle */
 		per_addr = addr & 0xff;
 		writel(nfchip.addr, per_addr);
@@ -75,7 +75,7 @@ static inline void send_address(u32 addr, u8 mode)
 		writel(nfchip.addr, per_addr);
 	}
 
-	if((mode == row_only) || (mode == both_col_row)) {
+	if ((mode == row_only) || (mode == both_col_row)) {
 		/* 3rd cycle */
 		per_addr = (addr >> 4) & 0xff;
 		writel(nfchip.addr, per_addr);
@@ -125,7 +125,7 @@ void nand_init()
 	writel(&nand_ctrl->nfcont, NFCONT);
 
 	/* cfg GPA17, 18, 19, 20, 22 as function pins */
-	set_bit((u32 *)GPACON, (NF_CE | NF_RE | NF_WE | NF_ALE | NF_CLE));
+	set_bit((u32 *) GPACON, (NF_CE | NF_RE | NF_WE | NF_ALE | NF_CLE));
 
 	nfchip.ctrl = &nand_ctrl->nfcont;
 	nfchip.stat = &nand_ctrl->nfstat;

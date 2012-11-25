@@ -40,7 +40,7 @@ struct irq_regs_t {
 	u32 intmsk;
 	u32 priority;
 	u32 intpnd;
-	u32 intoffset;	/* read only */
+	u32 intoffset;		/* read only */
 	u32 subsrcpnd;
 	u32 intsubmsk;
 };
@@ -87,15 +87,15 @@ struct watchdog_t {
 struct nand_ctrl_t {
 	u32 nfconf;
 	u32 nfcont;
-	u32 nfcmmd; //[7:0]
-	u32 nfaddr; //[7:0]
+	u32 nfcmmd;		//[7:0]
+	u32 nfaddr;		//[7:0]
 	u32 nfdata;
 	u32 nfmeccd[2];
 	u32 nfseccd;
 	u32 nfstat;
 	u32 nfestat[2];
-	u32 nfmecc[2];  /* read only */
-	u32 nfsecc;  /* read only */
+	u32 nfmecc[2];		/* read only */
+	u32 nfsecc;		/* read only */
 	u32 nfsblk;
 	u32 nfeblk;
 };

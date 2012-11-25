@@ -15,7 +15,6 @@
 #define UART1_PORT 1
 #define UART2_PORT 2
 
-
 void uart_init(u32 index);
 void putc(const u32 port, const char ch);
 void puts(const u32 port, const char *s);

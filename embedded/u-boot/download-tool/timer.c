@@ -20,15 +20,15 @@ void soc_reset(void)
 
 	/* watchdog timer control register
 	 * value = 0b0101 0101 0010 0001
-	 * [15:8]	= 0b01010101	: prescaler value.
-	 * [5]		= 0b1			: enable watchdog timer
-	 * [4:3]	= 0b00			: clk division factor
-	 * [2]		= 0b0			: disable interrupt
-	 * [0]		= 0b1			: enable reset signal
+	 * [15:8]       = 0b01010101    : prescaler value.
+	 * [5]          = 0b1                   : enable watchdog timer
+	 * [4:3]        = 0b00                  : clk division factor
+	 * [2]          = 0b0                   : disable interrupt
+	 * [0]          = 0b1                   : enable reset signal
 	 *
 	 * Time = 1/[Pclk/(prescaler value + 1)/division] = 10.7ns
 	 */
 	writel(&wd->wtcon, WTCON);
 
-	while(1);
+	while (1) ;
 }
