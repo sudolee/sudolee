@@ -74,6 +74,9 @@ static char *itoa(char *buf, char *end, unsigned long long num, int base,
 	}
 #if 0
 	else {			/* base == 10, not supported so far */
+		/*
+		 * http://homepage.cs.uiowa.edu/~jones/bcd/decimal.html
+		 */
 		do {
 			temp[i++] = "0123456789"[num % base];
 			num /= base;

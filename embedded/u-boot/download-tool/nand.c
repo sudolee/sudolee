@@ -102,25 +102,25 @@ void nand_init()
 	/* nand flash configuration register
 	 * value = 0b 01 0010 0001 0000
 	 * Note: Hclk time = 7.4ns
-	 * [13:12] = 0b01, TACLS=1*7.4ns
-	 * [10:8] = 0b010, TWRPH0=(0b10 + 1)*7.4ns
-	 * [6:4] = 0b001, TWRPH1=(0b01 + 1)*7.4ns
-	 * [3:0] hardware set
+	 * [13:12]	= 0b01		: TACLS=1*7.4ns
+	 * [10:8]	= 0b010		: TWRPH0=(0b10 + 1)*7.4ns
+	 * [6:4]	= 0b001		: TWRPH1=(0b01 + 1)*7.4ns
+	 * [3:0]				: hardware set
 	 */
 	writel(&nand_ctrl->nfconf, NFCONF);
 
 	/* control register
 	 * value = 0b
-	 * [13] = 0b0, disable lock-tight
-	 * [12] = 0b0, disable soft lock
-	 * [10] = 0b0, disable interrupt
-	 * [9] = 0b0, disable RnB interrupt
-	 * [8] = 0b0, rising edge RnB detection
-	 * [6] ,spare ECC lock
-	 * [5] , main ECC lock
-	 * [4] = 0b1, initECC
-	 * [1] , chip select, 0:enable, 1:disable
-	 * [0] 0b1, enable nand flash controller
+	 * [13]	= 0b0	: disable lock-tight
+	 * [12] = 0b0	: disable soft lock
+	 * [10] = 0b0	: disable interrupt
+	 * [9]	= 0b0	: disable RnB interrupt
+	 * [8]	= 0b0	: rising edge RnB detection
+	 * [6] 			: spare ECC lock
+	 * [5] 			: main ECC lock
+	 * [4]	= 0b1	: initECC
+	 * [1] 			: chip select, 0:enable, 1:disable
+	 * [0]	= 0b1	: enable nand flash controller
 	 */
 	writel(&nand_ctrl->nfcont, NFCONT);
 
