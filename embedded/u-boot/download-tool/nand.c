@@ -50,6 +50,12 @@ struct nand_ecc_ctrl {
 /* local globl info */
 static struct nand_info nf_info;
 
+/* Export nf_info to all */
+struct nand_info *get_nandinfo(void)
+{
+	return &nf_info;
+}
+
 static inline u8 nand_read_byte(struct nand_info *this)
 {
 	return readb(this->IO_NFDATA);
@@ -73,19 +79,10 @@ static inline void nand_cmdctrl(struct nand_info *this, int cmd, u32 ctrl)
 
 static inline void s3c2440_nand_select_chip(struct nand_info *this, int chip)
 {
-	/* TODO: enable nand clk *
-	if(chip != -1) {
-	} */
-
-	if(chip == -1) {
-		set_bit(this->ctrl_regs + S3C2440_NFCONT, S3C2440_NFSELBIT);
-	} else {
-		clear_bit(this->ctrl_regs + S3C2440_NFCONT, S3C2440_NFSELBIT);
-	}
-
-	/* TODO: disable nand clk *
-	if(chip == -1) {
-	} */
+	if(chip == -1)
+		set_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
+	else
+		clear_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
 }
 
 void nandhw_init(struct nand_info *this)
@@ -120,16 +117,8 @@ void nandhw_init(struct nand_info *this)
 //	set_bit((u32 *) GPACON, (NF_CE | NF_RE | NF_WE | NF_ALE | NF_CLE));
 	set_bit((u32 *) GPACON, (0x1 << 17) | (0x1 << 18) | (0x1 << 19) | (0x1 << 20) | (0x1 << 22));
 
-#if 0
-	nfchip.ctrl = &nand_ctrl->nfcont;
-	nfchip.stat = &nand_ctrl->nfstat;
-	nfchip.cmmd = &nand_ctrl->nfcmmd;
-	nfchip.addr = &nand_ctrl->nfaddr;
-	nfchip.data = &nand_ctrl->nfdata;
-#endif
-
+	/* reset nand chip in the end */
 	nand_common(this, NAND_CMD_RESET, -1, -1);
-	/* TODO: reset nand in the end */
 }
 
 static void nand_command(struct nand_info *this, u32 cmd, int column, int page)
@@ -219,5 +208,3 @@ void nand_module_init(void)
 
 
 }
-
-

@@ -62,5 +62,7 @@
 #define NAND_STATUS_READY 	(1 << 6)
 #define NAND_STATUS_WP 		(1 << 7)
 
+/* exported functions... */
+struct nand_info *get_nandinfo(void);
 
 #endif /* __NAND_H_ */
