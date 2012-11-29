@@ -1,5 +1,8 @@
-#ifndef ___STDARG_H__
-#define ___STDARG_H__
+
+1, va_arg 的一种实现
+from: kernel/include/acpi/platform/acenv.h
+
+#ifndef va_arg
 
 #ifndef _VALIST
 #define _VALIST
@@ -8,7 +11,7 @@ typedef char *va_list;
 
 /*
  * Storage alignment properties
- *  32-bits or 64-bits machine.
+ * 32-bits or 64-bits machine.
  */
 #define  _AUPBND                (sizeof (long int) - 1)
 #define  _ADNBND                (sizeof (long int) - 1)
@@ -21,5 +24,5 @@ typedef char *va_list;
 #define va_end(ap)              (void) 0
 #define va_start(ap, A)         (void) ((ap) = (((char *) &(A)) + (_bnd (A,_AUPBND))))
 
+2, 不使用va_arg的实现
 
-#endif /* ___STDARG_H__ */

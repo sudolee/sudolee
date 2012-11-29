@@ -37,7 +37,7 @@ static char *string(char *buf, char *end, char *s)
 	return buf;
 }
 
-static char *itoa(char *buf, char *end, unsigned long long num, int base,
+static char *number2str(char *buf, char *end, unsigned long long num, int base,
 		  int field_width, int type)
 {
 	const char digits[16] = "0123456789ABCEDF";
@@ -111,7 +111,8 @@ static char *itoa(char *buf, char *end, unsigned long long num, int base,
 	return buf;
 }
 
-long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
+//long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
+long tiny_vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 {
 	unsigned long long num;
 	int base, flags;
@@ -152,7 +153,7 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 		case 'p':
 			/* flags |= SMALL_CASE */
 			str =
-			    itoa(str, end,
+			    number2str(str, end,
 				 (unsigned long)va_arg(args, void *), 16,
 				 sizeof(void *) << 1, SMALL_CASE);
 			continue;
@@ -193,7 +194,7 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 		if (flags & SIGN_NUM)
 			num = (signed int)num;
 
-		str = itoa(str, end, num, base, field_width, flags);
+		str = number2str(str, end, num, base, field_width, flags);
 	}
 
 	if (size > 0)
@@ -210,7 +211,7 @@ long serial_printf(int port_num, const char *format, ...)
 	char printbuffer[MAX_PRINTBUF_SIZE];
 
 	va_start(args, format);
-	rv = vsnprintf(printbuffer, sizeof(printbuffer), format, args);
+	rv = tiny_vsnprintf(printbuffer, sizeof(printbuffer), format, args);
 	va_end(args);
 
 	puts(port_num, printbuffer);

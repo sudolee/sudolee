@@ -1,3 +1,4 @@
+#include "common.h"
 #include "clk_pwr.h"
 #include "memory.h"
 #include "uart.h"
@@ -15,7 +16,7 @@ void board_init(void)
 
 	for (i = 0;; i++) {
 		led_run(i);
-		delay(0x006fffff);
+		ndelay(0x006fffff);
 		i %= 4;
 		serial_printf(UART0_PORT, "%d, %s\n", i, "Hello, the cruel world...\n");
 	}

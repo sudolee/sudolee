@@ -3,14 +3,11 @@
 /*
  * Watch dog timer
  */
-static inline struct watchdog_t *get_watchdog_base(void)
-{
-	return (struct watchdog_t *)WATCH_DOG_ENTRY;
-}
+#define WD_RESET_BIT (0x1)
 
 void soc_reset(void)
 {
-	struct watchdog_t *wd = get_watchdog_base();
+	struct watchdog_t *wd = (struct watchdog_t *)WATCH_DOG_ENTRY;
 
 	/* set watch dog timer data register */
 	writel(&wd->wtdat, DEAULT_WTDAT);

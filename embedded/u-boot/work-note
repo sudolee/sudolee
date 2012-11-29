@@ -16,3 +16,7 @@
 3, sp必须align 4, or 引起数据终止异常.
 
 4, gcc -D 选项可以预定义一个宏.
+
+5, linux-stable/arch/arm/lib/io-writesb.S
+	__raw_writesb(addr, data, len);
+	/* writel() */

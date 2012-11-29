@@ -35,3 +35,8 @@ c >= 10
 Vcc = 3.3v
 Fclk:Hclk:Pclk = 1:3:6
 Fclk = MPLL = 405MHz
+
+
+2, bbt (bad block table)
+	每个块的前两页的oob byte[0]是坏块标记, 如果前两页任意一个"oob byte[0] != 0xFF", 则该块为坏块.
+	e.g. 对应2knand, oob 在page中的偏移是2048~2111.

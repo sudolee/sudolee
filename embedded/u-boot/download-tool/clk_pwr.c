@@ -3,13 +3,7 @@
  */
 
 #include "clk_pwr.h"
-
-inline void delay(u32 loops)
-{
-	__asm__ __volatile__("0:\n\t"
-			     "subs %0, %1, #1\n\t"
-			     "nop\n\t" "bne 0b":"=r"(loops):"0"(loops));
-}
+#include "common.h"
 
 static inline struct clk_pwr_t *get_cpm_base(void)
 {
@@ -25,12 +19,12 @@ void clk_pwr_init(void)
 	/* upll clock = 48 MHz, MDIV-PDIV-SDIV */
 	writel(&clk->upllcon, (0x38 << 12) | (0x2 << 4) | (0x2 << 0));
 
-	delay(7);
+	ndelay(7);
 
 	/* mpll clock = 405 MHz, MDIV-PDIV-SDIV */
 	writel(&clk->mpllcon, (0x7f << 12) | (0x2 << 4) | (0x1 << 0));
 
-	delay(7);
+	ndelay(7);
 
 	/*
 	 * Uclk = UPLL; Fclk:Hclk:Pclk = 1:3:6;
@@ -38,5 +32,5 @@ void clk_pwr_init(void)
 	 */
 	writel(&clk->clkdivn, (0x0 << 3) | (0x3 << 1) | (0x1 << 0));
 
-	delay(7);
+	ndelay(7);
 }
