@@ -5,6 +5,8 @@
 #include "io.h"
 #include "s3c2440.h"
 
+#include "print.h"
+
 /*
  * platform relative
  */
@@ -15,23 +17,31 @@
 #define S3C2440_NFADDR 0x0c
 
 /* bits define */
-#define S3C2440_NFSELBIT 0x1
+#define S3C2440_NFSELBIT (1 << 0)
+#define S3C2440_NFSTATUS_READY (1 << 0)
 
 /* Size:
  * block size = 2048 * pages
- * page size = (2048 + 64) bytes
+ * page size = (2048 + 64) bytes; 64 bytes OOB area
  *
  */
 
-#define NAND_WRITESIZE 2048
+//ecc bytes = 512
+#define NAND_ECCBYTES (1 << 9)
 
 
+/* status flags */
+#define NAND_ERASE_DONE 0x1
+#define NAND_WRITE_DONE 0x2
+
+/* control flags */
 #define NAND_CMD_NONE -1
-#define NAND_NCE 0x01
-#define NAND_CLE 0x02
-#define NAND_ALE 0x04
-#define NAND_CTRL_CLE (NAND_NCE | NAND_CLE)
-#define NAND_CTRL_ALE (NAND_NCE | NAND_ALE)
+#define NAND_nCE 			(1 << 0)
+#define NAND_CLE 			(1 << 1)
+#define NAND_ALE 			(1 << 2)
+#define NAND_CTRL_CHANGE 	(1 << 3)
+#define NAND_CTRL_CLE (NAND_nCE | NAND_CLE)
+#define NAND_CTRL_ALE (NAND_nCE | NAND_ALE)
 
 /*
  * Standard NAND flash commands

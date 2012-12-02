@@ -3,7 +3,7 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 ENTRY(_start)
 SECTIONS
 {
-	. = 0x00000000;
+	. = 0x30000000;
 
 	. = ALIGN(4);
 	.text :

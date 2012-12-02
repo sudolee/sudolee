@@ -37,10 +37,31 @@ static char *string(char *buf, char *end, char *s)
 	return buf;
 }
 
+/**    
+ * memcpy - Copy one area of memory to another
+ * @dest: Where to copy to    
+ * @src: Where to copy from   
+ * @count: The size of the area.
+ *
+ * You should not use this function to access IO space.
+ *
+ * TODO:
+ *   when compile with -Os, this func is requested ?
+ */
+void *memcpy(void *dest, const void *src, long count)
+{
+	char *tmp = dest;
+	const char *s = src;
+
+	while (count--)
+		*tmp++ = *s++;
+	return dest;
+}
+
 static char *number2str(char *buf, char *end, unsigned long long num, int base,
 		  int field_width, int type)
 {
-	const char digits[16] = "0123456789ABCEDF";
+	const char digits[16] = "0123456789ABCDEF";
 
 	char temp[66];
 	int need_prefix = (base != 10);

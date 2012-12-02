@@ -1,8 +1,6 @@
 #include "nand.h"
 #include "common.h"
 
-#define MTD_MAX_ECCPOS_ENTRIES_LARGE 4
-
 #if 1
 #define NF_DEBUG(fmt, args...) printf(fmt, ##args)
 #else
@@ -14,24 +12,15 @@ struct nand_info {
 	u32 IO_NFADDR;
 	u32 IO_NFDATA;
 
-	u8 (*read_byte)(struct nand_info *this);
-	u16 (*read_word)(struct nand_info *this);
 	void (*read_buf)(struct nand_info *this, u8 *buf, int len);
 	void (*write_buf)(struct nand_info *this, const u8 *buf, int len);
 
-	void (*select_chip)(struct nand_info *this, int chip);
 	void (*cmd_ctrl)(struct nand_info *this, int cmd, u32 ctrl);
 	int (*waitfunc)(struct nand_info *this);
-	int (*dev_ready)(struct nand_info *this);
 	int (*erase)(struct nand_info *this, u32 addr, int len);
-	int (*scan_bbt)(struct nand_info *this);
-
-	struct nand_ecc_ctrl *ecc;
 
 	/* nand flash controller register entry */
 	struct nand_ctrl_t *ctrl_regs;
-
-	u32 chip_delay; //5us after reset.
 
 	/* size */
 	int page_shift;
@@ -39,53 +28,21 @@ struct nand_info {
 	int col_mask;
 	int erase_shift;
 	int writesize;
-	//int oobsize = writesize >> 5;
-};
-
-/* ecc layout in oob area */
-struct nand_ecclayout {
-	u32 eccbytes;
-	u32 eccpos[MTD_MAX_ECCPOS_ENTRIES_LARGE];
-};
-
-struct nand_ecc_ctrl {
-	void (*hwctrl)(struct nand_info *this, int mode);
-	int (*calculate)(struct nand_info *this, const u8 *data, u8 *ecc_code);
-	int (*correct)(struct nand_info *this, u8 *data, u8 *new_ecc, u8 *orig_ecc);
-	struct nand_ecclayout *layout;
 };
 
 struct nand_ops {
 	u32 len;
 	u32 retlen;
-	u32 ooblen;
-	u32 oobretlen;
-	u8 *databuf;
-	u8 *oobbuf;
+	char *databuf;
 };
 
 /* local globl info */
 static struct nand_info nf_info;
 
-static struct nand_ecclayout ecc_layout = {
-	.eccbytes = 3,
-	.eccpos = {1, 2, 3}, /* byte 0 oob for bbt */
-};
-
 /* Export nf_info to all */
 struct nand_info *get_nandinfo(void)
 {
 	return &nf_info;
-}
-
-static inline u8 nand_read_byte(struct nand_info *this)
-{
-	return readb(this->IO_NFDATA);
-}
-
-static inline u16 nand_read_word(struct nand_info *this)
-{
-	return readw(this->IO_NFDATA);
 }
 
 static void nand_read_buf(struct nand_info *this, u8 *buf, int len)
@@ -104,65 +61,33 @@ static void nand_write_buf(struct nand_info *this, const u8 *buf, int len)
 		writesb(this->IO_NFDATA, buf + (len & ~0x3), len & 0x3);
 }
 
-static inline void s3c2440_nand_select_chip(struct nand_info *this, int chip)
-{
-	if(chip == -1)
-		set_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
-	else
-		clear_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
-}
-
 static inline void nand_cmdctrl(struct nand_info *this, int cmd, u32 ctrl)
 {
 	if(ctrl & NAND_CTRL_CHANGE) {
 		if(ctrl & NAND_nCE)
-			s3c2440_nand_select_chip(this, NAND_nCE);
+			clear_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
 		else
-			s3c2440_nand_select_chip(this, -1);
+			set_bit(&this->ctrl_regs->nfcont, S3C2440_NFSELBIT);
 	}
 
 	if(cmd != NAND_CMD_NONE) {
 		if(ctrl & NAND_CLE)
-			writeb(&this->ctrl_regs->nfcmmd, cmd);
+			writeb(this->IO_NFCMD, cmd);
 		else
-			writeb(&this->ctrl_regs->nfaddr, cmd);
+			writeb(this->IO_NFADDR, cmd);
 	}
 }
 
-static int wait_func(struct nand_info *this)
+static int check_chip_status(struct nand_info *this)
 {
 	this->cmd_ctrl(this, NAND_CMD_STATUS, NAND_CTRL_CLE);
 
-	return this->read_byte(this) & NAND_STATUS_READY;
-}
-
-static inline u8 check_chip_status(struct nand_info *this)
-{
-	this->cmd_ctrl(this, NAND_CMD_STATUS, NAND_CTRL_CLE);
-
-	return this->read_byte(this);
-}
-
-static int nand_dev_ready(struct nand_info *this)
-{
-	return readb(&this->ctrl_regs->nfstat) & S3C2440_NFSTATUS_READY;
+	return readb(this->IO_NFDATA);
 }
 
 static void nand_command(struct nand_info *this, int cmd, int column, int page)
 {
-	int ctrl = NAND_CTRL_CLE;
-
-#if 0
-	if(cmd == NAND_CMD_SEQIN) {
-		int readcmd;
-
-		if (column > this->writesize) {
-			/* OOB area */
-			column -= this->writesize;
-			readcmd = NAND_CMD_READOOB;
-		}
-	}
-#endif
+	int ctrl;
 
 	this->cmd_ctrl(this, cmd, NAND_CTRL_CLE);
 
@@ -177,11 +102,11 @@ static void nand_command(struct nand_info *this, int cmd, int column, int page)
 
 	if(page != -1) {
 		/* row addr: A12~A19 */
-		this->cmd_ctrl(this, (page >>  0) & 0xff, ctrl);
+		this->cmd_ctrl(this, (page >> 0) & 0xff, ctrl);
 		/* row addr: A20~A27 */
-		this->cmd_ctrl(this, (page >>  8) & 0xff, ctrl);
+		this->cmd_ctrl(this, (page >> 8) & 0xff, ctrl);
 		/* row addr: A28 */
-		this->cmd_ctrl(this, (page >> 16) & 0x01, ctrl);
+		this->cmd_ctrl(this, (page >> 8) & 0x01, ctrl);
 	}
 
 	switch(cmd) {
@@ -190,17 +115,18 @@ static void nand_command(struct nand_info *this, int cmd, int column, int page)
 	case NAND_CMD_ERASE2:
 	case NAND_CMD_SEQIN:
 	case NAND_CMD_STATUS:
-		break;
+		return;
 
 	case NAND_CMD_RESET:
-		udelay(this->chip_delay); /* 5us */
-		while(wait_func(this))
+		udelay(5); /* 5us */
+		this->cmd_ctrl(this, NAND_CMD_STATUS, NAND_CTRL_CLE);
+		while(readb(this->IO_NFDATA) & NAND_STATUS_READY);
 			;
 		break;
 
 	default:
 		ndelay(40); /* about 100ns */
-		while(this->dev_ready(this))
+		while(readb(&this->ctrl_regs->nfstat) & S3C2440_NFSTATUS_READY)
 			;
 	}
 }
@@ -222,19 +148,6 @@ static int check_offs_len(struct nand_info *this, u32 addr, int len)
 	return ret;
 }
 
-static int nand_check_wp(struct nand_info *this)
-{
-	this->cmd_ctrl(this, NAND_CMD_STATUS, NAND_CTRL_CLE);
-
-	return this->read_byte(this) & NAND_STATUS_WP;
-}
-
-static inline void erase_cmd(struct nand_info *this, int page)
-{
-	nand_command(this, NAND_CMD_ERASE1, -1, page);
-	nand_command(this, NAND_CMD_ERASE2, -1, -1);
-}
-
 static int nand_erase(struct nand_info *this, u32 addr, int len)
 {
 	int ret;
@@ -249,7 +162,7 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 	this->cmd_ctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE | NAND_nCE);
 
 	/* is it write protected ? */
-	if(nand_check_wp(this)) {
+	if(check_chip_status(this) & NAND_STATUS_WP) {
 		NF_DEBUG("nand_erase: device is write protected!!!\n");
 		goto erase_exit;
 	}
@@ -258,12 +171,14 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 	pages_per_block = 1 << (this->erase_shift - this->page_shift);
 
 	do {
-		erase_cmd(this, page);
+		nand_command(this, NAND_CMD_ERASE1, -1, page);
+		nand_command(this, NAND_CMD_ERASE2, -1, -1);
 
-		while(wait_func(this))
+		this->cmd_ctrl(this, NAND_CMD_STATUS, NAND_CTRL_CLE);
+		while(readb(this->IO_NFDATA) & NAND_STATUS_READY)
 			;
 
-		if(check_chip_status(this) & NAND_STATUS_FAIL) {
+		if(readb(this->IO_NFDATA) & NAND_STATUS_FAIL) {
 			NF_DEBUG("%s: Failed erase, page 0x%x\n", __func__, page);
 			goto erase_exit;
 		}
@@ -284,7 +199,7 @@ erase_exit:
 	/* chip deselect */
 	this->cmd_ctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE);
 
-	return (ret == NAND_ERASE_DONE) ? NAND_ERASE_DONE : -EIO;
+	return (ret == NAND_ERASE_DONE) ? 0 : -EIO;
 }
 
 #if 0
@@ -320,9 +235,76 @@ static int nand_do_read_ops(struct nand_info *this, u32 from, struct nand_ops *o
 }
 #endif
 
+static void nand_write_page(struct nand_info *this, const char *buf, int page)
+{
+	/*TODO: ecc check */
+	this->write_buf(this, (u8 *)buf, this->writesize);
+}
+
 static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *ops)
 {
-	return ops->len;
+	int page, subpage, column, bytes;
+	int writelen, retlen = 0;
+	int res;
+
+	writelen = ops->len;
+	retlen = ops->retlen;
+
+	if(!writelen)
+		return -EINVAL;
+
+	column = to & (this->writesize - 1);
+	subpage = column || (writelen & (this->writesize - 1));
+	if(subpage)
+		return -EINVAL;
+
+	/* select chip */
+	this->cmd_ctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE | NAND_nCE);
+
+	/* is chip write protected ? */
+	if(check_chip_status(this) & NAND_STATUS_WP) {
+		NF_DEBUG("%s: device write protected!!!\n", __func__);
+		goto write_exit;
+	}
+
+	page = to >> this->page_shift;
+	page &= this->page_mask;
+
+	do {
+		char *wbuf = ops->databuf;
+		bytes = this->writesize;
+
+		nand_command(this, NAND_CMD_SEQIN, 0x00, page);
+		nand_write_page(this, wbuf, page);
+		nand_command(this, NAND_CMD_PAGEPROG, -1, -1);
+
+		/* device ready ? */
+		while(check_chip_status(this) & NAND_STATUS_READY)
+			;
+
+		if(check_chip_status(this) & NAND_STATUS_FAIL) {
+			NF_DEBUG("%s: write page failed, page 0x%x.\n", __func__, page);
+			goto write_exit;
+		}
+
+		writelen -= bytes;
+		wbuf += bytes;
+		page++;
+
+		/* cross chip ? */
+		if(writelen && !(page & this->page_mask)) {
+			NF_DEBUG("%s() cross a chip boundary\n", __func__);
+			break;
+		}
+	} while ((writelen > 0) && (page & this->page_mask));
+
+	res = NAND_WRITE_DONE;
+	ops->retlen = ops->len - writelen;
+
+write_exit:
+	/* deselect chip */
+	this->cmd_ctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE);
+	return (res == NAND_WRITE_DONE) ? 0 : -EIO;
 }
 
 void nandhw_init(struct nand_info *this)
@@ -369,10 +351,8 @@ void nand_module_init(void)
 
 	nf_info.IO_NFCMD = (u32)&regs->nfcmmd;
 	nf_info.IO_NFADDR = (u32)&regs->nfaddr;
-	nf_info.IO_NFADDR = (u32)&regs->nfdata;
+	nf_info.IO_NFDATA = (u32)&regs->nfdata;
 	nf_info.ctrl_regs = regs;
-
-	nf_info.chip_delay = 5; // 5us
 
 	/*
 	 * column address: A0 ~ A11
@@ -388,23 +368,10 @@ void nand_module_init(void)
 	//nf_info.oobsize = 2048 >> 5;
 
 	/* functions init... */
-	nf_info.select_chip = s3c2440_nand_select_chip;
-	nf_info.read_byte = nand_read_byte;
-	nf_info.read_word = nand_read_word;
 	nf_info.cmd_ctrl = nand_cmdctrl;
-
 	nf_info.read_buf = nand_read_buf;
 	nf_info.write_buf = nand_write_buf;
-	nf_info.waitfunc = wait_func;
-	nf_info.dev_ready = nand_dev_ready;
 	nf_info.erase = nand_erase;
-	nf_info.scan_bbt = NULL;
-
-	nf_info.ecc->hwctrl = NULL;
-	nf_info.ecc->calculate = NULL;
-	nf_info.ecc->correct = NULL;
-	nf_info.ecc->layout = &ecc_layout;
-
 
 
 	nandhw_init(&nf_info);

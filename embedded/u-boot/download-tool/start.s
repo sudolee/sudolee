@@ -8,7 +8,6 @@
 .globl _start
 
 .extern board_init
-.extern led_init
 
 
 _start:
@@ -46,7 +45,7 @@ disable_watchdog:
 	mov r1, #0x0
 	str r1, [r0]			@ clear WTCON register
 
-	bl led_init				@ init led for debug and disable beep
+#	bl led_init				@ init led for debug and disable beep
 
 mmu_stuff:
 	mrc p15, 0, r0, c1, c0, 0
@@ -64,6 +63,14 @@ mmu_stuff:
 	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
 
-	b board_init
+	bl board_init
+
+/* TODO */
+	.equ SDRAM_SP_POINT, 0x34000000	@ sp pointer at the top of sdram
+	ldr sp, =SDRAM_SP_POINT
+	ldr pc, =start_on_sdram
+
+start_on_sdram:
+	b .
 
 .end

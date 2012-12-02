@@ -14,8 +14,8 @@ __aeabi_llsr:
 
     subs    r3, r2, #32 
     rsb ip, r2, #32 
-    movmi   al, al, lsr r2
-    movpl   al, ah, lsr r3
-    orrmi   al, al, ah, lsl ip
-    mov ah, ah, lsr r2
+    movmi   r0, r0, lsr r2
+    movpl   r0, r1, lsr r3
+    orrmi   r0, r0, r1, lsl ip
+    mov r1, r1, lsr r2
     mov pc, lr
