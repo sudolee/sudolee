@@ -27,6 +27,8 @@ all:
 #		start.o led.o board.o clk_pwr.o memory.o uart.o lib/printf.o nand.o
 	${OBJCOPY} -O binary ${TARGET} ${TARGET}.bin
 	${OBJDUMP} -D ${TARGET} > objdump-D-asm
+	gcc usr/mkimage.c -o usr/mkimage
 
 clean:
 	@rm -f *.o lib/*.o *.su lib/*.su objdump-D-asm ${TARGET}.bin ${TARGET} 
+	@rm -f usr/mkimage

@@ -12,8 +12,8 @@ struct nand_info {
 	u32 IO_NFADDR;
 	u32 IO_NFDATA;
 
-	void (*read_buf)(struct nand_info *this, u8 *buf, int len);
-	void (*write_buf)(struct nand_info *this, const u8 *buf, int len);
+	void (*read_buf)(struct nand_info *this, char *buf, int len);
+	void (*write_buf)(struct nand_info *this, const char *buf, int len);
 
 	void (*cmd_ctrl)(struct nand_info *this, int cmd, u32 ctrl);
 	int (*waitfunc)(struct nand_info *this);
@@ -45,7 +45,7 @@ struct nand_info *get_nandinfo(void)
 	return &nf_info;
 }
 
-static void nand_read_buf(struct nand_info *this, u8 *buf, int len)
+static void nand_read_buf(struct nand_info *this, char *buf, int len)
 {
 	readsl(this->IO_NFDATA, buf, len >> 2);
 
@@ -53,7 +53,7 @@ static void nand_read_buf(struct nand_info *this, u8 *buf, int len)
 		readsb(this->IO_NFDATA, buf + (len & ~0x3), len & 0x3);
 }
 
-static void nand_write_buf(struct nand_info *this, const u8 *buf, int len)
+static void nand_write_buf(struct nand_info *this, const char *buf, int len)
 {
 	writesl(this->IO_NFDATA, buf, len >> 2);
 
@@ -131,10 +131,12 @@ static void nand_command(struct nand_info *this, int cmd, int column, int page)
 	}
 }
 
-static int check_offs_len(struct nand_info *this, u32 addr, int len)
+static int nand_erase(struct nand_info *this, u32 addr, int len)
 {
-	int ret = 0;
+	int ret;
+	int page, pages_per_block;
 
+	/* addr and len aligned ? */
 	if(addr & ((1 << this->erase_shift) - 1)) {
 		NF_DEBUG("%s() unaligned address.\n", __func__);
 		ret = -EINVAL;
@@ -143,19 +145,6 @@ static int check_offs_len(struct nand_info *this, u32 addr, int len)
 	if(len & ((1 << this->erase_shift) - 1)) {
 		NF_DEBUG("%s() length not block aligned.\n", __func__);
 		ret = -EINVAL;
-	}
-
-	return ret;
-}
-
-static int nand_erase(struct nand_info *this, u32 addr, int len)
-{
-	int ret;
-	int page, pages_per_block;
-
-	if(check_offs_len(this, addr, len)) {
-		NF_DEBUG("nand_erase() invalid block %d\n", 1);
-		return -EINVAL;
 	}
 
 	/* chip select */
@@ -238,7 +227,7 @@ static int nand_do_read_ops(struct nand_info *this, u32 from, struct nand_ops *o
 static void nand_write_page(struct nand_info *this, const char *buf, int page)
 {
 	/*TODO: ecc check */
-	this->write_buf(this, (u8 *)buf, this->writesize);
+	this->write_buf(this, buf, this->writesize);
 }
 
 static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *ops)
@@ -253,6 +242,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 	if(!writelen)
 		return -EINVAL;
 
+	/* aligned ? */
 	column = to & (this->writesize - 1);
 	subpage = column || (writelen & (this->writesize - 1));
 	if(subpage)

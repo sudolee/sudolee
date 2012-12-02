@@ -24,21 +24,21 @@
 #define writel(addr, val) ({ u32 __v = val; mb(); __raw_writel(addr, __v); __v; })
 
 /* sb read functions... */
-extern inline void __raw_readsl(u32 addr, u8 *data, int len)
+extern inline void __raw_readsl(u32 addr, char *data, int len)
 {
 	u32 *buf = (u32 *)data;
 	while(len--)
 		*buf++ = __raw_readl(addr);
 }
 
-extern inline void __raw_readsw(u32 addr, u8 *data, int len)
+extern inline void __raw_readsw(u32 addr, char *data, int len)
 {
 	u16 *buf = (u16 *)data;
 	while(len--)
 		*buf++ = __raw_readw(addr);
 }
 
-extern inline void __raw_readsb(u32 addr, u8 *data, int len)
+extern inline void __raw_readsb(u32 addr, char *data, int len)
 {
 	u8 *buf = (u8 *)data;
 	while(len--)
@@ -50,21 +50,21 @@ extern inline void __raw_readsb(u32 addr, u8 *data, int len)
 #define readsl(addr, data, len) __raw_readsl(addr, data, len)
 
 /* sb write functions... */
-extern inline void __raw_writesl(u32 addr, const u8 *data, int len)
+extern inline void __raw_writesl(u32 addr, const char *data, int len)
 {
 	u32 *buf = (u32 *)data;
 	while(len--)
 		__raw_writel(addr, *buf++);
 }
 
-extern inline void __raw_writesw(u32 addr, const u8 *data, int len)
+extern inline void __raw_writesw(u32 addr, const char *data, int len)
 {
 	u16 *buf = (u16 *)data;
 	while(len--)
 		__raw_writew(addr, *buf++);
 }
 
-extern inline void __raw_writesb(u32 addr, const u8 *data, int len)
+extern inline void __raw_writesb(u32 addr, const char *data, int len)
 {
 	u8 *buf = (u8 *)data;
 	while(len--)
