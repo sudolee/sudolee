@@ -8,6 +8,7 @@
 .globl _start
 
 .extern board_init
+.extern dt_main
 
 
 _start:
@@ -39,7 +40,6 @@ start_code:
 	msr cpsr_c, r0
 
 disable_watchdog:
-	.align
 	.equ WTCON, 0x53000000	@ watchdog timer control register
 	ldr r0, =WTCON			@ get value of WTCON var
 	mov r1, #0x0
@@ -57,7 +57,6 @@ mmu_stuff:
 	mcr p15, 0, r0, c1, c0, 0
 
 /* set stack pointer */
-	.align
 	/* Note: sp must align to 4 byte */
 #	.equ SP_ENTRY, 0x40000ffc	@ Nor flash boot
 	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
@@ -65,11 +64,12 @@ mmu_stuff:
 
 	bl board_init
 
-/* TODO */
-	.equ SDRAM_SP_POINT, 0x34000000	@ sp pointer at the top of sdram
-	ldr sp, =SDRAM_SP_POINT
-	ldr pc, =start_on_sdram
+	.equ SDRAM_SP_POINTER, 0x33fffffc	@ sp pointer at the top of sdram 0~(64MB - 1 & 0x3)
+	ldr sp, =SDRAM_SP_POINTER
 
+	bl dt_main
+
+	ldr pc, =start_on_sdram
 start_on_sdram:
 	b .
 

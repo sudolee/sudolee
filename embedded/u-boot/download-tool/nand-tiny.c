@@ -7,6 +7,16 @@
 #define NF_DEBUG(fmt, args...) ({ 0;})
 #endif
 
+struct nand_ecc {
+	int size;
+	int steps;
+	void (*hwctl)(struct nand_info *this, int mode);
+	int (*calculate)(struct nand_info *this, const u8 *data, u8 *calc_ecc);
+	int (*correct)(struct nand_info *this, u8 *data, u8 *read_ecc, u8 *calc_ecc);
+	void (*write_page)(struct nand_info *this, const char *buf, int page);
+	void (*read_page)(struct nand_info *this, char *buf, int page);
+};
+
 struct nand_info {
 	u32 IO_NFCMD;
 	u32 IO_NFADDR;
@@ -21,6 +31,9 @@ struct nand_info {
 
 	/* nand flash controller register entry */
 	struct nand_ctrl_t *ctrl_regs;
+
+	/* ECC */
+	struct nand_ecc ecc;
 
 	/* size */
 	int page_shift;
@@ -224,7 +237,7 @@ static int nand_do_read_ops(struct nand_info *this, u32 from, struct nand_ops *o
 }
 #endif
 
-static void nand_write_page(struct nand_info *this, const char *buf, int page)
+static void nand_write_page_hwecc(struct nand_info *this, const char *buf, int page)
 {
 	/*TODO: ecc check */
 	this->write_buf(this, buf, this->writesize);
@@ -239,14 +252,9 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 	writelen = ops->len;
 	retlen = ops->retlen;
 
+	ops->retlen = 0;
 	if(!writelen)
-		return -EINVAL;
-
-	/* aligned ? */
-	column = to & (this->writesize - 1);
-	subpage = column || (writelen & (this->writesize - 1));
-	if(subpage)
-		return -EINVAL;
+		return 0;
 
 	/* select chip */
 	this->cmd_ctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE | NAND_nCE);
@@ -257,6 +265,9 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 		goto write_exit;
 	}
 
+	column = to & (this->writesize - 1);
+	subpage = column || (writelen & (this->writesize - 1));
+
 	page = to >> this->page_shift;
 	page &= this->page_mask;
 
@@ -265,7 +276,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 		bytes = this->writesize;
 
 		nand_command(this, NAND_CMD_SEQIN, 0x00, page);
-		nand_write_page(this, wbuf, page);
+		this->ecc.write_page(this, wbuf, page);
 		nand_command(this, NAND_CMD_PAGEPROG, -1, -1);
 
 		/* device ready ? */
@@ -362,6 +373,9 @@ void nand_module_init(void)
 	nf_info.read_buf = nand_read_buf;
 	nf_info.write_buf = nand_write_buf;
 	nf_info.erase = nand_erase;
+
+	/* ECC functions */
+	nf_info.ecc.write_page = nand_write_page_hwecc;
 
 
 	nandhw_init(&nf_info);

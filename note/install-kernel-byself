@@ -7,14 +7,11 @@
   sudo update-grub (Ubuntu only)
 
     NOTE:
-	    1, ERROR: P: Installing debian theme...cp: cannot stat `/usr/share/syslinux/themes/debian-wheezy/extlinux/memtest.bin': No such file or directory
+	    ERROR: P: Installing debian theme...cp: cannot stat `/usr/share/syslinux/themes/debian-wheezy/extlinux/memtest.bin': No such file or directory
 	       FIXED: sudo touch /boot/memtest.bin
-	    2, 删除旧的/lib/modules/xxxx
-		    这里要看清楚, 有些软件(e.g. virtual box)可能自己创建了一个目录,里面只有寥寥的几个文件.
-		    只删你当前用的版本就没有问题了.
 
 2, initrd
-  如果没有生成 initrd.img，则需要手工生成，并添加到 grub.cfg
+  如果没有生成initrd.img，则需要手工生成，并添加到grub.cfg
   sudo mkinitramfs -o /boot/initrd.img-3.2.34 3.2.34
   添加到grub.cfg: 如果执行了sudo update-grub, grub中有添加如下信息. 如果没有, 执行完sudo update-grub, 就可以拷贝以前的。
   添加initrd.img到grub.cfg中：
@@ -32,9 +29,7 @@
 
 3, 重启系统，使用自己编译的 Kernel 启动。
 
-
-
-5, 安装source和headers:(当前目录是刚刚编译完的那个内核)
+4, 安装source和headers:(当前目录是刚刚编译完的那个内核)
 
   export OBJ=/tmp/obj-linux-source
   mkdir $OBJ
@@ -60,8 +55,19 @@
   ln -s /usr/src/linux-source-your-version build
   ln -s /usr/src/linux-source-your-version source
 
+5, 清理工作
+	- 删除之前创建的"/boot/memtest.bin"
+	- 删除旧的内核
+		rm memtest86+.bin config-3.2.0-4-amd64 initrd.img-3.2.0-4-amd64 System.map-3.2.0-4-amd64 vmlinuz-3.2.0-4-amd64
+	- 更改链接
+		/initrd.img -> /boot/initrd.img-3.2.34LEE@Ts
+		/vmlinuz -> /boot/vmlinuz-3.2.34LEE@Ts
+	- 删除旧的/lib/modules/xxxx
+		有些软件(e.g. virtual box)可能自己创建了一个目录, 里面只有寥寥的几个文件, 不要删掉.
+		只删你当前用的版本就没有问题了.
+	- sudo updata-grub2
 
-4, 第三方驱动
+6, 第三方驱动
   除安装 Kernel 本身外, 还需要安装头文件, 这样才可以编译第三方驱动.
   有时, 你自己的Kernel配置中，必须关闭CONFIG_MODVERSIONS这个选项，要不然会出
   现因为某些符号找不到而无法加载WIFI驱动模块的问题。

@@ -22,8 +22,9 @@ all:
 	${CC} -o lib/string.o lib/string.c
 	${CC} -o lib/printf.o lib/printf.c
 	${CC} -o lib/lshrdi3.o lib/lshrdi3.s
+	${CC} -o dt-main.o dt-main.c
 	${LD} -o ${TARGET} -TLink.lds \
-		start.o board.o clk_pwr.o memory.o uart.o lib/printf.o lib/lshrdi3.o nand-tiny.o
+		start.o board.o clk_pwr.o memory.o uart.o lib/printf.o lib/lshrdi3.o nand-tiny.o dt-main.o
 #		start.o led.o board.o clk_pwr.o memory.o uart.o lib/printf.o nand.o
 	${OBJCOPY} -O binary ${TARGET} ${TARGET}.bin
 	${OBJDUMP} -D ${TARGET} > objdump-D-asm
