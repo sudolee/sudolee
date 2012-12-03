@@ -10,7 +10,9 @@
 	    ERROR: P: Installing debian theme...cp: cannot stat `/usr/share/syslinux/themes/debian-wheezy/extlinux/memtest.bin': No such file or directory
 	       FIXED: sudo touch /boot/memtest.bin
 
-2, initrd
+2, 重启系统，使用自己编译的 Kernel 启动。
+
+3, initrd
   如果没有生成initrd.img，则需要手工生成，并添加到grub.cfg
   sudo mkinitramfs -o /boot/initrd.img-3.2.34 3.2.34
   添加到grub.cfg: 如果执行了sudo update-grub, grub中有添加如下信息. 如果没有, 执行完sudo update-grub, 就可以拷贝以前的。
@@ -26,8 +28,6 @@
   initrd /boot/initrd.img-3.0.0
   }
   其中的 xxxxxxxxx 是UUID, 通过 ls -l /dev/disk/by-uuid得到.
-
-3, 重启系统，使用自己编译的 Kernel 启动。
 
 4, 安装source和headers:(当前目录是刚刚编译完的那个内核)
 
