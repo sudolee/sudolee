@@ -1,0 +1,80 @@
+1, 编译Kernel:
+  make menuconfig
+  make -jn
+  sudo make modules_install
+  sudo make headers_install
+  sudo make install
+  sudo update-grub (Ubuntu only)
+
+    NOTE:
+	    1, ERROR: P: Installing debian theme...cp: cannot stat `/usr/share/syslinux/themes/debian-wheezy/extlinux/memtest.bin': No such file or directory
+	       FIXED: sudo touch /boot/memtest.bin
+	    2, 删除旧的/lib/modules/xxxx
+		    这里要看清楚, 有些软件(e.g. virtual box)可能自己创建了一个目录,里面只有寥寥的几个文件.
+		    只删你当前用的版本就没有问题了.
+
+2, initrd
+  如果没有生成 initrd.img，则需要手工生成，并添加到 grub.cfg
+  sudo mkinitramfs -o /boot/initrd.img-3.2.34 3.2.34
+  添加到grub.cfg: 如果执行了sudo update-grub, grub中有添加如下信息. 如果没有, 执行完sudo update-grub, 就可以拷贝以前的。
+  添加initrd.img到grub.cfg中：
+
+  menuentry "Ubuntu 10.10, kernel 3.0.0 (on /dev/sda1)" {
+  insmod part_msdos
+  insmod ext2
+  set root='(hd0,msdos1)'
+  search --no-floppy --fs-uuid --set xxxxxxxxxxx
+  linux /boot/vmlinuz-3.0.0 root=UUID=xxxxxxxxxxxx ro quiet splash
+  ### Add the initrd ###
+  initrd /boot/initrd.img-3.0.0
+  }
+  其中的 xxxxxxxxx 是UUID, 通过 ls -l /dev/disk/by-uuid得到.
+
+3, 重启系统，使用自己编译的 Kernel 启动。
+
+
+
+5, 安装source和headers:(当前目录是刚刚编译完的那个内核)
+
+  export OBJ=/tmp/obj-linux-source
+  mkdir $OBJ
+  cp Makefile $OBJ/
+  cp Module.symvers $OBJ/
+  cp -rf ./include/ $OBJ/
+  mkdir -p $OBJ/arch/x86/kernel/
+  cp -f arch/x86/Makefile* $OBJ/arch/x86/
+  cp -f arch/x86/kernel/asm-offsets* $OBJ/arch/x86/kernel/
+  cp -rf arch/x86/include/ $OBJ/arch/x86/
+  cd scripts/; make bin2c pnmtologo; cd ..;
+  cp -rf scripts/ $OBJ/
+
+  mv $OBJ/ /usr/src/linux-source-your-version
+  cd /usr/src/
+  rm linux-kbuild-3.2; ln -s /usr/src/linux-source-your-version linux-kbuild-3.2;
+  cd /usr/lib/
+  rm -rf linux-kbuild-3.2/
+  ln -s /usr/src/linux-source-your-version linux-kbuild-3.2
+
+  cd /lib/modules/new-modules/
+  rm build source
+  ln -s /usr/src/linux-source-your-version build
+  ln -s /usr/src/linux-source-your-version source
+
+
+4, 第三方驱动
+  除安装 Kernel 本身外, 还需要安装头文件, 这样才可以编译第三方驱动.
+  有时, 你自己的Kernel配置中，必须关闭CONFIG_MODVERSIONS这个选项，要不然会出
+  现因为某些符号找不到而无法加载WIFI驱动模块的问题。
+
+  [*] Enable loadable module support --->
+  [ ] Module versioning support <--- 未选中
+
+  如果之前的编译的Kernel是选中的,请重新编译安装.
+
+  sudo make install
+  sudo make modules_install
+  sudo make headers_install
+
+  手动加载：
+  sudo modprobe rtl8192se
+
