@@ -39,12 +39,12 @@ inline void dt_main(void)
 
 	wait_image(header);
 
-	printf("Downloading\nimg size=0x%x\n", header->img_size);
+	printf("Downloading\nimgsize=0x%x\n", header->img_size);
 
 	/* Cope to 0 block 0 page */
 	ret = nf->write(nf, 0, header->img_size, &retlen, (char *)(DEFAULT_LOAD_ADDRESS + header->img_offset));
 	if((ret < 0) || (retlen < header->img_size))
-		printf("ERR: nf write return=%d, retlen=%d\n", ret, retlen);
+		printf("ERR: nf write return=%d,retlen=%d\n", ret, retlen);
 
 	printf("Downloaded\n");
 	/* Never return */

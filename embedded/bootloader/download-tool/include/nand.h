@@ -18,6 +18,9 @@
 
 /* bits define */
 #define S3C2440_NFSELBIT (1 << 0)
+#define S3C2440_NF_ECCINIT_BIT (1 << 4)
+#define S3C2440_NFMECCUNLOCK_BIT (1 << 5)
+#define S3C2440_NFSECCUNLOCK_BIT (1 << 6)
 #define S3C2440_NFSTATUS_READY (1 << 0)
 
 /* Size:
@@ -28,6 +31,7 @@
 /* nand_info->writesize */
 #define NAND_SIZE 0x420000 /* 2048*(2048 + 64) */
 #define NAND_PAGE_SIZE 2048
+#define NAND_OOBSIZE 64
 
 //ecc bytes = 512
 #define NAND_ECCBYTES (1 << 9)
@@ -80,10 +84,9 @@ struct nand_info;
 
 struct nand_ecc {
 	int size;
+	int bytes;
 	int steps;
-	void (*hwctl)(struct nand_info *this, int mode);
-	int (*calculate)(struct nand_info *this, const u8 *data, u8 *calc_ecc);
-	int (*correct)(struct nand_info *this, u8 *data, u8 *read_ecc, u8 *calc_ecc);
+	int (*correct)(struct nand_info *this, char *data, char *read_ecc, char *calc_ecc);
 	void (*write_page)(struct nand_info *this, const char *buf, int page);
 	void (*read_page)(struct nand_info *this, char *buf, int page);
 };

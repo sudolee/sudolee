@@ -2,6 +2,8 @@
 #include "string.h"
 
 #include "nand.h"
+#define NAND_ECC
+#define OOB_ECCOFFS 8
 
 #if 1
 #define NF_DEBUG(fmt, args...) printf(fmt, ##args)
@@ -130,7 +132,7 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 
 	/* is it write protected ? */
 	if(check_chip_status(this) & NAND_STATUS_WP) {
-		NF_DEBUG("nand_erase: device write protected\n");
+		NF_DEBUG("nand_erase: dev write protected\n");
 		goto erase_exit;
 	}
 
@@ -202,10 +204,69 @@ static int nand_do_read_ops(struct nand_info *this, u32 from, struct nand_ops *o
 }
 #endif
 
+#ifdef NAND_ECC
+#define ECC_CTRL_INIT   (1 << 0)
+#define ECC_CTRL_LOCK   (1 << 1)
+#define ECC_CTRL_UNLOCK (1 << 2)
+static inline void ecc_hwctrl(struct nand_info *this, int ctrl)
+{
+	if(ctrl & ECC_CTRL_INIT)
+		set_bit(this->ctrl_regs->nfcont, S3C2440_NF_ECCINIT_BIT);
+
+	/* unlock main area ecc */
+	if(ctrl & ECC_CTRL_UNLOCK)
+		clear_bit(this->ctrl_regs->nfcont, S3C2440_NFMECCUNLOCK_BIT);
+
+	/* lock main area ecc */
+#if 0
+	if(ctrl & ECC_CTRL_LOCK)
+		set_bit(this->ctrl_regs->nfcont, S3C2440_NFMECCUNLOCK_BIT);
+#endif
+}
+
+static inline int ecc_calculate(struct nand_info *this, const char *dat, char *ecc_calc)
+{
+	u32 code;
+
+	/* ecc/512-bytes only use 3-bytes */
+	code = readl(this->ctrl_regs->nfmeccd + 0);
+	ecc_calc[0] = code & 0xFF <<  0;
+	ecc_calc[1] = code & 0xFF << 16;
+
+	code = readl(this->ctrl_regs->nfmeccd + 1);
+	ecc_calc[2] = code & 0xFF <<  0;
+//	ecc_calc[3] = code & 0xFF << 16;
+
+	return 0;
+}
+#endif
+
 static inline void nand_write_page_hwecc(struct nand_info *this, const char *buf, int page)
 {
-	/*TODO: ecc check */
+#ifdef NAND_ECC
+	int i, steps, eccsize, bytes;
+	char *p = (char *)buf;
+	/* sizeof oob = 64-byte */
+	char oobbuf[NAND_OOBSIZE];
+
+	steps = this->ecc.steps;
+	eccsize = this->ecc.size;
+	bytes = this->ecc.bytes;
+
+	memset(oobbuf, 0xff, sizeof(oobbuf));
+
+	for(i = 0; steps; steps--, i += bytes, p += eccsize) {
+		ecc_hwctrl(this, ECC_CTRL_INIT | ECC_CTRL_UNLOCK);
+		nand_write_buf(this, p, eccsize);
+//		ecc_hwctrl(this, ECC_CTRL_LOCK);
+		/* store ecc into oobbuf begin with offset 8 */
+		ecc_calculate(this, p, oobbuf + OOB_ECCOFFS + i);
+	}
+
+	nand_write_buf(this, oobbuf, NAND_OOBSIZE);
+#else
 	nand_write_buf(this, buf, this->writesize);
+#endif
 }
 
 static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *ops)
@@ -322,9 +383,9 @@ void nandhw_init(struct nand_info *this)
 	 * [10] = 0b0	: disable interrupt
 	 * [9]	= 0b0	: disable RnB interrupt
 	 * [8]	= 0b0	: rising edge RnB detection
-	 * [6] 			: spare ECC lock
-	 * [5] 			: main ECC lock
-	 * [4]	= 0b1	: initECC
+	 * [6]	= 0b0	: spare ECC unlock
+	 * [5] 	= 0b0	: main ECC unlock
+	 * [4]	= 0b0	: initECC, init when use
 	 * [1] 			: chip select, 0:enable, 1:disable
 	 * [0]	= 0b1	: enable nand flash controller
 	 */
@@ -335,7 +396,9 @@ void nandhw_init(struct nand_info *this)
 	set_bit((u32 *) GPACON, (0x1 << 17) | (0x1 << 18) | (0x1 << 19) | (0x1 << 20) | (0x1 << 22));
 
 	/* reset nand chip in the end */
+	nand_cmdctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE | NAND_nCE);
 	nand_command(this, NAND_CMD_RESET, -1, -1);
+	nand_cmdctrl(this, NAND_CMD_NONE, NAND_CTRL_CHANGE);
 }
 
 void nand_module_init(void)
@@ -365,6 +428,9 @@ void nand_module_init(void)
 	nf_info.erase = nand_erase;
 	/* ECC functions */
 	nf_info.ecc.write_page = nand_write_page_hwecc;
+	nf_info.ecc.size = 512;
+	nf_info.ecc.bytes = 3;
+	nf_info.ecc.steps = 4; /* steps = writesize / ecc.size */
 
 	nandhw_init(&nf_info);
 	NF_DEBUG("nand init done\n");
