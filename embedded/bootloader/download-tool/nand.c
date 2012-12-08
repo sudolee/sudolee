@@ -23,8 +23,8 @@ struct nand_info {
 	u32 IO_NFADDR;
 	u32 IO_NFDATA;
 
-	void (*read_buf)(struct nand_info *this, char *buf, int len);
-	void (*write_buf)(struct nand_info *this, const char *buf, int len);
+	int (*write)(struct nand_info *this, u32 to, size_t len,
+		size_t *retlen, const char *buf);
 
 	void (*cmd_ctrl)(struct nand_info *this, int cmd, u32 ctrl);
 	int (*waitfunc)(struct nand_info *this);
@@ -37,6 +37,7 @@ struct nand_info {
 	struct nand_ecc ecc;
 
 	/* size */
+	unsigned long nand_size;
 	int page_shift;
 	int page_mask;
 	int col_mask;
@@ -45,8 +46,8 @@ struct nand_info {
 };
 
 struct nand_ops {
-	u32 len;
-	u32 retlen;
+	size_t len;
+	size_t retlen;
 	char *databuf;
 };
 
@@ -241,7 +242,7 @@ static int nand_do_read_ops(struct nand_info *this, u32 from, struct nand_ops *o
 static void nand_write_page_hwecc(struct nand_info *this, const char *buf, int page)
 {
 	/*TODO: ecc check */
-	this->write_buf(this, buf, this->writesize);
+	nand_write_buf(this, buf, this->writesize);
 }
 
 static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *ops)
@@ -317,6 +318,27 @@ write_exit:
 	return (res == NAND_WRITE_DONE) ? 0 : -EIO;
 }
 
+static int nand_write(struct nand_info *this, u32 to, size_t len,
+		size_t *retlen, const char *buf)
+{
+	int ret;
+	struct nand_ops ops;
+
+	if(((unsigned)to + len) > this->nand_size)
+		return -EINVAL;
+
+	if(!len)
+		return -EINVAL;
+
+	ops.len = len;
+	ops.databuf = (char *)buf;
+	ret = nand_do_write_ops(this, to, &ops);
+
+	*retlen = ops.retlen;
+
+	return ret;
+}
+
 void nandhw_init(struct nand_info *this)
 {
 
@@ -371,6 +393,7 @@ void nand_module_init(void)
 	 * page size: 2048 (+ 64 oob)
 	 * block size: 64 * pages
 	 */
+	nf_info.nand_size = 0x420000; /* 2048*(2048 + 64), sizeof nand flash memory */
 	nf_info.page_shift = 12;
 	nf_info.page_mask = 0x1FF; /* bit0 ~ bit16, i.e. A12 ~ A28 */
 	nf_info.erase_shift = 18;
@@ -379,13 +402,11 @@ void nand_module_init(void)
 
 	/* functions init... */
 	nf_info.cmd_ctrl = nand_cmdctrl;
-	nf_info.read_buf = nand_read_buf;
-	nf_info.write_buf = nand_write_buf;
+	nf_info.write = nand_write;
 	nf_info.erase = nand_erase;
 
 	/* ECC functions */
 	nf_info.ecc.write_page = nand_write_page_hwecc;
-
 
 	nandhw_init(&nf_info);
 	NF_DEBUG("The end of nand init.\n");
