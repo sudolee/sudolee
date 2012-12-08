@@ -4,13 +4,11 @@
 #include "uart.h"
 #include "print.h"
 
-void board_init(void)
+inline void board_init(void)
 {
-	printf("board_init start\n");
-
 	clk_pwr_init();
 	memory_init();
 	uart_init(UART0_PORT);
 
-	printf("board_init done\n");
+	printf("Board init done\n");
 }

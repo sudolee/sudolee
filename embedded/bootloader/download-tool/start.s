@@ -57,6 +57,7 @@ mmu_stuff:
 	mcr p15, 0, r0, c1, c0, 0
 
 /* set stack pointer */
+set_stack:
 #	.equ SP_ENTRY, 0x40000fff	@ Nor flash boot
 	.equ SP_ENTRY, 0x00000fff	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
@@ -70,8 +71,5 @@ mmu_stuff:
 
 	bl dt_main
 
-	ldr pc, =start_on_sdram
-start_on_sdram:
 	b .
-
 .end

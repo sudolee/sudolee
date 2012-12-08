@@ -116,12 +116,12 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 
 	/* addr and len aligned ? */
 	if(addr & ((1 << this->erase_shift) - 1)) {
-		NF_DEBUG("%s() unaligned address.\n", __func__);
+		NF_DEBUG("%s: unaligned addr\n", __func__);
 		ret = -EINVAL;
 	}
 
 	if(len & ((1 << this->erase_shift) - 1)) {
-		NF_DEBUG("%s() length not block aligned.\n", __func__);
+		NF_DEBUG("%s: block unaligned\n", __func__);
 		ret = -EINVAL;
 	}
 
@@ -130,7 +130,7 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 
 	/* is it write protected ? */
 	if(check_chip_status(this) & NAND_STATUS_WP) {
-		NF_DEBUG("nand_erase: device is write protected!!!\n");
+		NF_DEBUG("nand_erase: device write protected\n");
 		goto erase_exit;
 	}
 
@@ -146,7 +146,7 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 			;
 
 		if(readb(this->IO_NFDATA) & NAND_STATUS_FAIL) {
-			NF_DEBUG("%s: Failed erase, page 0x%x\n", __func__, page);
+			NF_DEBUG("%s: Failed erase page 0x%x\n", __func__, page);
 			goto erase_exit;
 		}
 
@@ -156,7 +156,7 @@ static int nand_erase(struct nand_info *this, u32 addr, int len)
 
 		/* cross chip ? */
 		if(len && !(page & this->page_mask)) {
-			NF_DEBUG("%s() cross a chip boundary\n", __func__);
+			NF_DEBUG("%s: cross chip boundary\n", __func__);
 			goto erase_exit;
 		}
 	} while((len > 0) && (page & this->page_mask));
@@ -225,7 +225,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 
 	/* is chip write protected ? */
 	if(check_chip_status(this) & NAND_STATUS_WP) {
-		NF_DEBUG("%s: write protected!\n", __func__);
+		NF_DEBUG("%s: write protected\n", __func__);
 		goto write_exit;
 	}
 
@@ -248,7 +248,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 			wbuf = pagebuff;
 		}
 
-		nand_command(this, NAND_CMD_SEQIN, 0x00, page);
+		nand_command(this, NAND_CMD_SEQIN, 0x0, page);
 		this->ecc.write_page(this, wbuf, page);
 		nand_command(this, NAND_CMD_PAGEPROG, -1, -1);
 
@@ -257,7 +257,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 			;
 
 		if(check_chip_status(this) & NAND_STATUS_FAIL) {
-			NF_DEBUG("%s: write page failed, page 0x%x.\n", __func__, page);
+			NF_DEBUG("%s: write failed, page 0x%x.\n", __func__, page);
 			goto write_exit;
 		}
 
@@ -267,7 +267,7 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 
 		/* cross chip ? */
 		if(writelen && !(page & this->page_mask)) {
-			NF_DEBUG("%s() cross a chip boundary\n", __func__);
+			NF_DEBUG("%s: cross chip boundary\n", __func__);
 			break;
 		}
 	} while ((writelen > 0) && (page & this->page_mask));
@@ -342,8 +342,6 @@ void nand_module_init(void)
 {
 	struct nand_ctrl_t *regs = (struct nand_ctrl_t *)NAND_CTRL_ENTRY;
 
-	NF_DEBUG("nand_module_init() start...\n");
-
 	nf_info.IO_NFCMD = (u32)&regs->nfcmmd;
 	nf_info.IO_NFADDR = (u32)&regs->nfaddr;
 	nf_info.IO_NFDATA = (u32)&regs->nfdata;
@@ -369,5 +367,5 @@ void nand_module_init(void)
 	nf_info.ecc.write_page = nand_write_page_hwecc;
 
 	nandhw_init(&nf_info);
-	NF_DEBUG("The end of nand init.\n");
+	NF_DEBUG("nand init done\n");
 }

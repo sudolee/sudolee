@@ -11,12 +11,12 @@
 #define MAGIC_STR "LEE.dt\n"
 
 /*
-** +-----------------+ 
-** | img header      | 1 page
-** +-----------------+
-** | image           | n pages  
-** +-----------------+
-*/
+ * +-----------------+ 
+ * |     header      | 32-byte
+ * +-----------------+
+ * |     image       | n byte
+ * +-----------------+
+ */
 
 struct header {
 	char magic[MAGIC_SIZE];
@@ -24,6 +24,8 @@ struct header {
 
 	int img_offset;
 	int img_size;
+
+	int pad_space[3];
 };
 
 static struct header *create_head(void)
@@ -102,7 +104,14 @@ static void make_image(const char *in, const char *out)
 
 static void usage(void)
 {
-	puts("Usage: mkimage -i input file -o output file");
+	puts("Usage:");
+	puts("\tmkimage -i input-path -o output-path");
+	printf("\nPacked input path with a header, in format below:\n	\
++-----------------+\n	\
+|     header      | %d bytes\n	\
++-----------------+\n	\
+|   input path    | N bytes\n	\
++-----------------+\n", (int)sizeof(struct header));
 }
 
 int main(int argc, char **argv)

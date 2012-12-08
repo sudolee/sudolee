@@ -30,7 +30,7 @@ static inline int skip_atoi(const char **s)
 static inline char *string(char *buf, char *end, char *s)
 {
 	if (s == NULL)
-		s = "<NULL>";
+		s = "NULL";
 
 	/* the last one for '\0'  */
 	while (!((*s == '\0') || ((buf + 1) > end)))
@@ -58,10 +58,12 @@ static inline char *number(char *buf, char *end, unsigned long long num, int bas
 		temp[i++] = '0';
 	} else if (base != 10) {	/* 8 or 16 */
 		int mask = base - 1;
+#if 0
 		int shift = 3;
 
 		if (base == 16)
 			shift = 4;
+#endif
 
 		/* it's equal to:
 		 *      this = (num & 0xff) % base | locase;
@@ -70,7 +72,7 @@ static inline char *number(char *buf, char *end, unsigned long long num, int bas
 		 */
 		do {
 			temp[i++] = (digits[((unsigned char)num) & mask] | locase);
-			num >>= shift;
+			num >>= 4;
 		} while (num);
 	}
 #if 0
@@ -163,9 +165,11 @@ long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 			ADDCH(str, '%');
 			continue;
 
+#if 0
 		case 'o':
 			base = 8;
 			break;
+#endif
 
 		case 'x':
 			flags |= SMALL_CASE;

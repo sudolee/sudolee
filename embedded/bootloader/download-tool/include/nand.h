@@ -77,6 +77,7 @@
 
 /* sturcture type */
 struct nand_info;
+
 struct nand_ecc {
 	int size;
 	int steps;
@@ -96,7 +97,7 @@ struct nand_info {
 		size_t *retlen, const char *buf);
 
 //	void (*cmd_ctrl)(struct nand_info *this, int cmd, u32 ctrl);
-	int (*waitfunc)(struct nand_info *this);
+//	int (*waitfunc)(struct nand_info *this);
 	int (*erase)(struct nand_info *this, u32 addr, int len);
 
 	/* nand flash controller register entry */

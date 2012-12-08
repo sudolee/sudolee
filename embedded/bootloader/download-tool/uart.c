@@ -11,20 +11,6 @@ struct uartlite {
 
 static struct uartlite uart_ports[3];
 
-static inline struct uart_t *get_uart_base(u32 index)
-{
-	switch (index) {
-	case UART0_PORT:
-		return (struct uart_t *)UART0_ENTRY;
-	case UART1_PORT:
-		return (struct uart_t *)UART1_ENTRY;
-	case UART2_PORT:
-		return (struct uart_t *)UART2_ENTRY;
-	default:
-		return NULL;
-	}
-}
-
 /* Send functions */
 inline void putc(const u32 port, const char ch)
 {
@@ -58,40 +44,34 @@ inline char *gets(const u32 port)
 }
 #endif
 
-/* init uartlite structure */
-static inline void port_init(u32 port, struct uart_t *entry)
-{
-	uart_ports[port].rx = &entry->rxdata;
-	uart_ports[port].tx = &entry->txdata;
-	uart_ports[port].status = &entry->ufstat;
-}
-
 inline void uart_init(u32 index)
 {
-	struct uart_t *uart = get_uart_base(index);
+	struct uart_t *uart;
 
-	if (uart) {
-		/* config uart function pins */
-		switch (index) {
+	/* config uart function pins */
+	switch (index) {
 #define GPH_UART0 (0xaa << 0)
 #define GPH_UART1 (0xa << 8)
 #define GPH_UART2 (0xa << 12)
-		case UART0_PORT:
-			set_bit((u32 *) GPHCON, GPH_UART0);
-			break;
+	case UART0_PORT:
+		set_bit((u32 *) GPHCON, GPH_UART0);
+		uart = (struct uart_t *)UART0_ENTRY;
+		break;
 
-		case UART1_PORT:
-			set_bit((u32 *) GPHCON, GPH_UART1);
-			break;
+	case UART1_PORT:
+		set_bit((u32 *) GPHCON, GPH_UART1);
+		uart = (struct uart_t *)UART1_ENTRY;
+		break;
 
-		case UART2_PORT:
-			set_bit((u32 *) GPHCON, GPH_UART2);
-			break;
-		default:
-			/* Nothing to do */
-			break;
-		}
+	case UART2_PORT:
+		set_bit((u32 *) GPHCON, GPH_UART2);
+		uart = (struct uart_t *)UART2_ENTRY;
+		break;
+	default:
+		uart = NULL;
+	}
 
+	if(uart) {
 		/* uart line control register
 		 * value        = 0b 010 0011
 		 * [6]          = 0b0   : normal mode
@@ -131,6 +111,9 @@ inline void uart_init(u32 index)
 		 */
 		writel(&uart->ubrdiv, 0x24);
 
-		port_init(index, uart);
+		/* init uartlite structure */
+		uart_ports[index].rx = &uart->rxdata;
+		uart_ports[index].tx = &uart->txdata;
+		uart_ports[index].status = &uart->ufstat;
 	}
 }
