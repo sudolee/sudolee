@@ -5,6 +5,7 @@
   sudo make headers_install
   sudo make install
   sudo update-grub (Ubuntu only)
+  [sudo make firmware_install]
 
     NOTE:
 	    ERROR: P: Installing debian theme...cp: cannot stat `/usr/share/syslinux/themes/debian-wheezy/extlinux/memtest.bin': No such file or directory

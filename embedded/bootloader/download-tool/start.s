@@ -57,15 +57,17 @@ mmu_stuff:
 	mcr p15, 0, r0, c1, c0, 0
 
 /* set stack pointer */
-	/* Note: sp must align to 4 byte */
-#	.equ SP_ENTRY, 0x40000ffc	@ Nor flash boot
-	.equ SP_ENTRY, 0x00000ffc	@ nand flash boot
+#	.equ SP_ENTRY, 0x40000fff	@ Nor flash boot
+	.equ SP_ENTRY, 0x00000fff	@ nand flash boot
 	ldr sp, =SP_ENTRY			@ this tool only run in steppingstone.
+	/* Note: sp must be aligned to 8-byte */
+	bic sp, sp, #0x7
 
 	bl board_init
 
-	.equ SDRAM_SP_POINTER, 0x33fffffc	@ sp pointer at the top of sdram 0~(64MB - 1 & 0x3)
+	.equ SDRAM_SP_POINTER, 0x33ffffff	@ sp pointer at the top of sdram 0~(64MB - 1 & 0x3)
 	ldr sp, =SDRAM_SP_POINTER
+	bic sp, sp, #0x7
 
 	bl dt_main
 

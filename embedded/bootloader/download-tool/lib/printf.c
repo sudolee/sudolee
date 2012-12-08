@@ -1,7 +1,9 @@
 #include "type.h"
 #include "print.h"
-
 #include "uart.h"
+
+/* Needed when link */
+void *memcpy(void *dest, const void *src, long count);
 
 #define SIGN_NUM	(1 << 0)
 #define ZERO_PAD	(1 << 1)
@@ -35,27 +37,6 @@ static char *string(char *buf, char *end, char *s)
 		ADDCH(buf, *s++);
 
 	return buf;
-}
-
-/**    
- * memcpy - Copy one area of memory to another
- * @dest: Where to copy to    
- * @src: Where to copy from   
- * @count: The size of the area.
- *
- * You should not use this function to access IO space.
- *
- * TODO:
- *   when compile with -Os, this func is requested ?
- */
-void *memcpy(void *dest, const void *src, long count)
-{
-	char *tmp = dest;
-	const char *s = src;
-
-	while (count--)
-		*tmp++ = *s++;
-	return dest;
 }
 
 static char *number2str(char *buf, char *end, unsigned long long num, int base,

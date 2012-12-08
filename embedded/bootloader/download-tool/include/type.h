@@ -9,6 +9,7 @@
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned long u32;
+typedef unsigned long size_t;
 
 #define offsetof(TYPE, MEMBER) ((u32) &((TYPE *)0)->MEMBER)
 #define container_of(ptr, type, member) ({          \

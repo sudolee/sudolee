@@ -1,5 +1,6 @@
 #include "nand.h"
 #include "common.h"
+#include "string.h"
 
 #if 1
 #define NF_DEBUG(fmt, args...) printf(fmt, ##args)
@@ -245,12 +246,11 @@ static void nand_write_page_hwecc(struct nand_info *this, const char *buf, int p
 
 static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *ops)
 {
-	int page, subpage, column, bytes;
-	int writelen, retlen = 0;
+	int page, column, bytes;
+	int writelen;
 	int res;
 
 	writelen = ops->len;
-	retlen = ops->retlen;
 
 	ops->retlen = 0;
 	if(!writelen)
@@ -266,14 +266,23 @@ static int nand_do_write_ops(struct nand_info *this, u32 to, struct nand_ops *op
 	}
 
 	column = to & (this->writesize - 1);
-	subpage = column || (writelen & (this->writesize - 1));
 
 	page = to >> this->page_shift;
 	page &= this->page_mask;
 
 	do {
+		/* pagebuff used for subpage write */
+		char pagebuff[NAND_PAGE_SIZE];
 		char *wbuf = ops->databuf;
 		bytes = this->writesize;
+
+		/* Partial page write ? */
+		if(column || writelen < (this->writesize -1)) {
+			memset(pagebuff, 0xff, this->writesize);
+			bytes = min(bytes - column, writelen);
+			memcpy(&pagebuff[column], ops->databuf, bytes);
+			wbuf = pagebuff;
+		}
 
 		nand_command(this, NAND_CMD_SEQIN, 0x00, page);
 		this->ecc.write_page(this, wbuf, page);

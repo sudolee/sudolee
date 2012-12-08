@@ -25,6 +25,8 @@
  * page size = (2048 + 64) bytes; 64 bytes OOB area
  *
  */
+/* nand_info->writesize */
+#define NAND_PAGE_SIZE 2048
 
 //ecc bytes = 512
 #define NAND_ECCBYTES (1 << 9)
