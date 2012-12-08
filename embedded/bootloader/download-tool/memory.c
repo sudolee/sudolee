@@ -1,13 +1,8 @@
 #include "memory.h"
 
-static inline struct memory_t *get_mem_base(void)
+inline void memory_init(void)
 {
-	return (struct memory_t *)MEMORY_ENTRY;
-}
-
-void memory_init(void)
-{
-	struct memory_t *mem_config = get_mem_base();
+	struct memory_t *mem_config = (struct memory_t *)MEMORY_ENTRY;
 
 	/*
 	 * BWSCON

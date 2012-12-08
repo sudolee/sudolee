@@ -1,21 +1,21 @@
 # dt = download tool for qt2440
 
 CC = arm-linux-gnueabi-gcc -g -Os -mabi=aapcs -mno-thumb-interwork -mfloat-abi=soft -mlittle-endian -mcpu=arm920t -marm -fno-builtin -nostdinc -fno-common -fstack-usage -Wall -I./include/ -c
-LD=arm-linux-gnueabi-ld -S
-OBJCOPY=arm-linux-gnueabi-objcopy
-OBJDUMP=arm-linux-gnueabi-objdump
+LD = arm-linux-gnueabi-ld -S
+OBJCOPY = arm-linux-gnueabi-objcopy
+OBJDUMP = arm-linux-gnueabi-objdump
 
 TARGET=dt
 
 all:
 	${CC} -o start.o start.s
-	${CC} -o led.o led.s
+#	${CC} -o led.o led.s
 	${CC} -o board.o board.c
 	${CC} -o clk_pwr.o clk_pwr.c
 	${CC} -o memory.o memory.c
-	${CC} -o irq.o irq.c
+#	${CC} -o irq.o irq.c
 	${CC} -o uart.o uart.c
-	${CC} -o timer.o timer.c
+#	${CC} -o timer.o timer.c
 	${CC} -o nand.o nand.c
 	${CC} -o lib/list.o lib/list.c
 	${CC} -o lib/string.o lib/string.c

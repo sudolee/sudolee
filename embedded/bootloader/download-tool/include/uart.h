@@ -18,6 +18,8 @@
 void uart_init(u32 index);
 void putc(const u32 port, const char ch);
 void puts(const u32 port, const char *s);
-char getc(const u32 port);
+
+/* Not use so far */
+//char getc(const u32 port);
 
 #endif /* __UART_H_ */

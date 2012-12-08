@@ -41,11 +41,11 @@ char *strcpy(char * dest, char * src)
  */
 void *memcpy(void *dest, const void *src, long count)
 {
-	char *tmp = dest;
+	char *temp = dest;
 	const char *s = src;
 
 	while (count--)
-		*tmp++ = *s++;
+		*temp++ = *s++;
 	return dest;
 }
 

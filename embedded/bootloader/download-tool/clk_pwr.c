@@ -5,14 +5,9 @@
 #include "clk_pwr.h"
 #include "common.h"
 
-static inline struct clk_pwr_t *get_cpm_base(void)
+inline void clk_pwr_init(void)
 {
-	return (struct clk_pwr_t *)CLOCK_POWER_ENTRY;
-}
-
-void clk_pwr_init(void)
-{
-	struct clk_pwr_t *clk = get_cpm_base();
+	struct clk_pwr_t *clk = (struct clk_pwr_t *)CLOCK_POWER_ENTRY;
 
 	writel(&clk->locktime, 0xffffffff);	/* max pll lock time */
 

@@ -6,11 +6,11 @@
 
 void board_init(void)
 {
-	printf("board_init() start\n");
+	printf("board_init start\n");
 
 	clk_pwr_init();
 	memory_init();
 	uart_init(UART0_PORT);
 
-	printf("board_init() successfull.\n");
+	printf("board_init done\n");
 }

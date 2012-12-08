@@ -26,7 +26,7 @@ static inline struct uart_t *get_uart_base(u32 index)
 }
 
 /* Send functions */
-void putc(const u32 port, const char ch)
+inline void putc(const u32 port, const char ch)
 {
 	if (ch == '\n')
 		putc(port, '\r');
@@ -36,14 +36,15 @@ void putc(const u32 port, const char ch)
 	writeb(uart_ports[port].tx, ch);
 }
 
-void puts(const u32 port, const char *s)
+inline void puts(const u32 port, const char *s)
 {
 	while (*s)
 		putc(port, *s++);
 }
 
+#if 0 /* receive funcs not use so far */
 /* Receive functions */
-char getc(const u32 port)
+inline char getc(const u32 port)
 {
 	/* is any data in rx fifo ? */
 	while (!(readl(uart_ports[port].status) & RX_FIFO_EMPTY)) ;
@@ -51,20 +52,21 @@ char getc(const u32 port)
 }
 
 __attribute__ ((weak))
-char *gets(const u32 port)
+inline char *gets(const u32 port)
 {
 	return NULL;
 }
+#endif
 
 /* init uartlite structure */
-static void port_init(u32 port, struct uart_t *entry)
+static inline void port_init(u32 port, struct uart_t *entry)
 {
 	uart_ports[port].rx = &entry->rxdata;
 	uart_ports[port].tx = &entry->txdata;
 	uart_ports[port].status = &entry->ufstat;
 }
 
-void uart_init(u32 index)
+inline void uart_init(u32 index)
 {
 	struct uart_t *uart = get_uart_base(index);
 

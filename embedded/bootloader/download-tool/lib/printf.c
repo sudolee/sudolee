@@ -3,7 +3,7 @@
 #include "uart.h"
 
 /* Needed when link */
-void *memcpy(void *dest, const void *src, long count);
+extern void *memcpy(void *dest, const void *src, long count);
 
 #define SIGN_NUM	(1 << 0)
 #define ZERO_PAD	(1 << 1)
@@ -15,9 +15,9 @@ void *memcpy(void *dest, const void *src, long count);
 		} while (0)
 
 /* we use this so that we can do without the ctype library */
-#define is_digit(c) ((c) >= '0' && (c) <= '9')
+#define is_digit(c) (((c) >= '0') && ((c) <= '9'))
 
-static int skip_atoi(const char **s)
+static inline int skip_atoi(const char **s)
 {
 	int i = 0;
 
@@ -27,7 +27,7 @@ static int skip_atoi(const char **s)
 	return i;
 }
 
-static char *string(char *buf, char *end, char *s)
+static inline char *string(char *buf, char *end, char *s)
 {
 	if (s == NULL)
 		s = "<NULL>";
@@ -39,12 +39,12 @@ static char *string(char *buf, char *end, char *s)
 	return buf;
 }
 
-static char *number2str(char *buf, char *end, unsigned long long num, int base,
+static inline char *number(char *buf, char *end, unsigned long long num, int base,
 		  int field_width, int type)
 {
-	const char digits[16] = "0123456789ABCDEF";
+	const char digits[] = "0123456789ABCDEF";
 
-	char temp[66];
+	char temp[24];
 	int need_prefix = (base != 10);
 	int i;
 	char locase;
@@ -69,7 +69,6 @@ static char *number2str(char *buf, char *end, unsigned long long num, int base,
 		 *      num /= base;
 		 */
 		do {
-//temp[i++] = ("0123456789ABCDEF"[((unsigned char)num) & mask] | locase);
 			temp[i++] = (digits[((unsigned char)num) & mask] | locase);
 			num >>= shift;
 		} while (num);
@@ -114,7 +113,7 @@ static char *number2str(char *buf, char *end, unsigned long long num, int base,
 }
 
 //long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
-long tiny_vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
+long vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 {
 	unsigned long long num;
 	int base, flags;
@@ -155,7 +154,7 @@ long tiny_vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 		case 'p':
 			/* flags |= SMALL_CASE */
 			str =
-			    number2str(str, end,
+			    number(str, end,
 				 (unsigned long)va_arg(args, void *), 16,
 				 sizeof(void *) << 1, SMALL_CASE);
 			continue;
@@ -196,7 +195,7 @@ long tiny_vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 		if (flags & SIGN_NUM)
 			num = (signed int)num;
 
-		str = number2str(str, end, num, base, field_width, flags);
+		str = number(str, end, num, base, field_width, flags);
 	}
 
 	if (size > 0)
@@ -205,7 +204,9 @@ long tiny_vsnprintf(char *buf, u32 size, const char *fmt, va_list args)
 	return str - buf;
 }
 
-#define MAX_PRINTBUF_SIZE 128
+/* TODO: size seem little */
+#define MAX_PRINTBUF_SIZE 80
+
 long serial_printf(int port_num, const char *format, ...)
 {
 	va_list args;
@@ -213,7 +214,7 @@ long serial_printf(int port_num, const char *format, ...)
 	char printbuffer[MAX_PRINTBUF_SIZE];
 
 	va_start(args, format);
-	rv = tiny_vsnprintf(printbuffer, sizeof(printbuffer), format, args);
+	rv = vsnprintf(printbuffer, sizeof(printbuffer), format, args);
 	va_end(args);
 
 	puts(port_num, printbuffer);

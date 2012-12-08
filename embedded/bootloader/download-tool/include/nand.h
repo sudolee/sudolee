@@ -26,6 +26,7 @@
  *
  */
 /* nand_info->writesize */
+#define NAND_SIZE 0x420000 /* 2048*(2048 + 64) */
 #define NAND_PAGE_SIZE 2048
 
 //ecc bytes = 512
@@ -73,6 +74,51 @@
 #define NAND_STATUS_FAIL 	(1 << 0)
 #define NAND_STATUS_READY 	(1 << 6)
 #define NAND_STATUS_WP 		(1 << 7)
+
+/* sturcture type */
+struct nand_info;
+struct nand_ecc {
+	int size;
+	int steps;
+	void (*hwctl)(struct nand_info *this, int mode);
+	int (*calculate)(struct nand_info *this, const u8 *data, u8 *calc_ecc);
+	int (*correct)(struct nand_info *this, u8 *data, u8 *read_ecc, u8 *calc_ecc);
+	void (*write_page)(struct nand_info *this, const char *buf, int page);
+	void (*read_page)(struct nand_info *this, char *buf, int page);
+};
+
+struct nand_info {
+	u32 IO_NFCMD;
+	u32 IO_NFADDR;
+	u32 IO_NFDATA;
+
+	int (*write)(struct nand_info *this, u32 to, size_t len,
+		size_t *retlen, const char *buf);
+
+//	void (*cmd_ctrl)(struct nand_info *this, int cmd, u32 ctrl);
+	int (*waitfunc)(struct nand_info *this);
+	int (*erase)(struct nand_info *this, u32 addr, int len);
+
+	/* nand flash controller register entry */
+	struct nand_ctrl_t *ctrl_regs;
+
+	/* ECC */
+	struct nand_ecc ecc;
+
+	/* size */
+	unsigned long nand_size;
+	int page_shift;
+	int page_mask;
+	int col_mask;
+	int erase_shift;
+	int writesize;
+};
+
+struct nand_ops {
+	size_t len;
+	size_t retlen;
+	char *databuf;
+};
 
 /* exported functions... */
 struct nand_info *get_nandinfo(void);
