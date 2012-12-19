@@ -1,3 +1,0 @@
-
-find . | grep -Ei '\.c$|\.h$|\.s$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.cc$' > cscope.files
-cscope -Rbqk
