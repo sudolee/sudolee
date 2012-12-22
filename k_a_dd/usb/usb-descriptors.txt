@@ -40,5 +40,13 @@
 3, interface descriptor
 	Offset	Field				Size	value		Desription
 
+[Note]
+	在USB协议中同一个配置中的不同接口不能共用端点
+    同一个接口可以有多个接口描述符,用bAlternateSetting来识别
+    同一个接口的不同接口描述符,可以拥有相同的端点
+    同一个接口中的不同描述符可以像其他接口描述符一样写在配置描述符里
+	e.g. 如果只需改变某个interface里某个endpoint的属性时, 就使用不同的bAlternateSetting(这样就可以使用相同的endp),
+		端点的属性可以在此时改变.
+
 
 4, endpoint descriptor
