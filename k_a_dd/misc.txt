@@ -1,0 +1,11 @@
+
+
+
+1, trigger kernel panic
+	echo c > /proc/sysrq-trigger
+
+2, get build id(version)
+	cat /sys/kernel/debug/smd/build
+
+3, mount debugfs
+	mount -t debugfs none /sys/kernel/debug

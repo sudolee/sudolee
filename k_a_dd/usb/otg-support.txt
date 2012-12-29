@@ -1,0 +1,19 @@
+./drivers/usb/host/Kconfig +40		config USB_EHCI_HCD		(default yes)
+./drivers/usb/host/Kconfig +168		config USB_EHCI_MSM		(?)
+./drivers/usb/host/Kconfig +257		config USB_EHCI_MSM_72K
+./drivers/usb/otg/Kconfig  +77		config USB_MSM_OTG_72K
+
+1. To enable the otg as a host, you should use a pmic to output the voltage of vbus (5.5v). pm8029 doesn't support this.
+2. usb can be used as a host or a device. It is decided by the ID pin.
+3. To enable the otg host fucnction, three macros should be open in the QRD code:
+CONFIG_USB_EHCI_MSM_72K
+CONFIG_USB_EHCI_ROOT_HUB_TT
+CONFIG_USB_MSM_OTG
+
+1,
+USB_EHCI_MSM
+
+
+2,
+USB_EHCI_MSM_72K
+USB_MSM_OTG_72K

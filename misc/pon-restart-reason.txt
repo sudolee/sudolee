@@ -1,0 +1,100 @@
+power on and restart reason
+
+== power on reason ==
+	1, get it via proc_comm
+	[1]modem side:
+		pm_register_pcil_cmds()-> SMEM_PROC_COMM_REGISTER_CMD()-> pm_get_power_on_status_pcil()-> pm_get_power_on_status()
+		proc command: SMEM_PROC_COMM_GET_POWER_ON_STATUS
+	[2]app side:
+		msm_proc_comm(PCOM_GET_POWER_ON_STATUS, &pon_status, &ftm_nv);
+
+	2, get it via smem
+	[1]modem side:
+		oemsbl_smem_store_pon_status-> oemsbl_smem_store_pon_status()
+
+/**************************************************************************************
+void oemsbl_smem_store_pon_status( void )
+{
+  uint32 status_loc =0 , *smem_bootmode_ptr =0; 
+  /* Storing the PON status to SMEM */
+  if(pm_get_power_on_status (&status_loc) == PM_ERR_FLAG__SUCCESS)
+  {
+/* [QRD] [BSP] add for boot reason and long press power key startup phone module 20120229 begin*/                                                
+    Adjust_pwr_on_status((int *)&status_loc);
+/* [QRD] [BSP] add for boot reason and long press power key startup phone module 20120229 end */        
+    /*-------------------------------------------------------------------------
+      Copy over the apps boot mode into SMEM.
+    -------------------------------------------------------------------------*/
+    smem_bootmode_ptr = (uint32 *) smem_alloc( SMEM_POWER_ON_STATUS_INFO,
+                                                     sizeof(uint32));       
+     OEMSBL_VERIFY( smem_bootmode_ptr != NULL);
+     memcpy(smem_bootmode_ptr, &status_loc, sizeof(uint32));
+   }
+} /* oemsbl_smem_store_pon_status() */
+**************************************************************************************/
+
+	[2]app side:
+		boot_reason = *(unsigned int *)(smem_get_entry(SMEM_POWER_ON_STATUS_INFO, &smem_size));
+		
+
+== restart reason ==
+	1, reboot flow:
+	syscal_reboot()-> kernel_restart()-> / kernel_restart_prepare()-> blocking_notifier_call_chain(&reboot_notifier_list...)
+                                         \ machine_restart()-> arm_pm_restart()==msm_pm_restart()
+	2, Update restart reason:
+	[1]app side:
+	在重启流程中, kernel_restart()在call machine_restart()之前, 会先执行kernel_restart_prepare(), 依次执行reboot_notifier_list
+	上的回调函数, 包括在pm2.c里注册的msm_reboot_call()
+
+/**************************************************************************************
+static int msm_reboot_call(struct notifier_block *this, unsigned long code, void *_cmd)
+{
+    if ((code == SYS_RESTART) && _cmd) {
+        char *cmd = _cmd;
+        if (!strcmp(cmd, "bootloader")) {
+            restart_reason = 0x77665500;
+        } else if (!strcmp(cmd, "recovery")) {
+            restart_reason = 0x77665502;
+        } else if (!strcmp(cmd, "eraseflash")) {
+            restart_reason = 0x776655EF;
+        } else if (!strncmp(cmd, "oem-", 4)) {
+            unsigned code = simple_strtoul(cmd + 4, 0, 16) & 0xff;
+            restart_reason = 0x6f656d00 | code;
+        } else {
+            restart_reason = 0x77665501;
+        }    
+    }    
+    return NOTIFY_DONE;
+}
+**************************************************************************************/
+
+	[2]modem side:
+	chip_control_register_pcil_cmds()-> reset_chip_pcil()-> bootmem_write_boot_mode(*reason)
+	write reason and magic number into IRAM(#define BOOTMODE_ID_ADDR (HWIO_IRAM_BASE_ADDR - sizeof(bootmode_id_type)))
+	[Note]: HWIO_IRAM_BASE_ADDR=IRAM_BASE=0xfffef800
+
+	3, reboot:
+	msm_pm_restart()执行msm_proc_comm(),写入restart_reason并发送reset命令.
+	msm_pm_restart()-> msm_proc_comm(PCOM_RESET_CHIP, &restart_reason, 0)
+
+	[Note: oemsbl]
+	oemsbl_proc_comm_process()-> oemsbl_process_system_reset()-> oemsbl_proc_hw_reset()
+		enable watchdog, wait for reset.
+
+	4, load restart reason:
+	- qcsbl_load_bootmode()把restart reason存入appsbl_interface.
+	- oemsbl_shared_ram_init()把restart reason copy到smem, app启动后可以通过这个smem获取restart reason.
+
+/**************************************************************************************
+  smem_bootmode = (appsbl_interface_type *) smem_alloc( SMEM_APPS_BOOT_MODE,
+                                                 sizeof(appsbl_interface_type));
+  memcpy(smem_bootmode, qcsbl_ptr->appsbl_interface, sizeof(appsbl_interface_type));
+**************************************************************************************/
+
+	5, get restart reason:
+	[1] get it in lk:
+    	smem_status = smem_read_alloc_entry(SMEM_APPS_BOOT_MODE,
+                        &restart_reason, len);
+
+	[2] get it in kernel:
+	restart_reason = *(u32 *)(smem_get_entry(SMEM_APPS_BOOT_MODE, &size));
