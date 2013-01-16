@@ -59,6 +59,7 @@ Note: this certificate is only used for test. You should get yours after WHQL te
 	- mkdir /tmp/mtp-local
 	- mtpfs /tmp/mtp-local		(mount mtp device as /tmp/mtp-local)
 	- umount /tmp/mtp-local
+	[Note]: https://wiki.archlinux.org/index.php/MTP
 
 == rndis ==
 1, RNDIS protocol
