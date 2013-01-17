@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#sudo cp -f colors/* /usr/share/vim/vim7*/colors/
 rm -rf ~/.vim
 rm -f ~/.vimrc
 cp -rf vim ~/.vim
