@@ -1,0 +1,2 @@
+1, code flow
+	aboot_init()-> fastboot_init(target_get_scratch_address(), 253MB) /* scratch_addr=0x002A0000, rules.mk */
