@@ -1,3 +1,8 @@
 1, 对每个project执行相同的git命令, e.g.
-	repo forall -c git reset --hard
-	repo forall -c git checkout Xtag
+	- repo forall -c git reset --hard
+	- repo forall -c git checkout Xtag
+
+2, 已经下载了代码但在sync时出现这样的错误
+	- sudolee@Ts:~/work/code/release$ repo sync
+	  error: .repo/manifests/: contains uncommitted changes
+	- cd .repo/manifests/; git stash; git clean -f -d;
