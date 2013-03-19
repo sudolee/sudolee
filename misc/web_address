@@ -1,5 +1,11 @@
+open source:
+	linux kernel-> www.kernel.org
+	busybox-> http://www.busybox.net/
+	aboriginal + toybox-> http://www.landley.net/code/toybox/
+	yaffs-> http://www.yaffs.net/download-yaffs-using-git
+		git clone git://www.aleph1.co.uk/yaffs2
+
 Linux:
-	www.kernel.org
 	lwn.net
 	lxr.linux.no
 	www.linuxsir.org
@@ -18,8 +24,6 @@ Linux:
 	https://silver.arm.com
 google chrome:
 	https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-yaffs filesystem:
-	git clone git://www.aleph1.co.uk/yaffs2 #http://www.yaffs.net/node/346
 free cross toolchain:
 	http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/
 
@@ -39,9 +43,10 @@ Windows:
 skype without tom:
 	http://www.skype.com/go/getskype-full  (for the full installer you run from your hard drive)
 	http://download.skype.com/SkypeSetup.exe  (for the standard installer)
-	http://download.skype.com/linux/skype-ubuntu_4.0.0.7-1_i386.deb
-	http://download.skype.com/linux/skype-debian_4.0.0.7-1_i386.deb
+	http://download.skype.com/linux/skype-ubuntu_4.0.0.8-1_i386.deb # i386-> amd64
+	http://download.skype.com/linux/skype-debian_4.0.0.8-1_i386.deb # i386-> amd64
 	http://download.skype.com/linux/skype-debian_4.1.0.20-1_i386.deb
+	http://download.skype.com/linux/skype-ubuntu-precise_4.1.0.20-1_i386.deb
 	http://download.skype.com/linux/skype-ubuntu_2.2.0.35-1_i386.deb # i386-> amd64
 	http://download.skype.com/linux/skype-debian_2.2.0.35-1_i386.deb # i386-> amd64
 

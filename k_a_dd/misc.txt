@@ -1,8 +1,11 @@
 
 
 
-1, trigger kernel panic
-	echo c > /proc/sysrq-trigger
+1, trigger kernel panic: echo c > /proc/sysrq-trigger
+
+	write_sysrq_trigger()->__handle_sysrq()-> __sysrq_get_key_op()-> sysrq_key_table[]
+	-> sysrq_crash_op()-> handler()-> sysrq_handle_crash() /* write something into (*NULL) */
+	-> page_fault()-> console_unlock()-> up()-> do_page_fault()-> bad_area()-> notify_update()-> __bad_area_nosemaphore()-> no_context()-> oops_end()-> panic()
 
 2, get build id(version)
 	cat /sys/kernel/debug/smd/build
