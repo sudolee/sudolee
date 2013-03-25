@@ -31,7 +31,6 @@ sublime Text:
 	http://www.sublimetext.com/
 realplayer source:
 	https://helixcommunity.org/
-
 python:
 	http://sebug.net/paper/python/
 
@@ -45,10 +44,6 @@ skype without tom:
 	http://download.skype.com/SkypeSetup.exe  (for the standard installer)
 	http://download.skype.com/linux/skype-ubuntu_4.0.0.8-1_i386.deb # i386-> amd64
 	http://download.skype.com/linux/skype-debian_4.0.0.8-1_i386.deb # i386-> amd64
-	http://download.skype.com/linux/skype-debian_4.1.0.20-1_i386.deb
-	http://download.skype.com/linux/skype-ubuntu-precise_4.1.0.20-1_i386.deb
-	http://download.skype.com/linux/skype-ubuntu_2.2.0.35-1_i386.deb # i386-> amd64
-	http://download.skype.com/linux/skype-debian_2.2.0.35-1_i386.deb # i386-> amd64
 
 hosts:
 	--huhamhire-hosts--
