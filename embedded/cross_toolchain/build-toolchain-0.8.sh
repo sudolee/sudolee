@@ -11,7 +11,7 @@ TARGET=arm-linux-gnueabi
 HOST=$MACHTYPE
 BUILD=$MACHTYPE
 
-PRO_ROOT=/home/sudolee/cross
+PRO_ROOT=$HOME/cross
 PREFIX=$PRO_ROOT/arm-cross-toolchain
 PRO_PACKAGES=$PRO_ROOT/packages
 SYSROOT=$PREFIX/$TARGET/sys-root

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PACKAGES=$HOME/cross/packages
+
 KERNEL_VERSION=linux-3.0.41
 #5.09
 FILE_VERSION=file-5.11
@@ -23,11 +25,13 @@ LIBELF_VERSION=libelf-0.8.13
 ## Request softwares...
 sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
 	zip unzip autoconf m4 automake gettext gperf dejagnu expect tcl autogen \
-	guile-2.0 flex texinfo subversion ssh diff patch ecj libtool byacc bison fixincludes \
-	git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib msgfmt \
+	guile-2.0 flex texinfo subversion ssh diffutils patch ecj libtool byacc bison fixincludes \
+	git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib \
 	axel
 
 ## Prepare packages...
+mkdir $PACKAGES
+cd $PACKAGES
 
 # kernel (long term kernel)
 if [ ! -f ${KERNEL_VERSION}.tar.bz2 ];then
