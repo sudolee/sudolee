@@ -11,7 +11,7 @@ GMP_VERSION=gmp-5.0.4
 #3.0.1
 MPFR_VERSION=mpfr-3.1.1
 MPC_VERSION=mpc-0.9
-#0.11.2
+#0.12
 PPL_VERSION=ppl-0.12
 CLOOG_VERSION=cloog-ppl-0.15.11
 BINUTILS_VERSION=binutils-2.21.1a
@@ -83,8 +83,7 @@ if [ ! -f $MPC_VERSION.tar.gz ];then
 fi
 
 # ppl (with pwl)
-if [ ! -f ppl-0.11.2.tar.bz2 ];then
-	#axel -a ftp://ftp.cs.unipr.it/pub/ppl/releases/0.11.2/ppl-0.11.2.tar.bz2
+if [ ! -f ppl-0.12.tar.bz2 ];then
 	axel -a ftp://ftp.cs.unipr.it/pub/ppl/releases/0.12/ppl-0.12.tar.bz2
 fi
 
