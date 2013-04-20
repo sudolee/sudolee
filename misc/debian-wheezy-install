@@ -81,3 +81,14 @@
 	More info:
 		http://www.thinkwiki.org/wiki/How_to_configure_the_TrackPoint#GPointing_Device_Settings
 		http://wiki.debian.org/InstallingDebianOn/Thinkpad/Trackpoint
+
+12, cannot mount removeable storage after install debian via usb ?
+	用u盘安装系统的时候, 系统在/etc/fstab里设置了sdb*的权限, 如下:
+	将这几行删掉就好了.
+	---------------------------------------------------------
+	/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+	/dev/sdb1       /media/usb0     auto    rw,user,noauto  0       0
+	/dev/sdb2       /media/usb1     auto    rw,user,noauto  0       0
+	---------------------------------------------------------
+
+	Details-> http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=612119
