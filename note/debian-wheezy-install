@@ -65,6 +65,19 @@
 	install this package: firmware-iwlwifi
 
 11, thinkpad 中键滑屏设置
-	install this package: gpointing-device-settings
-	在shell里面运行: gpointing-device-settings
-	tpps/2 IBM TrackPoint-> [use whell emulation] + [button=2]
+	add code below into /etc/X11/xorg.conf.d/20-thinkpad.conf (creat this file)
+	---------------------------------------------------------
+	Section "InputClass"
+    	Identifier "Trackpoint Wheel Emulation"
+    	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device" 
+    	MatchDevicePath    "/dev/input/event*"
+    	Option             "EmulateWheel"          "true"
+    	Option             "EmulateWheelButton"    "2"
+    	Option             "Emulate3Buttons"       "false"
+    	Option             "XAxisMapping"          "6 7"
+    	Option             "YAxisMapping"          "4 5"
+	EndSection
+	---------------------------------------------------------
+	More info:
+		http://www.thinkwiki.org/wiki/How_to_configure_the_TrackPoint#GPointing_Device_Settings
+		http://wiki.debian.org/InstallingDebianOn/Thinkpad/Trackpoint

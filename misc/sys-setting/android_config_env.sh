@@ -27,4 +27,8 @@ curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ./repo
 chmod +x repo
 sudo mv ./repo /usr/local/bin/repo
 
+# Note:
+# cross toolchain request zlib1g-dev lib32z1-dev
+# adb request lib32ncurses6-dev
+#
 exit
