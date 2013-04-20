@@ -18,10 +18,10 @@
 	- 把镜像文件作为源, "apt-cdrom add" (安装DVD里的kde而不是通过网络, 这样要快很多)
 	- apt-get update; apt-get install task-kde-desktop (kde桌面环境)
 	- 安装中文环境, 安装后就能正常显示中文, 也会安装fcitx输入法(个人感觉在debian下比ibus好用)
-			task-chinese-s - Simplified Chinese environment
 			task-chinese-s-desktop - Simplified Chinese desktop
-			task-chinese-s-kde-desktop - Simplified Chinese KDE desktop
 			kde-l10n-zhcn - Chinese Simplified (zh_CN) localization files for KDE
+			task-chinese-s - Simplified Chinese environment
+			task-chinese-s-kde-desktop - Simplified Chinese KDE desktop
 	- 重启后进入kde桌面环境
 
 5, 更改更新源/etc/apt/sources.list
@@ -65,5 +65,3 @@
 	install this package: gpointing-device-settings
 	在shell里面运行: gpointing-device-settings
 	tpps/2 IBM TrackPoint-> [use whell emulation] + [button=2]
-	
-
