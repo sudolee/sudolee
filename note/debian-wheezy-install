@@ -58,5 +58,12 @@
 	- 上面包含了virtualbox的源, apt-get update后直接apt-get install virtualbox-4.2
 	- 修改"Default Machine Folder", 直接在 "~/.VirtualBox/VirtualBox.xml" 中修改默认路径(VirtualBox VMs)
 
+9, cannot found wifi firmware ?
+	install this package: firmware-iwlwifi
 
+10, thinkpad 中键滑屏设置
+	install this package: gpointing-device-settings
+	在shell里面运行: gpointing-device-settings
+	tpps/2 IBM TrackPoint-> [use whell emulation] + [button=2]
+	
 
