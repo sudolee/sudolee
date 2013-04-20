@@ -7,6 +7,8 @@ if v:lang =~ "utf8$" || v:lang =~ "UTF-8$"
 endif
 
 colorscheme evening
+"colorscheme murphy
+"colorscheme torte
 set nu
 syntax on
 set cursorline
