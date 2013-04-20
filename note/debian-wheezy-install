@@ -45,23 +45,26 @@
 	# virtualbox
 	deb http://download.virtualbox.org/virtualbox/debian wheezy contrib
 
-6, 修改用户
+6, multimedia source warning ?
+	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1F41B907
+
+7, 修改用户
 	在文件/etc/sudoers中添加一行, 如下:
 	sudolee ALL=(ALL:ALL) ALL
 
-7, 安装邮件客户端icedove(其实就是thunderbird, 因为商标问题, 在debian下porting为这个)
+8, 安装邮件客户端icedove(其实就是thunderbird, 因为商标问题, 在debian下porting为这个)
 	apt-get install icedove icedove-l10n-zh-cn
 	p.s. 以前备份的thunderbird或者icedove邮件直接拷贝到~/.icedove/xxxx.default/Mail就可以了
 		我在备份的时候发现要先创建账户, 然后把自动生成的~/.icedove/xxxx.default/Mail用之前备份的替换掉才可以.
 
-8, virtualBox
+9, virtualBox
 	- 上面包含了virtualbox的源, apt-get update后直接apt-get install virtualbox-4.2
 	- 修改"Default Machine Folder", 直接在 "~/.VirtualBox/VirtualBox.xml" 中修改默认路径(VirtualBox VMs)
 
-9, cannot found wifi firmware ?
+10, cannot found wifi firmware ?
 	install this package: firmware-iwlwifi
 
-10, thinkpad 中键滑屏设置
+11, thinkpad 中键滑屏设置
 	install this package: gpointing-device-settings
 	在shell里面运行: gpointing-device-settings
 	tpps/2 IBM TrackPoint-> [use whell emulation] + [button=2]
