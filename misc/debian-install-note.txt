@@ -170,3 +170,7 @@ c) aptosid source warning ?
 	apt-get install aptosid-archive-keyring
 d) apt-get install linux-image-3.8-8.slh.1-aptosid-amd64
 e) reboot
+[Note]:
+	装完新内核需要重新安装virtualbox, 重新安装vbox又需有linux-headers-$(uname -r)
+	apt-get install linux-headers-$(uname -r)
+	然后再重新安装virtualbox
