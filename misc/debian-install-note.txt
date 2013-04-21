@@ -27,6 +27,7 @@
 - 重启后进入kde桌面环境
 
 5, 更改更新源/etc/apt/sources.list
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ## 163
   #deb http://mirrors.163.com/debian wheezy main contrib non-free
   #deb-src http://mirrors.163.com/debian wheezy main non-free contrib
@@ -52,6 +53,7 @@
 
   # virtualbox
   deb http://download.virtualbox.org/virtualbox/debian wheezy contrib
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
 6, multimedia source warning ?
   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1F41B907
