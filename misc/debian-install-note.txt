@@ -74,8 +74,21 @@ apt-get install icedove icedove-l10n-zh-cn
   
 10, cannot found wifi firmware ?
   apt-get install firmware-iwlwifi
+
+11, wifi驱动
+	https://sudolee.googlecode.com/files/rtl_92ce_92se_92de_8723ae_88ee_linux_mac80211_0012.0207.2013.tar.bz2
+	Use this source code, just do follow:
+		make
+		sudo make uninstall
+		sudo make install
+	p.s. You can also get it from http://www.realtek.com.tw/
+	[Note]: Cannot build ? Pls try to do this:
+	1, apt-get install build-essential linux-headers-$(uname -r)
+	# 第2步可能不需要了，但是很久以前装wheezy wifi驱动的时候需要这一步
+	# 如果第一步结束后可以make，就不要ln了
+	2, ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
   
-11, thinkpad 中键滑屏设置
+12, thinkpad 中键滑屏设置
 add code below into /etc/X11/xorg.conf.d/20-thinkpad.conf (creat this file)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Section "InputClass"
@@ -93,7 +106,7 @@ More info:
 http://www.thinkwiki.org/wiki/How_to_configure_the_TrackPoint#GPointing_Device_Settings
 http://wiki.debian.org/InstallingDebianOn/Thinkpad/Trackpoint
 
-12, cannot mount removeable storage after install debian via usb ? (无法挂载u盘、移动硬盘？)
+13, cannot mount removeable storage after install debian via usb ? (无法挂载u盘、移动硬盘？)
 用u盘安装系统的时候, 系统在/etc/fstab里设置了sdb*的权限, 如下:
 将这几行删掉就好了.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -103,7 +116,7 @@ http://wiki.debian.org/InstallingDebianOn/Thinkpad/Trackpoint
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Details-> http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=612119
 
-13, upgrade from wheezy to sid:
+14, upgrade from wheezy to sid:
 [Note]:我是直接从testing更新到unstable的, 如果你安装的stable就要先更新到testing.
 a) 把wheezy的/etc/apt/sources.list更新到sid
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -124,12 +137,12 @@ b) apt-get update
 c) apt-get dist-upgrade
 d) reboot
 
-14, adobe flash player
+15, adobe flash player
 	howto install: apt-get install flashplugin-nonfree
 	howto udate: update-flashplugin-nonfree --install
  Details-> http://wiki.debian.org/FlashPlayer
 
-15, Nivdia Optimus for linux(省电技术)
+16, Nivdia Optimus for linux(省电技术)
 a) Add archive key to apt keyring. Run as root:
 	wget -O - http://suwako.nomanga.net/suwako.asc | apt-key add -
 b) Update your /etc/apt/sources.list configuration
@@ -144,3 +157,6 @@ Details:
 https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
 https://wiki.debian.org/Bumblebee
 http://suwako.nomanga.net/
+
+17, disable Nepomuk/Strigi Server(这货相当占cpu和内存, 禁掉后无异常)
+system settings -> desktop search -> Just disable it, :)
