@@ -119,18 +119,19 @@ Details-> http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=612119
 [Note]:我是直接从testing更新到unstable的, 如果你安装的stable就要先更新到testing.
 a) 把wheezy的/etc/apt/sources.list更新到sid
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-		## china
-		deb http://ftp.cn.debian.org/debian/ sid main contrib non-free
-		deb-src http://ftp.cn.debian.org/debian/ sid main contrib non-free
+	## china
+	deb http://ftp.cn.debian.org/debian/ sid main contrib non-free
+	deb-src http://ftp.cn.debian.org/debian/ sid main contrib non-free
 
+	# Third Parties Repos
+	# Debian Multimedia
+	deb http://www.las.ic.unicamp.br/pub/debian-multimedia/ sid main non-free
+	# deb-multimedia.org
+	deb http://www.deb-multimedia.org sid main non-free
 
-		# multimedia
-		deb http://deb-multimedia.org sid main non-free
-
-
-		# Bumblebee
-		deb http://suwako.nomanga.net/debian sid main contrib
-		deb-src http://suwako.nomanga.net/debian sid main
+	# Bumblebee
+	deb http://suwako.nomanga.net/debian sid main contrib
+	deb-src http://suwako.nomanga.net/debian sid main
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 b) apt-get update
 c) apt-get dist-upgrade
@@ -160,3 +161,12 @@ http://suwako.nomanga.net/
 17, disable Nepomuk/Strigi Server(这货相当占cpu和内存, 禁掉后无异常)
 system settings -> desktop search -> Just disable it, :)
 Details-> http://www.ikde.org/tech/kde-tech-nepomuk/
+
+18, install new kernel from aptosid.
+a) update /etc/apt/sources.list
+	deb http://debian.tu-bs.de/project/aptosid/debian/ sid main fix.main
+b) apt-get update
+c) aptosid source warning ?
+	apt-get install aptosid-archive-keyring
+d) apt-get install linux-image-3.8-8.slh.1-aptosid-amd64
+e) reboot
