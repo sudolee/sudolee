@@ -92,3 +92,8 @@
 	---------------------------------------------------------
 
 	Details-> http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=612119
+
+13, install adobe flash player
+	apt-get install flashplugin-nonfree
+	udate: update-flashplugin-nonfree --install
+	Details-> http://wiki.debian.org/FlashPlayer
