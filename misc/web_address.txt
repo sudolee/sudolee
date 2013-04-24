@@ -28,7 +28,7 @@ free cross toolchain:
 	http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/
 
 sublime Text:
-	http://www.sublimetext.com/
+	http://www.sublimetext.com/3
 realplayer source:
 	https://helixcommunity.org/
 python:
@@ -53,3 +53,5 @@ hosts:
 	--smarthosts--
 		http://code.google.com/p/smarthosts/
 		svn checkout http://smarthosts.googlecode.com/svn/trunk/
+
+IQ-test: http://www.iqtest.dk/testEnglish.swf
