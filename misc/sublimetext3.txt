@@ -1,0 +1,34 @@
+http://www.sublimetext.com/3
+build 3021
+
+1,
+	cp /opt/sublime_text/sublime_text /opt/sublime_text/sublime_text.old
+2,
+	vim /opt/sublime_text/sublime_text
+3,
+	:%!xxd
+
+4,
+	找到一处3342的地方大致是: ....4333 3342 3032....
+	将这里的"3342"改为"3242"
+5,
+	:%!xxd -r
+6,
+	:wq
+7,
+	應用程序---編程---sublimetext啓動
+	你會發現要你輸入license, 输入以下：
+
+—–BEGIN LICENSE—–
+China
+Unlimited User License
+EA7E-2861
+BE67D2175D3569FDAB9EB5340FAD2822
+E7B56B3397A76AA9FBE8AC3D3C65918B
+DFC28F2EA158140D9E07853D594818EB
+3A237B2E8E98ED257C269548F50EDA34
+EF0C7F72D8917DB538A0245E46BFD6B1
+85F4EDE331F253530ED67A5C19E92399
+04C5F4A1AF4AF3DB5EC49C1FEE17CA76
+7E369F8AAE4AC6C6E756B5882E1608B9
+—–END LICENSE—–
