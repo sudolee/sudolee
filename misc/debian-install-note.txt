@@ -159,7 +159,6 @@ Details:
 https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
 https://wiki.debian.org/Bumblebee
 http://suwako.nomanga.net/
-http://www.nvidia.com/object/optimus_technology.html
 
 17, disable Nepomuk/Strigi Server(这货相当占cpu和内存, 禁掉后无异常)
 system settings -> desktop search -> Just disable it, :)
@@ -177,3 +176,6 @@ e) reboot
 	装完新内核需要重新安装virtualbox, 重新安装vbox又需有linux-headers-$(uname -r)
 	apt-get install linux-headers-$(uname -r)
 	然后再重新安装virtualbox
+
+Resource:
+1, http://debgen.simplylinux.ch/
