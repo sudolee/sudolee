@@ -12,3 +12,6 @@
 
 3, mount debugfs
 	mount -t debugfs none /sys/kernel/debug
+
+4, memory
+	CONFIG_CMA <- drivers/base/Kconfig
