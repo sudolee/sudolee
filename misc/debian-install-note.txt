@@ -177,12 +177,9 @@ e) reboot
 	apt-get install linux-headers-$(uname -r)
 	然后再重新安装virtualbox
 
-19, Dual boot system time not right ?
-Windows fetches the time from the net and then sets your hardware clock to the
-local time then Debian fetches the time from the net and sets your hardware clock
-to UTC (Greenwich time). To solve this, edit /etc/default/rcS and change:
-UTC=yes -> UTC=no
-Then Debian will set your hardware clock to local time like Windows and they will make peace.
+19, 双系统(debian sid + windows)时间不对 ?
+	文件/etc/adjtime:
+	UTC -> LOCAL
 
 Resource:
 1, http://debgen.simplylinux.ch/
