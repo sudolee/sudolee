@@ -69,6 +69,9 @@ static inline void nand_command(struct nand_info *this, int cmd, int column, int
 {
 	int ctrl;
 
+	/*
+	 * TODO: read0 ? read1 ? read2
+	 */
 	nand_cmdctrl(this, cmd, NAND_CTRL_CLE);
 
 	/* send address ? */
