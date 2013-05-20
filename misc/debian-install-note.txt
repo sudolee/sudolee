@@ -207,5 +207,7 @@ Section "InputClass"
 EndSection
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+Details-> http://wiki.debian.org/SynapticsTouchpad
+
 Resource:
 1, http://debgen.simplylinux.ch/
