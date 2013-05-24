@@ -125,9 +125,8 @@ a) 把wheezy的/etc/apt/sources.list更新到sid
 	deb http://ftp.cn.debian.org/debian/ sid main contrib non-free
 	deb-src http://ftp.cn.debian.org/debian/ sid main contrib non-free
 
-	# Third Parties Repos
 	# Debian Multimedia
-	deb http://www.las.ic.unicamp.br/pub/debian-multimedia/ sid main non-free
+	deb http://ftp.cn.debian.org/debian-multimedia/ sid main non-free
 	# deb-multimedia.org
 	deb http://www.deb-multimedia.org sid main non-free
 
