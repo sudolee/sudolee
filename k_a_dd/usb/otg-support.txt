@@ -1,0 +1,49 @@
+== code support ==
+./drivers/usb/host/Kconfig +40		config USB_EHCI_HCD		(default yes)
+./drivers/usb/host/Kconfig +168		config USB_EHCI_MSM		(?)
+./drivers/usb/host/Kconfig +257		config USB_EHCI_MSM_72K
+./drivers/usb/otg/Kconfig  +77		config USB_MSM_OTG_72K
+
+1. To enable the otg as a host, you should use a pmic to output the voltage of vbus (5.5v). pm8029 doesn't support this.
+2. usb can be used as a host or a device. It is decided by the ID pin.
+3. To enable the otg host fucnction, three macros should be open in the QRD code:
+CONFIG_USB_EHCI_MSM_72K
+CONFIG_USB_EHCI_ROOT_HUB_TT
+CONFIG_USB_MSM_OTG
+
+1,
+USB_EHCI_MSM
+
+
+2,
+USB_EHCI_MSM_72K (8660,7X30,8X50 and 7X27)
+USB_EHCI_ROOT_HUB_TT
+USB_MSM_OTG_72K
+
+== otg mode switch ==
+1, mount -t debugfs none /sys/kernel/debug/
+2, sys/kernel/debug/otg/{mode,info}
+echo 'host/peripheral/none' > /sys/kernel/debug/otg/mode
+
+== OTG ==
+A-Device: Device with a Standard-A receptacle or a device with a Micro-A plug inserted
+        into its receptacle. The A-device supplies power to VBUS and is host at the start
+       of a session. If the A-device is On-The-Go (equipped with a Micro-AB
+      receptacle), it may relinquish the role of host to an On-The-Go B-device under
+     certain conditions.
+
+B-Device-> Device with:
+	- a Standard-B receptacle or,
+	- Mini-B receptacle, or
+	- Micro-B receptacle, or
+	- Micro-AB receptacle with either a Micro-B plug or no plug inserted into its receptacle, or
+	- a captive cable ending in a Standard-A or Micro-A plug.
+	The B-device is a peripheral at the start of a session. If the B-device is On-The-Go (equipped with a Micro-AB receptacle), it may be granted the role of host from an On-The-Go A-device.
+
+ADP: Attach Detection Protocol. A protocol which enables an OTG device or EH to detect when a remote device has been attached or detached.
+HNP: Host Negotiation(协商) Protoco
+SRP: Session Request Protocol
+	(The Session Request Protocol (SRP) allows a B-device to request the A-device to turn on the power supply to the USB interface (VBUS) and start a session. A session is defined as the period of time that VBUS is powered.)
+
+
+

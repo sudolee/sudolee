@@ -1,0 +1,153 @@
+1, 配置和插件
+	- svn co http://sudolee.googlecode.com/svn/trunk/misc/sys-setting/vim_setting/
+	- 下载完后: cd vim_setting; ./do_vim_setting.sh
+		(将插件安装到~/.vim/, 更新配置文件~/.vimrc)
+	- 更多插件见: http://www.vim.org/scripts/
+
+2, Tlist
+	- Tlist的快捷键在~/.vimrc里被设置为F3,F4
+		F3: 打开/关闭Tlist
+		F4: 在代码和Tlist之间跳转(实际上就是Ctrl+ww)
+	- Note
+		在Tlist里面搜索函数或者变量后, 直接回车就能定位到代码的相应位置处
+
+3, apt-get install cscope
+
+4, cscope生成搜索索引:
+	a. 如果是kernel代码:
+		cd kernel; make cscope ARCH=arm
+	b. 如果是普通的工程代码, 下面以一个temp工程为例
+		- 工程代码树
+			sudolee@Ts:~/cache$ tree temp/
+			temp/
+			├── a.c
+			├── b.c
+			├── inc/
+			│   └── 1.c
+			└── src/
+				└── 2.c
+			2 directories, 4 files
+
+		- 必须在工程的最上层目录生成索引
+			-> cd temp; find . | grep -E -i '\.c$|\.h$|\.s$|\.cpp$|\.cxx$|\.cc$|\.java$|\.hh$|\.lds$' > cscope.files
+			这一步把所有需要生成索引的文件路径写入cscope.files文件
+			-> cscope -Rbqk
+			这一步读取cscope.files文件, 并生成需要的索引: cscope.out
+	c. Note
+		- 默认执行cscope -Rbqk只能索引.c, .h文件, 所以必须事先生成cscope.files文件
+		- ~/.vimrc里面添加了载入cscope数据的配置
+	d. 打开文件时必须在最上层打开子文件夹里的文件, 否则索引数据不能加载
+		e.g. 打开2.c时必须在temp里打开, cd到src/再打开就不能加载索引了
+		- 正确: cd temp/; vim src/2.c;
+		- 错误: cd temp/src/; vim 2.c;
+
+5, cscope搜索 (在vim命令模式输入)
+	- cs f g main (在整个工程里搜索main函数的定义, 完整的写法是: cscope find g main)
+	- cs f s main (搜索main出现的地方)
+	- cs f c main (搜索main被调用的地方)
+	- cs f d main (搜索main所调用的函数)
+	- Note
+		搜索可能会产生多个结果, 比如我将光标移动到option_instat_callback函数处, 然后按下ctrl + \ + s快捷键, 结果如下:
+		(也可以在vim命令行输入:cs f s option_instat_callback, 进行搜索)
+		-> "#"列表示序号, 第1, 2, 3个搜索结果
+		-> "filename"是出现在那个文件里
+		-> "line"列表示在文件中的行号
+		-> 如果搜索结果太多, 显示的结果跟less打开一个文件的操作相似, 按space键查看更多结果
+		-> 光标会在"empty cancels"后面闪烁, 输入"1回车"进入第一个搜索结果
+
+			/* option_instat_callback 搜索结果 */
+			Cscope tag: option_instat_callback
+			   #   line  filename / context / line
+			   1     51  drivers/usb/serial/option.c <<GLOBAL>>
+						 static void option_instat_callback(struct urb *urb);
+			   2   1148  drivers/usb/serial/option.c <<GLOBAL>>
+						 .read_int_callback = option_instat_callback,
+			   3   1275  drivers/usb/serial/option.c <<option_instat_callback>>
+						 static void option_instat_callback(struct urb *urb)
+			Type number and <Enter> (empty cancels): 
+
+6, cscope快捷键(+不用输入)
+	- ctrl + \ + g 搜索符号的定义
+	- ctrl + \ + s 搜索符号出现的位置
+	- ctrl + \ + c 搜索该符号被调用的地方
+	- ctrl + \ + d 搜索该函数所调用的函数
+	- Note
+		-> 以上快捷键的使用方法, 以ctrl + \ + g为例: 按住ctrl不放, 再按住\, 同时放开前面两者, 迅速按一下g
+		-> 有时搜索的结果可能会因代码的格式原因有误差, 用ctrl + \ + s搜索所有出现的地方,然后逐个排查
+		-> ctrl + ]和ctrl + \ + g功能相同(ctags也可使用ctrl + ])
+		-> ctrl + o回退到(本次)跳转前的位置(ctags也可使用ctrl + o)
+		-> 更多功能在vim命令模式输入"cs回车"查看
+		-> 所有快捷键定义在: ~/.vim/plugin/cscope_macros.vim
+
+7, vim 替换命令
+	- :n,ms/partern/wanted/g
+		把从第n到m行中的partern替换为wanted,后面的g表示全部替换(如果某行有多个partern),
+		不加g只替换某行第一个.
+	- :%s/partern/wanted/g
+		全文替换, 其他同上
+
+8, vim里的正则表达式
+	- 只匹配dmesg里的时间戳-> <.>\[.*\.\d\+\]
+
+元字符 说明
+. 匹配任意一个字符
+[abc] 匹配方括号中的任意一个字符。可以使用-表示字符范围，
+     如[a-z0-9]匹配小写字母和阿拉伯数字。
+[^abc] 在方括号内开头使用^符号，表示匹配除方括号中字符之外的任意字符。
+\d 匹配阿拉伯数字，等同于[0-9]。
+\D 匹配阿拉伯数字之外的任意字符，等同于[^0-9]。
+\x 匹配十六进制数字，等同于[0-9A-Fa-f]。
+\X 匹配十六进制数字，等同于[^0-9A-Fa-f]。
+\w 匹配单词字母，等同于[0-9A-Za-z_]。
+\W 匹配单词字母之外的任意字符，等同于[^0-9A-Za-z_]。
+\t 匹配<TAB>字符。
+\s 匹配空白字符，等同于[ \t]。
+\S 匹配非空白字符，等同于[^ \t]。
+\a 所有的字母字符. 等同于[a-zA-Z]
+\l 小写字母 [a-z]
+\L 非小写字母 [^a-z]
+\u 大写字母 [A-Z]
+\U 非大写字母 [^A-Z]
+ 
+表示数量的元字符
+元字符 说明
+* 匹配0-任意个
+\+ 匹配1-任意个
+\? 匹配0-1个
+\{n,m} 匹配n-m个
+\{n} 匹配n个
+\{n,} 匹配n-任意个
+\{,m} 匹配0-m个
+\_. 匹配包含换行在内的所有字符
+\{-} 表示前一个字符可出现零次或多次，但在整个正则表达式可以匹配成功的前提下，匹配的字符数越少越好
+\= 匹配一个可有可无的项
+\_s 匹配空格或断行
+\_[]
+ 
+元字符 说明
+\* 匹配 * 字符.
+\. 匹配 . 字符.
+\/ 匹配 / 字符.
+\\ 匹配 \ 字符.
+\[ 匹配 [ 字符.
+ 
+表示位置的符号
+元字符 说明
+$ 匹配行尾
+^ 匹配行首
+\< 匹配单词词首
+\> 匹配单词词尾
+ 
+替换变量
+在正规表达式中使用 \( 和 \) 符号括起正规表达式，即可在后面使用\1、\2等变量来访问 \( 和 \) 中的内容.
+ 
+懒惰模式
+\{-n,m} 与\{n,m}一样，尽可能少次数地重复
+\{-} 匹配它前面的项一次或0次, 尽可能地少
+\| "或"操作符
+\& 并列
+ 
+ 
+函数式
+:s/替换字符串/\=函数式
+在函数式中可以使用 submatch(1)、submatch(2) 等来引用 \1、\2 等的内容，而submatch(0)可以引用匹配的整个内容.

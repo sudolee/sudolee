@@ -1,0 +1,10 @@
+== code flow ==
+main() {
+	mkdir("/dev/block/vold/", 0755);
+	vm = VolumeManager::Instance();
+	nm = NetlinkManager::Instance();
+	cl = new CommandListener();
+	process_config(); /* parse "/etc/vold.fstab", line by line */
+}
+
+FR: http://www.open-open.com/doc/view/f23a8411789b493b9dc27271394861c9

@@ -1,5 +1,11 @@
+open source:
+	linux kernel-> www.kernel.org
+	busybox-> http://www.busybox.net/
+	aboriginal + toybox-> http://www.landley.net/code/toybox/
+	yaffs-> http://www.yaffs.net/download-yaffs-using-git
+		git clone git://www.aleph1.co.uk/yaffs2
+
 Linux:
-	www.kernel.org
 	lwn.net
 	lxr.linux.no
 	www.linuxsir.org
@@ -24,7 +30,7 @@ free cross toolchain:
 	http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/
 
 sublime Text:
-	http://www.sublimetext.com/
+	http://www.sublimetext.com/3
 realplayer source:
 	https://helixcommunity.org/
 
@@ -53,3 +59,5 @@ hosts:
 	--smarthosts--
 		http://code.google.com/p/smarthosts/
 		svn checkout http://smarthosts.googlecode.com/svn/trunk/
+
+IQ-test: http://www.iqtest.dk/testEnglish.swf

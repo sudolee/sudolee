@@ -1,0 +1,3 @@
+1, sshfs
+	- sshfs user@192.168.8.22:/remoute/path/ /local/path/
+	- sudo umount /local/path/

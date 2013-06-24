@@ -1,0 +1,21 @@
+1, overview
+  mount syscall is define in fs/namespace.c like this:
+  SYSCALL_DEFINE5(mount, char __user *, dev_name, char __user *, dir_name,
+    char __user *, type, unsigned long, flags, void __user *, data)
+
+2, code flow
+syscall_mount()
+  - copy type string from userspace to kernel
+  - get target dir name
+  - copy dev name from userspace to kernel
+  - copy mount options from ...
+  - do_mount()
+    - analyse mount flags
+       -> if(flags & MS_REMOUNT), do_remount()
+       -> if(flags & MS_BIND), do_loopback()
+       -> if(flags & (MS_SHARED|MS_PRIVATE|MS_SLAVE|MS_UNBINDABLE)), do_change_type()
+       -> if(flags & MS_MOVE), do_move_mount()
+       -> otherwise, do_new_mount()
+	    - do_kern_mount()-> vfs_kern_mount()-> mount_fs()
+	    - do_add_mount()
+	

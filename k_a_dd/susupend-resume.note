@@ -1,0 +1,54 @@
+== suspend ==
+kernel/kernel/power/main.c
+	-> state_store()
+		state= on, standby, mem
+
+case state in;
+	on)
+		late_resume()
+	;;
+	!on)
+	kernel/kernel/power/earlysuspend.c
+		-> register_early_suspend() 		# add into list according to level.
+		-> early_suspend() -> early_suspend registered by devices drivers. ->
+
+	kernel/kernel/power/wakelock.c
+		-> wake_unlock() -> suspend() ->
+
+	kernel/kernel/power/suspend.c
+		-> pm_suspend() -> enter_state() -> suspend_devices_and_enter() -> 
+			/	
+			|	-> suspend_ops->begin() # set by func[suspend_set_ops()]
+			|		p.s. kernel/arch/arm/mach-msm/pm2.c
+			|
+			|	kernel/drivers/base/power/main.c
+			|		-> dpm_suspend_start() -> suspend_finish() -> device_suspend() -> async_suspend() ->
+			|			-> device_suspend() -> pwr_domain, type->pm, class, buses
+			|
+			|	-> suspend_enter()	/ suspend_ops->prepare() 
+			|						| suspend_ops->prepare_late()
+			|						| suspend_ops->prepare()
+			|						| arch_suspend_disable_irqs()
+			|						| syscore_suspend()
+			\						\ suspend_ops->enter()		/ pm2.c-> msm_pm_enter()
+																|
+																|
+	;;
+esac
+
+== resume ==
+kernel/kernel/power/suspend.c
+	-> arch_suspend_enable_irqs()
+	-> enable_nonboot_cpus()
+	-> dpm_resume_noirq()
+	-> suspend_ops->finish()
+	-> arch_suspend_enable_irqs()
+	-> suspend_ops->end()
+	-> suspend_ops->recover()
+	-> suspend_finish()
+# After this, all processes(include user processes) is thawed.
+
+=========
+framework
+=========
+frameworks/base/services/java/com/android/server/PowerManagerService.java

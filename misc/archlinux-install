@@ -1,0 +1,244 @@
+1, download
+	https://www.archlinux.org/download/
+
+2, dd bs=4M if=archlinux.iso of=/dev/sdx
+
+3, Is it UEFI ?
+	ls -1 /sys/firmware/efi/vars/
+	If ture, see here: https://wiki.archlinux.org/index.php/Beginners%27_Guide
+
+4, /etc/locale.gen
+	en_US.UTF-8 UTF-8
+	$ locale-gen
+	$ export LANG=en_US.UTF-8
+
+5, ping -c 3 www.baidu.com
+	If okay, skip step[6].
+
+6, set network
+	$ vi /etc/resolv.conf
+		nameserver 8.8.8.8
+		nameserver 8.8.4.4
+		nameserver 114.114.114.114
+
+	[wired]
+		$ ip addr show
+		$ ip link set enp0s25 up
+		--static
+			$ systemctl stop dhcpcd.service
+			$ ip addr add 192.168.x.124/24 dev enp0s25
+			$ ip route add default via 192.168.x.1
+		--dynamic
+			systemctl start/enable dhcpcd@enp0s25.service
+
+	[wireless]
+		$ iwconfig / iw dev
+		$ ip link set wlp3s0 up
+		$ iw dev wlp3s0 scan | less
+		--connect to WPA/WPA2 wifi
+			$ wpa_passphrase [ssid] [passphrase] > my_wpa_supplicant.conf
+			$ wpa_supplicant -B -iwlp3s0 -cmy_wpa_supplicant.conf
+		--static ip
+			$ ip addr add 192.168.x.x/24 dev wlp3s0
+			$ ip route add default via 192.168.x.1
+		--dynamic ip
+			$ dhcpcd wlp3s0
+
+7, partitions
+	$ cfdisk /dev/sda
+	$ mkfs.ext4 /dev/sdax
+	$ mkswap /dev/sdaX
+	$ swapon /dev/sdaX
+
+    [Note]:
+		If install to the whole disk, the first partition must be bootable.
+
+8, mount
+	$ mount /dev/sdax /mnt			# root
+	$ mkdir /mnt/home
+	$ mount /dev/sdax /mnt/home		# home
+
+9, /etc/pacman.d/mirrorlist
+	## Score: 8.6, US
+	Server = http://mirrors.kernel.org/archlinux/$repo/os/$arch
+	$ pacman -Syy
+
+10, install base system
+	$ pacstrap -i /mnt base
+	$ genfstab -U -p /mnt >> /mnt/etc/fstab
+	$ arch-chroot /mnt
+
+11, configure dest system
+	[a] locale.gen + locale.conf
+		-- /etc/locale.gen
+		    uncomment the line: "en_US.UTF-8 UTF-8"
+		$ locale-gen
+		$ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+		$ export LANG=en_US.UTF-8
+	[b] /etc/vconsole.conf
+		KEYMAP=us
+		FONT=
+	[c] ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	[d] hwclock --systohc --utc
+	[e] echo yourhostname > /etc/hostname
+	[f] network configure
+		--wired
+			See step[6] -> [wired].
+				
+		--wireless
+			$ pacman -S iw wireless_tools wpa_supplicant wpa_actiond dialog NetworkManager
+			$ iwconfig / iw dev
+			$ iw dev wlp3s0 scan | less
+			$ systemctl enable NetworkManager		# this is for GUI, not use this stage.
+			--method 1:
+				See step[6] -> [wireless].
+			--method 2:
+				$ wifi-menu wlp3s0
+
+	[Note]:
+		set /etc/resolv.conf
+
+	[g] mkinitcpio -p linux
+	[h] passwd
+
+	[i] GRUB
+		$ pacman -S grub-bios os-prober
+		$ grub-mkconfig -o /boot/grub/grub.cfg
+		$ grub-install --recheck /dev/sda
+		$ cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+
+	[k]  $ exit; umount /mnt/home/ /mnt; reboot
+
+12, useradd
+	$ useradd -m -g users -s /bin/bash matti
+	$ chfn matti
+	$ passwd matti
+	$ gpasswd -a matti network,audio,disk,floppy,storage
+	- /etc/sudoers
+	    yourusername ALL=(ALL:ALL) ALL
+
+13, network
+	$ echo yourhostname > /etc/hostname
+	$ systemctl start/enable dhcpcd@enp0s25.service
+
+	$ pacman -S networkManager iproute2 wireless_tools wireless-regdb netctl ifplugd
+	$ pacman -S iw wpa_supplicant wpa_actiond dialog
+	$ systemctl start/enable NetworkManager		# must be preform as is.
+	.OR.
+	$ wifi-menu wlp3s0
+
+14, xorg
+	$ pacman -S base-devel xorg-server xorg-server-utils xorg-xinit udev evdev xf86-input-synaptics \
+		xf86-video-intel xf86-input-keyboard xf86-input-mouse \
+		xf86-video-nouveau nouveau-dri mesa		# this line nvidia only
+
+15, kde
+	$ pacman -S kde kde-l10n-zh_cn ttf-dejavu ttf-liberation phonon-gstreamer \
+		archlinux-artwork archlinux-themes-kdm kdeplasma-applets-networkmanagement
+	$ pacman -S wqy-zenhei # chinese ttf
+
+	$ systemctrl start/enable kdm.service
+	.OR.
+	$ cp /etc/skel/.xinitrc ~/
+		uncomment: exec startkde
+
+	[Note]
+		~/.xinitrc will be exec when perform "startx".
+
+16, multimedia
+	pacman -S alsa-utils alsa-plugins libsamplerate alsa-lib pulseaudio pulseaudio-alsa kdemultimedia-kmix dbus
+	pacman -S kdemultimedia-mplayerthumbs kdemultimedia-ffmpegthumbs \
+		gst-plugins-good gstreamer0.10-good-plugins gstreamer0.10-ffmpeg
+
+17, touchpad
+	- pacman -S xf86-input-synaptics
+	- /etc/X11/xorg.conf.d/synaptics.conf
+Section "InputClass"
+        Identifier      "Touchpad"                      # required
+        MatchIsTouchpad "yes"                           # required
+        Driver          "synaptics"                     # required
+        Option          "MinSpeed"              "0.5"
+        Option          "MaxSpeed"              "1.0"
+        Option          "AccelFactor"           "0.075"
+        Option          "TapButton1"            "1"
+        Option          "TapButton2"            "2"     # multitouch
+        Option          "TapButton3"            "3"     # multitouch
+        Option          "VertTwoFingerScroll"   "1"     # multitouch
+        Option          "HorizTwoFingerScroll"  "1"     # multitouch
+        Option          "VertEdgeScroll"        "1"
+        Option          "CoastingSpeed"         "8"
+        Option          "CornerCoasting"        "1"
+        Option          "CircularScrolling"     "1"
+        Option          "CircScrollTrigger"     "7"
+        Option          "EdgeMotionUseAlways"   "1"
+        Option          "LBCornerButton"        "8"     # browser "back" btn
+        Option          "RBCornerButton"        "9"     # browser "forward" btn
+EndSection
+
+	- /etc/X11/xorg.conf.d/20-thinkpad.configure
+Section "InputClass"
+    	Identifier "Trackpoint Wheel Emulation"
+    	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device" 
+    	MatchDevicePath    "/dev/input/event*"
+    	Option             "EmulateWheel"          "true"
+    	Option             "EmulateWheelButton"    "2"
+    	Option             "Emulate3Buttons"       "false"
+    	Option             "XAxisMapping"          "6 7"
+    	Option             "YAxisMapping"          "4 5"
+EndSection
+
+
+18, misc
+	- pacman -S bash-completion
+		$ cp /usr/share/bash-completion/bash_completion /etc/
+		$ . /etc/bash_completion
+	- pacman -S screenfetch pkgfile cpupower
+
+19, bumblebee	# nivida only
+	pacman -S bumblebee bbswitch
+
+	Details -> https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
+
+20, input method
+  [a] fcitx
+    $ pacman -S fcitx-im fcitx-googlepinyin kcm-fcitx
+      (will install: fcitx fcitx-gtk2 fcitx-gtk3 fcitx-qt4)
+    add the three lines into ~/.xprofile .OR. ~/.xinitrc
+		export GTK_IM_MODULE=fcitx
+		export QT_IM_MODULE=fcitx
+		export XMODIFIERS="@im=fcitx"
+
+	Details -> https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
+
+21, adobe flash plugin
+	$ pacman -S flashplugin
+
+22, sudo pacman -S --needed libtool autoconf automake gcc-libs bison screen gcc binutils \
+	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua51 python2 \
+	linux-headers linux-manpages ctags acl rrdtool elfutils mercurial texinfo git tcl tk \
+	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
+	kdiff3 meld
+
+23, bluetooth
+	$ pacman -S bluedevil
+
+24, system setting
+	-- openssh
+		$ pacman -S openssh
+		$ systemctl enable sshd.socket
+		$ vim /etc/ssh/sshd_config
+		banner /path/of/banner			# for welcome message
+		PermitRootLogin no
+	-- yaourt
+		$ vim /etc/pacman.conf
+			[archlinuxfr]
+			SigLevel = Never
+			Server = http://repo.archlinux.fr/$arch
+		$ pacman -Syu yaourt
+	-- skype
+		$ vim /etc/pacman.conf
+			[multilib]
+			Include = /etc/pacman.d/mirrorlist
+		$ pacman -Syy; pacman -S skype
+	-- office suite
+		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer

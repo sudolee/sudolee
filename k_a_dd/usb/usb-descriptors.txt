@@ -1,0 +1,52 @@
+1, device descriptor
+	offset	field				size	value		description
+	0		bLength				1		number		设备描述符的size
+	1		bDescriptorType		1		constant	设备描述符类型(1为device)
+	2		bcdUSB				2		BCD			遵循的usb协议版本
+	4		bDeviceClass		1		class		class类型
+													如果=0, 则由各个intfc决定各自的类型且intf的操作相互独立
+													如果1~0xFE, 不同intfc支持不同功能,但may not操作独立.(某个已定义的class类型)
+													如果=0xFF, (厂商)自定义的class
+	5		bDeviceSubClass		1		subclass	根据bDeviceClass的不同而不同
+													if bDeviceClass=0, this field must be "0"
+													if bDeviceClass!=0xFF, this field is reserved for USB-IF(org).
+	6		bDeviceProtocol		1		protocol	协议类型,根据devcls和devsubcls而定.如果设备支持设device级的class指定的协议(相对与intf级),这个字节代表class指定的协议.
+													if this field=0, 设备不使用设备级的class指定的协议.可能使用intfc级的class指定的协议.
+													if this field=0xFF,(厂商)自定义协议
+	7		bMaxPacketSize0		1		number		endpoint0的最大size(8,16,32,64)
+	8		idVendor			2		id			vendor id
+	10		idProdut			2		id			produt id
+	12		bcdDevice			2		bcd			bcd表示的设备发行序列号
+	14		iManufacturer		1		index		制造商字符串描述符的索引
+	15		iProduct			1		index		产品字符串描述符的索引
+	16		iSerialNumber		1		index		设备序列号字符串描述符的索引
+	17		bNumConfigurations	1		number		可用的配置数目
+
+2, configuration descriptor
+	Offset	Field				Size	value		Desription
+	0		bLength				1		number		配置描述符的size
+	1		bDescriptorType		1		constant	配置描述符类型(2)
+	2		wTotalLength		2		number		本配置的总size(config,intfc,endpoint,class或厂商指定)
+	4		bNumInterfaces		1		number		支持的配置数目
+	5		bConfigurationVale	1		number		setconfiguration()请求的配置值
+	6		iConfiguration		1		index		本配置的字符串描述的索引
+	7		bmAttributes		1		bitmap		配置属性
+													D7: must be set to "1"
+													D6: self-powerd(1=bus supply)
+													D5: remoute wakeup(1=enable)
+													D4...0: reserved(reset to "0")
+	8		bMaxPower			1		mA			从bus上获取的最大电源(2mA为单位)
+
+3, interface descriptor
+	Offset	Field				Size	value		Desription
+
+[Note]
+	在USB协议中同一个配置中的不同接口不能共用端点
+    同一个接口可以有多个接口描述符,用bAlternateSetting来识别
+    同一个接口的不同接口描述符,可以拥有相同的端点
+    同一个接口中的不同描述符可以像其他接口描述符一样写在配置描述符里
+	e.g. 如果只需改变某个interface里某个endpoint的属性时, 就使用不同的bAlternateSetting(这样就可以使用相同的endp),
+		端点的属性可以在此时改变.
+
+
+4, endpoint descriptor

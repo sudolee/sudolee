@@ -1,7 +1,7 @@
 #!/bin/sh
 
 git config --global core.editor 'vim'
-git config --global user.name 'sudolee'
+git config --global user.name 'matti'
 git config --global user.email 'desoxydate@gmail.com'
 
 if [ $1 ];then

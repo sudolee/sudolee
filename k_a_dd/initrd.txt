@@ -1,4 +1,8 @@
 
+== Introduce ==
+
+
+
 == initrd ==
 
 1, 打包进内核镜像的initrd.
