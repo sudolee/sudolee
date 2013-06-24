@@ -146,9 +146,13 @@
 		~/.xinitrc will be exec when perform "startx".
 
 16, multimedia
-	pacman -S alsa-utils alsa-plugins libsamplerate alsa-lib pulseaudio pulseaudio-alsa kdemultimedia-kmix dbus
-	pacman -S kdemultimedia-mplayerthumbs kdemultimedia-ffmpegthumbs \
-		gst-plugins-good gstreamer0.10-good-plugins gstreamer0.10-ffmpeg
+	$ pacman -S --needed kdemultimedia
+	[codec]
+		pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
+	[sound]
+		$ pacman -S alsa-utils alsa-plugins libsamplerate alsa-lib pulseaudio pulseaudio-alsa kdemultimedia-kmix dbus
+	[video]
+		$ pacman -S vlc gstreamer0.10-plugins
 
 17, touchpad
 	- pacman -S xf86-input-synaptics
@@ -175,7 +179,7 @@ Section "InputClass"
         Option          "RBCornerButton"        "9"     # browser "forward" btn
 EndSection
 
-	- /etc/X11/xorg.conf.d/20-thinkpad.configure
+	- /etc/X11/xorg.conf.d/20-thinkpad.conf
 Section "InputClass"
     	Identifier "Trackpoint Wheel Emulation"
     	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device" 
@@ -223,6 +227,11 @@ EndSection
 	$ pacman -S bluedevil
 
 24, system setting
+	-- time
+		$ pacman -S ntp
+		system settings -> data & time -> select: set data and time autoamically.
+		.OR.
+		$ ntpd -gq
 	-- openssh
 		$ pacman -S openssh
 		$ systemctl enable sshd.socket
