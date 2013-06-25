@@ -10,7 +10,8 @@ sudo pacman -S --needed libtool autoconf automake gcc-libs-multilib bison screen
 	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua \
 	linux-headers linux-manpages ctags acl rrdtool elfutils mercurial texinfo git tcl tk curl \
 	kdiff3 meld lib32-ncurses readline man-pages man2html xml2 \
-	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools
+	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
+	gperf gperftools perl-switch
 
 curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > repo
 chmod a+x repo
