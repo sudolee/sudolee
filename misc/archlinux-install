@@ -1,7 +1,8 @@
-1, download
+1, download:
 	https://www.archlinux.org/download/
 
-2, dd bs=4M if=archlinux.iso of=/dev/sdx
+2, create bootalbe USB strick:
+	dd bs=4M if=archlinux.iso of=/dev/sdx
 
 3, Is it UEFI ?
 	ls -1 /sys/firmware/efi/vars/
@@ -17,9 +18,8 @@
 
 6, set network
 	$ vi /etc/resolv.conf
-		nameserver 8.8.8.8
-		nameserver 8.8.4.4
 		nameserver 114.114.114.114
+		nameserver 8.8.8.8
 
 	[wired]
 		$ ip addr show
@@ -34,7 +34,7 @@
 	[wireless]
 		$ iwconfig / iw dev
 		$ ip link set wlp3s0 up
-		$ iw dev wlp3s0 scan | less
+		$ iw dev wlp3s0 scan | grep SSID
 		--connect to WPA/WPA2 wifi
 			$ wpa_passphrase [ssid] [passphrase] > my_wpa_supplicant.conf
 			$ wpa_supplicant -B -iwlp3s0 -cmy_wpa_supplicant.conf
@@ -88,7 +88,7 @@
 		--wireless
 			$ pacman -S iw wireless_tools wpa_supplicant wpa_actiond dialog NetworkManager
 			$ iwconfig / iw dev
-			$ iw dev wlp3s0 scan | less
+			$ iw dev wlp3s0 scan | grep SSID
 			$ systemctl enable NetworkManager		# this is for GUI, not use this stage.
 			--method 1:
 				See step[6] -> [wireless].
@@ -110,10 +110,10 @@
 	[k]  $ exit; umount /mnt/home/ /mnt; reboot
 
 12, useradd
-	$ useradd -m -g users -s /bin/bash matti
-	$ chfn matti
-	$ passwd matti
-	$ gpasswd -a matti network,audio,disk,floppy,storage
+	$ useradd -m -g users -s /bin/bash username
+	$ chfn username
+	$ passwd username
+	$ gpasswd -a username network,audio,disk,floppy,storage,uucp
 	- /etc/sudoers
 	    yourusername ALL=(ALL:ALL) ALL
 
@@ -128,9 +128,9 @@
 	$ wifi-menu wlp3s0
 
 14, xorg
-	$ pacman -S base-devel xorg-server xorg-server-utils xorg-xinit udev evdev xf86-input-synaptics \
-		xf86-video-intel xf86-input-keyboard xf86-input-mouse \
-		xf86-video-nouveau nouveau-dri mesa		# this line nvidia only
+	$ pacman -S base-devel xorg-server xorg-server-utils xorg-xinit udev xf86-input-synaptics \
+		xf86-video-intel xf86-input-keyboard xf86-input-mouse mesa \
+		xf86-video-nouveau nouveau-dri		# This line nvidia only
 
 15, kde
 	$ pacman -S kde kde-l10n-zh_cn ttf-dejavu ttf-liberation phonon-gstreamer \
@@ -194,8 +194,7 @@ EndSection
 
 18, misc
 	- pacman -S bash-completion
-		$ cp /usr/share/bash-completion/bash_completion /etc/
-		$ . /etc/bash_completion
+		$ . /usr/share/bash-completion/bash_completion
 	- pacman -S screenfetch pkgfile cpupower
 
 19, bumblebee	# nivida only
@@ -206,7 +205,8 @@ EndSection
 20, input method
   [a] fcitx
     $ pacman -S fcitx-im fcitx-googlepinyin kcm-fcitx
-      (will install: fcitx fcitx-gtk2 fcitx-gtk3 fcitx-qt4)
+		(will install: fcitx fcitx-gtk2 fcitx-gtk3 fcitx-qt4)
+
     add the three lines into ~/.xprofile .OR. ~/.xinitrc
 		export GTK_IM_MODULE=fcitx
 		export QT_IM_MODULE=fcitx
@@ -218,7 +218,7 @@ EndSection
 	$ pacman -S flashplugin
 
 22, sudo pacman -S --needed libtool autoconf automake gcc-libs bison screen gcc binutils \
-	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua51 python2 \
+	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua \
 	linux-headers linux-manpages ctags acl rrdtool elfutils mercurial texinfo git tcl tk \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
 	kdiff3 meld
