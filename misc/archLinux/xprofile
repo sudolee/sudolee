@@ -1,0 +1,17 @@
+# ~/.xprofile
+
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+	. /usr/share/bash-completion/bash_completion
+fi
+
+if [ -f ~/.profile ]; then
+	. ~/.profile
+fi
+
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
