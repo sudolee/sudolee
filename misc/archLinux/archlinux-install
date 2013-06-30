@@ -251,3 +251,6 @@ EndSection
 		$ pacman -Syy; pacman -S skype
 	-- office suite
 		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer
+	-- wireshark
+		$ pacman -S --needed wireshark-gtk
+		$ gpasswd -a $USER wireshark
