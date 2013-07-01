@@ -2,12 +2,12 @@
 
 GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.ld*|\.chh$|\.cc$'
 
-if test -d "arch" -a -d "arch/$1";then
-	find -L . -path ./arch -prune -o -print | grep -E $GREP_OPT > cscope.files
+if test -n "$1" -a -d "arch/$1";then
+	find -L . -path "./arch/" -prune -o -print | grep -E $GREP_OPT > cscope.files
 	find -L ./arch/$1 | grep -E $GREP_OPT >> cscope.files
 	echo "GEN cscope <- arch/$1"
 else
 	find -L . | grep -E $GREP_OPT > cscope.files
 	echo "GEN cscope"
 fi
-cscope -Rbqk
+cscope -bqk
