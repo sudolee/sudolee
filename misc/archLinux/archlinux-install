@@ -220,7 +220,7 @@ EndSection
 22, sudo pacman -S --needed libtool autoconf automake gcc-libs bison screen gcc binutils \
 	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua \
 	linux-headers linux-manpages ctags acl rrdtool elfutils mercurial texinfo git tcl tk \
-	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
+	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools net-tools \
 	kdiff3 meld
 
 23, bluetooth
@@ -228,10 +228,11 @@ EndSection
 
 24, system setting
 	-- time
+		- timedatectl set-timezone Asia/Shanghai
+			此命令会创建一个/etc/localtime软链接，指向/usr/share/zoneinfo/中的时区文件.
 		$ pacman -S ntp
-		system settings -> data & time -> select: set data and time autoamically.
-		.OR.
 		$ ntpd -gq
+		$ hwclock -w
 	-- openssh
 		$ pacman -S openssh
 		$ systemctl enable sshd.socket
