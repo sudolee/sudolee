@@ -233,6 +233,8 @@ EndSection
 		$ pacman -S ntp
 		$ ntpd -gq
 		$ hwclock -w
+	-- pdf -> Okular乱码
+		$ pacman -S poppler-data
 	-- openssh
 		$ pacman -S openssh
 		$ systemctl enable sshd.socket
