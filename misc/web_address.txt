@@ -45,6 +45,8 @@ Windows:
 skype without tom:
 	http://www.skype.com/go/getskype-full  (for the full installer you run from your hard drive)
 	http://download.skype.com/SkypeSetup.exe  (for the standard installer)
+	http://download.skype.com/linux/skype-ubuntu-precise_4.2.0.11-1_i386.deb
+	http://download.skype.com/linux/skype-debian_4.2.0.11-1_i386.deb
 	http://download.skype.com/linux/skype-ubuntu_4.0.0.7-1_i386.deb
 	http://download.skype.com/linux/skype-debian_4.0.0.7-1_i386.deb
 	http://download.skype.com/linux/skype-debian_4.1.0.20-1_i386.deb

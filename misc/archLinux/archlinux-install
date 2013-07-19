@@ -257,3 +257,4 @@ EndSection
 	-- wireshark
 		$ pacman -S --needed wireshark-gtk
 		$ gpasswd -a $USER wireshark
+		$ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
