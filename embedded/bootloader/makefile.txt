@@ -1,50 +1,47 @@
 
-
-
 == Flow ==
-1, make mini2440_config
+1, make matti2440(_config)
 	@$(MKCONFIG) -A $(@:_config=)
 	i.e.
 	mkconfig -A mini2440
 
-2, 在boards.cfg中查找mini2440, 并把参数$@设置为搜到的mini2440所在的行.
-	- $1即"-A", $2 即"mini2440"
+2, mkconfig在boards.cfg中查找matti2440的行, 并把参数$@设置为搜到的mini2440所在的行.
+	- $1即"-A", $2即"matti2440"
 	- line=`egrep -i "^[[:space:]]*${2}[[:space:]]" boards.cfg`
-	- set ${line} ${1}
+	- set ${line}
 
 	# Target                     ARCH        CPU         Board name          Vendor         SoC         Options
-	mini2440                     arm         arm920t     mini2440            friendlyarm    s3c24x0
+    matti2440                    arm         arm920t     matti2440           matti          s3c24x0     matti2440:DEBUG=1
 
 3, 创建头文件
 	- cd ./include; rm -rf asm/
 	- ln -s ../arch/${arch}/include/asm asm
-	-
-		if [ -z "${soc}" ] ; then
-			ln -s arch-${cpu} asm/arch
-		else
-			ln -s arch-${soc} asm/arch
-		fi
-	- ln -s proc-armv asm/proc
+	- ln -s ../arch/arm/include/asm/arch-${soc} asm/arch
+	- ln -s ../arch/arm/include/asm/proc-armv asm/proc
 
 4, 创建include/config.mk
 	ARCH   = arm
-	CPU    = arm920t
-	BOARD  = mini2440
-	VENDOR = friendlyarm
+	CPU    = arm920t/spl_cpu
+	BOARD  = matti2440
+	VENDOR = matti
 	SOC    = s3c24x0
 
-5, board dir = board/${BOARDDIR}
-	if [ -z "${vendor}" ] ; then
-	    BOARDDIR=${board}
-	else
-	    BOARDDIR=${vendor}/${board}
-	fi
+[Note]:
+	- 如果spl_cpu不为空且打开CONFIG_SPL_BUILD=y宏, CPU将被设置为spl_cpu
+	- 设置spl_cpu: 在boards.cfg的cpu列, 填入cpu1:cpu2, cpu2将作为spl_cpu
+
+5, BOARDDIR = ${vendor}/${board}
 
 6, 额外头文件加到config.h
+	#define CONFIG_SYS_ARCH arm
+	#define CONFIG_SYS_CPU arm920t
+	#define CONFIG_SYS_BOARD matti2440
+	#define CONFIG_SYS_VENDOR matti
+	#define CONFIG_SYS_SOC s3c24x0
 	#define CONFIG_BOARDDIR board/$BOARDDIR
 	#include <config_cmd_defaults.h>
 	#include <config_defaults.h>
-	#include <configs/${CONFIG_NAME}.h>
+	#include <configs/${1%_config}.h>
 	#include <asm/config.h>
 	#include <config_fallbacks.h>
 	#include <config_uncmd_spl.h>
