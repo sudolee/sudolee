@@ -25,6 +25,10 @@ sudo apt-get install \
 
 # set for wireshark
 sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+# used by adb/fastboot
+# lib32ncurses5
 # lingot  for musical tuner
 # bumblebee primus firmware-iwlwifi \
 # libstdc++
+
+# use pcmanfm instead of nautilus in gnome
