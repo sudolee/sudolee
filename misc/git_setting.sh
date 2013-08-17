@@ -17,4 +17,4 @@ git config --global color.diff always
 git config --global color.ui always
 git config --global color.status always
 
-exit 0
+return

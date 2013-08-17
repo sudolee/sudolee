@@ -1,18 +1,30 @@
 #!/bin/bash
-#
-# Just install useful softwares...
-#
 
-sudo apt-get install gcc g++ gcc-multilib g++-multilib make gdb bison libc6 libc6-dev manpages manpages-posix manpages-dev manpages-posix-dev glibc-doc \
-	subversion git-core gitk libncurses5 libncurses5-dev im-switch tree indent patch tar zip rar unzip unrar vim \
-	putty axel wget cramfsprogs cscope ctags diffutils meld sharutils ssh perl bash python \
-	soundconverter gawk sed build-essential -y
+sudo apt-get install \
+	firmware-iwlwifi \
+	vim cscope ctags indent \
+	vlc \
+	fcitx fcitx-googlepinyin im-config \
+	bash python perl lua5.2 tcl bash-completion tree gawk sed python-markdown m4 \
+	rsync axel curl \
+	wireshark \
+	manpages-posix glibc-doc \
+	linux-headers-amd64 \
+	gcc gcc-multilib g++ g++-multilib cpp gdb bison flex binutils \
+	make libtool autoconf automake autogen gettext texinfo build-essential \
+	gnupg gperf expect dejagnu guile-2.0 byacc fixincludes \
+	patch patchutils diffutils meld \
+	libc6-dev libzip2 libncurses5 libncurses5-dev libreadline6 libreadline6-dev zlib1g zlib1g-dev\
+	libxml2-utils man2html xmlto xsltproc tofrodos \
+	elfutils htop \
+	bzip2 gzip zip unzip rar unrar \
+	exfat-utils ntfs-3g e2fsprogs dosfstools cramfsprogs \
+	net-tools ethtool iw tcpdump tcpreplay \
+	subversion git-core gitk quilt \
+	ssh minicom putty screen \
 
-
-# filezilla vim-gnome iptux kchmviewer gdebi minicom tftp vsftpd
-# bluefish sqlite3
-# gparted transmission-cli shotwell
-# lingot ## for musical tuner.
-
-sudo apt-get autoremove
-sudo apt-get autoclean
+# set for wireshark
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+# lingot  for musical tuner
+# bumblebee primus firmware-iwlwifi \
+# libstdc++
