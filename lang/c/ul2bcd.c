@@ -6,7 +6,7 @@
 
 unsigned long long ul2bcd(unsigned long long val)
 {
-	int i, step;
+	unsigned int i, step;
 	unsigned long long new = 0;
 
 
