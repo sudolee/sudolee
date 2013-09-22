@@ -4,30 +4,29 @@
 
 #include <stdio.h>
 
-unsigned long long ul2bcd(unsigned long long val)
+unsigned long long ul2bcd(unsigned long long dec)
 {
 	unsigned int i, step;
-	unsigned long long new = 0;
+	unsigned long long bcd = 0;
 
 
-	step = (sizeof(val) << 1);
+	step = (sizeof(dec) << 1);
 	for(i = 0; i < step; i++) {
-		if(new) {
-			new >>= 4;
+		if(bcd) {
+			bcd >>= 4;
 		}
-		new |= ((val % 10) << ((step << 2) - 4));
-		val /= 10;
+		bcd |= ((dec % 10) << ((step << 2) - 4));
+		dec /= 10;
 	}
-	printf("sizeof(val) : %u, %#lx\n", sizeof(val), new);
 
-	return new;
+	return bcd;
 }
 
 int main()
 {
 	unsigned long long test = 1234567800000000;
 
-	printf("%lu -- bcd --> %#lx\n", test, ul2bcd(test));
+	printf("%Lu -- bcd --> %#Lx\n", test, ul2bcd(test));
 
 	return 0;
 }

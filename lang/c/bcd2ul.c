@@ -15,24 +15,24 @@ struct new_imsi_msisdn_ethhd {
 }__attribute__((packed));
 
 /* convert bcd to unsigned 64 */
-static unsigned long long bcd2ul(unsigned long long val)
+static unsigned long long bcd2ul(unsigned long long bcd)
 {
 	unsigned int i, step, count;
-	unsigned long long new;
+	unsigned long long dec;
 
 	/* 16 */
-	new = 0;
-	step = sizeof(val) << 1;
+	dec = 0;
+	step = sizeof(bcd) << 1;
 	for(i = 0, count = step; i < step; i++) {
-		if(new) {
-			new *= 10;
+		if(dec) {
+			dec *= 10;
 		}
-		new += ((val >> ((count << 2) - 4)) & 0xF);
-		val &= (0x0FFFFFFFFFFFFFFF >> (i << 2));
+		dec += ((bcd >> ((count << 2) - 4)) & 0xF);
+		bcd &= (0x0FFFFFFFFFFFFFFF >> (i << 2));
 		count--;
 	}
 	
-	return new;
+	return dec;
 }
 
 int main()
