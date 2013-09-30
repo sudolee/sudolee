@@ -7,7 +7,8 @@
 struct new_imsi_msisdn_ethhd {
 	union {
 		struct {
-			unsigned long long imsi:52; unsigned long long msisdn_a:12;
+			unsigned long long imsi:52;
+			unsigned long long msisdn_a:12;
 			unsigned int msisdn_b;
 		};
 		unsigned int data[3];
