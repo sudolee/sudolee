@@ -50,16 +50,16 @@
 	$ mkdir /mnt/home
 	$ mount /dev/sdax /mnt/home     # home
 
-9, set /etc/pacman.d/mirrorlist
+9, set /etc/pacman.d/mirrorlist (one of them)
 	Server = http://mirrors.kernel.org/archlinux/$repo/os/$arch
 	Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
 	Server = http://mirrors.163.com/archlinux/$repo/os/$arch
 	$ pacman -Syy
 
 10, install base system
-	$ pacstrap /mnt base wpa_supplicant
+	$ pacstrap /mnt base wpa_supplicant    # wpa_supplicant is used by wireless setting
 	$ genfstab -U -p /mnt >> /mnt/etc/fstab
-	$ arch-chroot /mnt
+	$ arch-chroot /mnt /bin/bash
 
 11, configure dest system
 	[a] locale.gen + locale.conf
@@ -79,24 +79,31 @@
 	[h] passwd
 	[i] GRUB
 		$ pacman -S grub-bios os-prober
-		$ grub-mkconfig -o /boot/grub/grub.cfg
+		$ grub-mkconfig -o /boot/grub/grub.cfg     # this step error in archlinux 12.01 ? Goto issues.
 		$ grub-install --recheck /dev/sda
 		$ cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
 	[k] $ exit; umount -R /mnt; reboot
 
 12, useradd
-	$ useradd -m -g users -s /bin/bash username
-	$ passwd username
-	$ gpasswd -a username network,audio,disk,floppy,storage,uucp
+	$ useradd -m -g users -s /bin/bash YourUserName
+	$ passwd YourUserName
+	$ gpasswd -a YourUserName network,video,audio,disk,floppy,storage,uucp
 
 13, network
-	$ pacman -S iproute2 wireless_tools wireless-regdb netctl ifplugd iw wpa_supplicant wpa_actiond dialog NetworkManager
+	$ pacman -S NetworkManager iw
 	$ systemctl enable NetworkManager    # must be preform as is. this is for GUI, not use this stage.
 
-14, xorg & video
-	$ pacman -S base-devel xorg-server xorg-server-utils xorg-xinit udev xf86-input-synaptics \
-		xf86-video-intel xf86-input-keyboard xf86-input-mouse mesa \
-		xf86-video-nouveau nouveau-dri      # This line nvidia only
+14, video drivers
+	$ pacman -S xf86-video-intel \       # Intel  only
+		lib32-intel-dri          \       # For 32-bit 3D support on x86_64, multilib
+		xf86-video-nouveau       \       # Nvidia only
+		lib32-nouveau-dri        \       # For 32-bit 3D support on x86_64, multilib
+		xf86-video-ati           \       # Ati    only
+		lib32-ati-dri                    # For 32-bit 3D support on x86_64, multilib
+
+14.1, xorg & input
+	$ pacman -S base-devel xorg-server mesa \    # xorg-server-utils xorg-xinit
+		xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
 
 15, bumblebee    # nivida only
 	pacman -S bumblebee bbswitch
@@ -105,21 +112,24 @@
 	Details -> https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
 
 16, kde
-	$ pacman -S kde kde-l10n-zh_cn ttf-dejavu ttf-liberation phonon-gstreamer \
-		archlinux-themes-kdm kdeplasma-applets-plasma-nm
-	$ pacman -S wqy-zenhei       # chinese ttf
+	$ pacman -S kde-meta kde-l10n-zh_cn kdemultimedia \
+		phonon-vlc/phonon-gstreamer \           # If both installed, set SystemSetting->MultiMedia->AudioAndVideoSettings->Backend
+		ttf-dejavu ttf-liberation wqy-zenhei \
+		archlinux-themes-kdm kdeplasma-applets-plasma-nm \
+		appmenu-qt
 	$ systemctrl enable kdm.service
 	- set /etc/sudoers
 	    YourUserName ALL=(ALL:ALL) ALL
 
 17, multimedia
-	$ pacman -S --needed kdemultimedia
 	[codec]
 		$ pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
 	[sound]
-		$ pacman -S alsa-utils alsa-plugins libsamplerate alsa-lib pulseaudio pulseaudio-alsa kdemultimedia-kmix dbus
+		$ pacman -S alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix \
+			gst-plugins-good/gstreamer0.10-good-plugins
+		$ amixer sset Master unmute
 	[video]
-		$ pacman -S vlc gstreamer0.10-plugins
+		$ pacman -S vlc
 
 18, touchpad
 	- pacman -S xf86-input-synaptics
@@ -188,7 +198,7 @@ EndSection
 		$ pacman -S ntp
 		$ ntpd -gq
 		$ hwclock -w
-	-- pdf -> Okular乱码
+	-- pdf -> Okular issue
 		$ pacman -S poppler-data
 	-- openssh
 		$ pacman -S openssh
@@ -200,7 +210,7 @@ EndSection
 		$ vim /etc/pacman.conf
 			[multilib]
 			Include = /etc/pacman.d/mirrorlist
-		$ pacman -Syy; pacman -S skype
+		$ pacman -Syy; pacman -S skype  # lib32-libpulse needed by skype ?
 	-- office suite
 		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer libreoffice-calc libreoffice-draw
 	-- wireshark
@@ -215,3 +225,8 @@ EndSection
 			SigLevel = Never
 			Server = http://repo.archlinux.fr/$arch
 		$ pacman -Syu yaourt
+
+23, issues
+	[a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
+		Add code below into /etc/default/grub:
+		"GRUB_DISABLE_SUBMENU=y"
