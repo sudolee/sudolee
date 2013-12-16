@@ -9,7 +9,7 @@
 	If ture, see here: https://wiki.archlinux.org/index.php/Beginners%27_Guide
 
 4, /etc/locale.gen
-	$ sed -i s/#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+	$ sed -i s/\#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
 		uncomment #en_US.UTF-8 UTF-8
 	$ locale-gen
 	$ export LANG=en_US.UTF-8
@@ -63,7 +63,7 @@
 
 11, configure dest system
 	[a] locale.gen + locale.conf
-		$ sed -i s/#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+		$ sed -i s/\#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
 			uncomment #en_US.UTF-8 UTF-8
 		$ locale-gen
 		$ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
