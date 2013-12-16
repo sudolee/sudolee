@@ -9,7 +9,8 @@
 	If ture, see here: https://wiki.archlinux.org/index.php/Beginners%27_Guide
 
 4, /etc/locale.gen
-	en_US.UTF-8 UTF-8
+	$ sed -i s/#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+		uncomment #en_US.UTF-8 UTF-8
 	$ locale-gen
 	$ export LANG=en_US.UTF-8
 
@@ -17,7 +18,7 @@
 	If okay, skip step[6].
 
 6, set network
-	$ vi /etc/resolv.conf
+	$ set /etc/resolv.conf
 		nameserver 114.114.114.114
 		nameserver 8.8.8.8
 
@@ -25,22 +26,16 @@
 		$ ip addr show
 		$ ip link set enp0s25 up
 		--static
-			$ systemctl stop dhcpcd.service
 			$ ip addr add 192.168.x.124/24 dev enp0s25
 			$ ip route add default via 192.168.x.1
-		--dynamic
-			systemctl start/enable dhcpcd@enp0s25.service
 
 	[wireless]
 		$ iwconfig / iw dev
 		$ ip link set wlp3s0 up
 		$ iw dev wlp3s0 scan | grep SSID
 		--connect to WPA/WPA2 wifi
-			$ wpa_passphrase [ssid] [passphrase] > my_wpa_supplicant.conf
-			$ wpa_supplicant -B -iwlp3s0 -cmy_wpa_supplicant.conf
-		--static ip
-			$ ip addr add 192.168.x.x/24 dev wlp3s0
-			$ ip route add default via 192.168.x.1
+			$ wpa_passphrase [ssid] [passphrase] > wl.pw
+			$ wpa_supplicant -B -iwlp3s0 -cwl.pw
 		--dynamic ip
 			$ dhcpcd wlp3s0
 
@@ -50,111 +45,83 @@
 	$ mkswap /dev/sdaX
 	$ swapon /dev/sdaX
 
-    [Note]:
-		If install to the whole disk, the first partition must be bootable.
-
 8, mount
-	$ mount /dev/sdax /mnt			# root
+	$ mount /dev/sdax /mnt          # root
 	$ mkdir /mnt/home
-	$ mount /dev/sdax /mnt/home		# home
+	$ mount /dev/sdax /mnt/home     # home
 
-9, /etc/pacman.d/mirrorlist
-	## Score: 8.6, US
+9, set /etc/pacman.d/mirrorlist
 	Server = http://mirrors.kernel.org/archlinux/$repo/os/$arch
+	Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
+	Server = http://mirrors.163.com/archlinux/$repo/os/$arch
 	$ pacman -Syy
 
 10, install base system
-	$ pacstrap -i /mnt base
+	$ pacstrap /mnt base wpa_supplicant
 	$ genfstab -U -p /mnt >> /mnt/etc/fstab
 	$ arch-chroot /mnt
 
 11, configure dest system
 	[a] locale.gen + locale.conf
-		-- /etc/locale.gen
-		    uncomment the line: "en_US.UTF-8 UTF-8"
+		$ sed -i s/#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+			uncomment #en_US.UTF-8 UTF-8
 		$ locale-gen
 		$ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 		$ export LANG=en_US.UTF-8
-	[b] /etc/vconsole.conf
+	[b] set /etc/vconsole.conf
 		KEYMAP=us
 		FONT=
 	[c] ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	[d] hwclock --systohc --utc
-	[e] echo yourhostname > /etc/hostname
-	[f] network configure
-		--wired
-			See step[6] -> [wired].
-				
-		--wireless
-			$ pacman -S iw wireless_tools wpa_supplicant wpa_actiond dialog NetworkManager
-			$ iwconfig / iw dev
-			$ iw dev wlp3s0 scan | grep SSID
-			$ systemctl enable NetworkManager		# this is for GUI, not use this stage.
-			--method 1:
-				See step[6] -> [wireless].
-			--method 2:
-				$ wifi-menu wlp3s0
-
-	[Note]:
-		set /etc/resolv.conf
-
+	[e] echo YourHostName > /etc/hostname
+	[f] network configure : goto step [6]
 	[g] mkinitcpio -p linux
 	[h] passwd
-
 	[i] GRUB
 		$ pacman -S grub-bios os-prober
 		$ grub-mkconfig -o /boot/grub/grub.cfg
 		$ grub-install --recheck /dev/sda
 		$ cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
-
-	[k]  $ exit; umount /mnt/home/ /mnt; reboot
+	[k] $ exit; umount -R /mnt; reboot
 
 12, useradd
 	$ useradd -m -g users -s /bin/bash username
-	$ chfn username
 	$ passwd username
 	$ gpasswd -a username network,audio,disk,floppy,storage,uucp
-	- /etc/sudoers
-	    yourusername ALL=(ALL:ALL) ALL
 
 13, network
-	$ echo yourhostname > /etc/hostname
-	$ systemctl start/enable dhcpcd@enp0s25.service
+	$ pacman -S iproute2 wireless_tools wireless-regdb netctl ifplugd iw wpa_supplicant wpa_actiond dialog NetworkManager
+	$ systemctl enable NetworkManager    # must be preform as is. this is for GUI, not use this stage.
 
-	$ pacman -S networkManager iproute2 wireless_tools wireless-regdb netctl ifplugd
-	$ pacman -S iw wpa_supplicant wpa_actiond dialog
-	$ systemctl start/enable NetworkManager		# must be preform as is.
-	.OR.
-	$ wifi-menu wlp3s0
-
-14, xorg
+14, xorg & video
 	$ pacman -S base-devel xorg-server xorg-server-utils xorg-xinit udev xf86-input-synaptics \
 		xf86-video-intel xf86-input-keyboard xf86-input-mouse mesa \
-		xf86-video-nouveau nouveau-dri		# This line nvidia only
+		xf86-video-nouveau nouveau-dri      # This line nvidia only
 
-15, kde
+15, bumblebee    # nivida only
+	pacman -S bumblebee bbswitch
+	gpasswd -a $USER bumblebee
+
+	Details -> https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
+
+16, kde
 	$ pacman -S kde kde-l10n-zh_cn ttf-dejavu ttf-liberation phonon-gstreamer \
-		archlinux-artwork archlinux-themes-kdm kdeplasma-applets-networkmanagement
-	$ pacman -S wqy-zenhei # chinese ttf
+		archlinux-themes-kdm kdeplasma-applets-plasma-nm
+	$ pacman -S wqy-zenhei       # chinese ttf
+	$ systemctrl enable kdm.service
+	- set /etc/sudoers
+	    YourUserName ALL=(ALL:ALL) ALL
 
-	$ systemctrl start/enable kdm.service
-	.OR.
-	$ cp /etc/skel/.xinitrc ~/
-		uncomment: exec startkde
-
-	[Note]
-		~/.xinitrc will be exec when perform "startx".
-
-16, multimedia
+17, multimedia
 	$ pacman -S --needed kdemultimedia
 	[codec]
-		pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
+		$ pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
 	[sound]
 		$ pacman -S alsa-utils alsa-plugins libsamplerate alsa-lib pulseaudio pulseaudio-alsa kdemultimedia-kmix dbus
 	[video]
 		$ pacman -S vlc gstreamer0.10-plugins
 
-17, touchpad
+18, touchpad
 	- pacman -S xf86-input-synaptics
 	- /etc/X11/xorg.conf.d/synaptics.conf
 Section "InputClass"
@@ -182,7 +149,7 @@ EndSection
 	- /etc/X11/xorg.conf.d/20-thinkpad.conf
 Section "InputClass"
     	Identifier "Trackpoint Wheel Emulation"
-    	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device" 
+    	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device"
     	MatchDevicePath    "/dev/input/event*"
     	Option             "EmulateWheel"          "true"
     	Option             "EmulateWheelButton"    "2"
@@ -191,45 +158,33 @@ Section "InputClass"
     	Option             "YAxisMapping"          "4 5"
 EndSection
 
-
-18, misc
-	- pacman -S bash-completion
-		$ . /usr/share/bash-completion/bash_completion
-	- pacman -S screenfetch pkgfile cpupower
-
-19, bumblebee	# nivida only
-	pacman -S bumblebee bbswitch
-
-	Details -> https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
-
-20, input method
+19, input method
   [a] fcitx
     $ pacman -S fcitx-im fcitx-googlepinyin kcm-fcitx
 		(will install: fcitx fcitx-gtk2 fcitx-gtk3 fcitx-qt4)
 
-    add the three lines into ~/.xprofile .OR. ~/.xinitrc
+    Add the three lines into ~/.xprofile:
 		export GTK_IM_MODULE=fcitx
 		export QT_IM_MODULE=fcitx
 		export XMODIFIERS="@im=fcitx"
 
 	Details -> https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
 
-21, adobe flash plugin
-	$ pacman -S flashplugin
+20, misc
+	$ pacman -S bash-completion
+		$ . /usr/share/bash-completion/bash_completion
+	$ pacman -S screenfetch pkgfile cpupower
+	$ pacman -S flashplugin  # adobe flash plugin
+	$ pacman -S bluedevil    # bluetooth
 
-22, sudo pacman -S --needed libtool autoconf automake gcc-libs bison screen gcc binutils \
+21, $ pacman -S --needed libtool autoconf automake gcc-libs bison screen gcc binutils \
 	patchutils bzip2 flex make gettext zip unzip libestr ncurses zlib gawk quilt asciidoc libzip rsync lua \
 	linux-headers linux-manpages ctags acl rrdtool elfutils mercurial texinfo git tcl tk \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools net-tools \
 	kdiff3 meld
 
-23, bluetooth
-	$ pacman -S bluedevil
-
-24, system setting
+22, system setting
 	-- time
-		- timedatectl set-timezone Asia/Shanghai
-			此命令会创建一个/etc/localtime软链接，指向/usr/share/zoneinfo/中的时区文件.
 		$ pacman -S ntp
 		$ ntpd -gq
 		$ hwclock -w
@@ -241,20 +196,22 @@ EndSection
 		$ vim /etc/ssh/sshd_config
 		banner /path/of/banner			# for welcome message
 		PermitRootLogin no
-	-- yaourt
-		$ vim /etc/pacman.conf
-			[archlinuxfr]
-			SigLevel = Never
-			Server = http://repo.archlinux.fr/$arch
-		$ pacman -Syu yaourt
 	-- skype
 		$ vim /etc/pacman.conf
 			[multilib]
 			Include = /etc/pacman.d/mirrorlist
 		$ pacman -Syy; pacman -S skype
 	-- office suite
-		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer
+		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer libreoffice-calc libreoffice-draw
 	-- wireshark
 		$ pacman -S --needed wireshark-gtk
 		$ gpasswd -a $USER wireshark
 		$ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+	-- E.G.
+		$ /etc/skel/
+	-- yaourt
+		$ vim /etc/pacman.conf
+			[archlinuxfr]
+			SigLevel = Never
+			Server = http://repo.archlinux.fr/$arch
+		$ pacman -Syu yaourt

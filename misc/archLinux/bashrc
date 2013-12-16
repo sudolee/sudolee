@@ -91,10 +91,11 @@ if ! shopt -oq posix; then
 fi
 
 # add by Matti...
+export SVN_EDITOR=vim
+#alias meld='2>/dev/null meld'
 export PATH=/opt/arm-cross-toolchain/bin:$PATH
 export JAVA_HOME=/opt/sun-jdk1.6.0_43/
 export JRE_HOME=$JAVA_HOME/jre
 export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
 export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-alias meld='2>/dev/null meld'
 # Matti add end.

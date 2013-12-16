@@ -1,8 +1,8 @@
 #!/bin/sh
 
-rm -rf ~/.vim
+rm -fr ~/.vim
 rm -f ~/.vimrc
-cp -rf vim ~/.vim
+cp -fr vim ~/.vim
 cp -f vimrc ~/.vimrc
 
 
