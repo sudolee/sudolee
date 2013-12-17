@@ -199,6 +199,9 @@ EndSection
 		$ pacman -S ntp
 		$ ntpd -gq
 		$ hwclock -w
+	-- utc time in windows7
+		Using regedit, add a DWORD value with hexadecimal value 1 to the registry
+		HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal
 	-- pdf -> Okular issue
 		$ pacman -S poppler-data
 	-- openssh
