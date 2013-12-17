@@ -57,7 +57,8 @@
 	$ pacman -Syy
 
 10, install base system
-	$ pacstrap /mnt base wpa_supplicant    # wpa_supplicant is used by wireless setting
+	$ pacstrap /mnt base \
+		wpa_supplicant    # For wireless connective.
 	$ genfstab -U -p /mnt >> /mnt/etc/fstab
 	$ arch-chroot /mnt /bin/bash
 
