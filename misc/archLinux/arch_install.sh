@@ -1,7 +1,7 @@
 #!/bin/bash
 
-archinstallcmd='pacman -S --needed --noconfirm -q >/dev/null 2>&1'
-#archinstallcmd='pacman -S --needed'
+#archinstallcmd='pacman -S --needed --noconfirm -q >/dev/null 2>&1'
+archinstallcmd='pacman -S --needed --noconfirm -q'
 
 Confirm () {
 	# call with a prompt string or use a default
@@ -23,18 +23,22 @@ echo '[multilib]
 Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 fi
 
-pacman -Syy
+#pacman -Syy
 
 read -p "--> Enter your new user name : " NewUserName
 Confirm "Will create new user \"$NewUserName\"," || (echo "Cannot continue without new UserName. :(" && exit)
 
 #useradd -m -g $NewUserName -s /bin/bash
 #passwd $NewUserName
-#gpasswd -a $NewUserName network,video,audio,disk,floppy,storage,uucp
+for i in network video audio disk floppy storage uucp
+do
+	echo add $NewUserName into group $i
+	#gpasswd -a $NewUserName $i
+done
 
-Confirm "Have intel  GPU ?" && GPU_INTEL=true
-Confirm "Have nivida GPU ?" && GPU_NIVIDA=true
-Confirm "Have ati    GPU ?" && GPU_ATI=true
+Confirm "Have intel  GPU ?"         && GPU_INTEL=true
+Confirm "Have nivida GPU ?"         && GPU_NIVIDA=true
+Confirm "Have ati    GPU ?"         && GPU_ATI=true
 Confirm "Have bluetooth hardware ?" && BLUETOOTH=true
 
 [ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
@@ -71,8 +75,11 @@ fi
 
 $archinstallcmd chromium thunderbird thunderbird-i18n-zh-cn
 $archinstallcmd libreoffice-en-US libreoffice-kde4 libreoffice-writer libreoffice-calc libreoffice-draw
-$archinstallcmd virtualbox virtualbox-host-modules
 $archinstallcmd poppler-data
+
+$archinstallcmd virtualbox virtualbox-host-modules
+gpasswd -a $NewUserName vboxusers
+echo vboxdrv > /etc/modules-load.d/virtualbox.conf
 
 pushd /usr/bin/
 [ -f python2 ] && { rm -fv python; ln -sv python2 python; }
@@ -93,6 +100,7 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	bash-completion linux-manpages minicom ntp
 
 gpasswd -a $NewUserName wireshark
+setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
 ntpd -gq
 hwclock -w
