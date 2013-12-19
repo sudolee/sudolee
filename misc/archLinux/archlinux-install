@@ -190,7 +190,7 @@ EndSection
 
 21, $ pacman -S --needed linux-headers gcc binutils gcc-libs bison make \
 	libtool autogen autoconf automake patchutils elfutils gdb diffutils \
-	gnupg gperf expect dejagnu guile \
+	gnupg gperf expect dejagnu guile gperftools \
 	tar zip unzip bzip2 libzip zlib \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
 	git subversion mercurial quilt \
