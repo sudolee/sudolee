@@ -3,10 +3,7 @@
 # for examples
 
 # If not running interactively, don't do anything
-case $- in
-    *i*) ;;
-      *) return;;
-esac
+[[ $- != *i* ]] && return
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -89,13 +86,3 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# add by Matti...
-export SVN_EDITOR=vim
-#alias meld='2>/dev/null meld'
-export PATH=/opt/arm-cross-toolchain/bin:$PATH
-export JAVA_HOME=/opt/sun-jdk1.6.0_43/
-export JRE_HOME=$JAVA_HOME/jre
-export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
-export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-# Matti add end.

@@ -7,7 +7,7 @@ Confirm () {
 	# call with a prompt string or use a default
 	read -p "--> ${1:-Are you sure ?} [Y/n] " response
 	case $response in
-		[nN][oO]|[nN])
+		[nN]|[nN][oO])
 			false
 			;;
 		*)
@@ -26,7 +26,7 @@ fi
 pacman -Syy
 
 read -p "--> Enter your new user name : " NewUserName
-Confirm "Will create new user \"$NewUserName\"," || (echo "Cannot continue without new UserName. :(" && exit)
+Confirm "Will create new user \"$NewUserName\"," || { echo "Cannot continue without new UserName. :("; exit; }
 
 useradd -m -g $NewUserName -s /bin/bash
 passwd $NewUserName
@@ -40,17 +40,20 @@ Confirm "Have intel  GPU ?"         && GPU_INTEL=true
 Confirm "Have nivida GPU ?"         && GPU_NIVIDA=true
 Confirm "Have ati    GPU ?"         && GPU_ATI=true
 Confirm "Have bluetooth hardware ?" && BLUETOOTH=true
+Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
 
 [ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
 [ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri;
 	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
 [ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
 
+[ "$TTOUCHPAD" ]   && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
+
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
 $archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-vlc ttf-dejavu \
 	ttf-liberation wqy-zenhei archlinux-themes-kdm kdeplasma-applets-plasma-nm \
 	appmenu-qt
-$archinstallcmd networkmanager iw openssh
+$archinstallcmd networkmanager openssh
 
 systemctl enable NetworkManager
 systemctl enable kdm.service
@@ -79,7 +82,7 @@ $archinstallcmd poppler-data
 
 $archinstallcmd virtualbox virtualbox-host-modules
 gpasswd -a $NewUserName vboxusers
-echo vboxdrv > /etc/modules-load.d/virtualbox.conf
+[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
 
 pushd /usr/bin/
 [ -f python2 ] && { rm -fv python; ln -sv python2 python; }
@@ -104,11 +107,5 @@ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
 ntpd -gq
 hwclock -w
-
-#curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > repo
-#chmod a+x repo
-#mv repo /usr/local/bin/
-
-#echo "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", MODE=\"0660\", OWNER=\"$USER\"" > /etc/udev/rules.d/51-android.rules
 
 exit 0
