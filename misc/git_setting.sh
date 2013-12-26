@@ -1,4 +1,5 @@
 git config --global core.editor 'vim'
+git config --global push.default simple
 git config --global user.name 'matti'
 git config --global user.email 'desoxydate@gmail.com'
 
