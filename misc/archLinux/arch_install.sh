@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#archinstallcmd='pacman -S --needed --noconfirm -q >/dev/null 2>&1'
 archinstallcmd='pacman -S --needed --noconfirm -q'
 
 Confirm () {
@@ -19,8 +18,10 @@ Confirm () {
 Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
 
 if [ 0 -eq $(grep -cE '^\[multilib\]$' /etc/pacman.conf) ]; then
-echo '[multilib]
-Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
+	cat > /etc/pacman.conf <<- EOF
+	[multilib]
+	Include = /etc/pacman.d/mirrorlist
+	EOF
 fi
 
 pacman -Syy
@@ -60,25 +61,30 @@ systemctl enable kdm.service
 systemctl enable sshd.socket
 
 $archinstallcmd \
-	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore \
-	alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix gst-plugins-good gstreamer0.10-good-plugins \
+	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
+	libtheora libvorbis libxv wavpack x264 xvidcore \
+	alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix \
+	gst-plugins-good gstreamer0.10-good-plugins \
 	vlc \
 	fcitx-im fcitx-googlepinyin kcm-fcitx \
 	bash-completion screenfetch cpupower flashplugin
 
 . /usr/share/bash-completion/bash_completion
 
-if [ 0 -eq $(grep -cE '^export GTK_IM_MODULE=fcitx$' /home/$NewUserName/.xprofile) ]; then
-echo 'export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS="@im=fcitx"' >> /home/$NewUserName/.xprofile
+if [ 0 -eq $(grep -cE 'export GTK_IM_MODULE=fcitx$' /home/$NewUserName/.xprofile) ]; then
+	cat > /home/$NewUserName/.xprofile <<- EOF
+	export GTK_IM_MODULE=fcitx
+	export QT_IM_MODULE=fcitx
+	export XMODIFIERS="@im=fcitx"
+	EOF
 fi
 
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
-$archinstallcmd chromium thunderbird thunderbird-i18n-zh-cn
-$archinstallcmd libreoffice-en-US libreoffice-kde4 libreoffice-writer libreoffice-calc libreoffice-draw
-$archinstallcmd poppler-data
+$archinstallcmd chromium thunderbird thunderbird-i18n-zh-cn \
+	libreoffice-en-US libreoffice-kde4 libreoffice-writer \
+	libreoffice-calc libreoffice-draw libreoffice-impress \
+	poppler-data
 
 $archinstallcmd virtualbox virtualbox-host-modules
 gpasswd -a $NewUserName vboxusers
