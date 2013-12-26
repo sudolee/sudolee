@@ -22,10 +22,6 @@ Linux:
 	www.linuxfromscratch.org  # build cross compiler
 	http://www.win.tue.nl/~aeb/linux/
 	https://silver.arm.com
-google chrome:
-	https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-yaffs filesystem:
-	git clone git://www.aleph1.co.uk/yaffs2 #http://www.yaffs.net/node/346
 free cross toolchain:
 	http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/
 
@@ -43,15 +39,12 @@ Windows:
 	http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=11800	##WinDDK download
 
 skype without tom:
-	http://www.skype.com/go/getskype-full  (for the full installer you run from your hard drive)
-	http://download.skype.com/SkypeSetup.exe  (for the standard installer)
+	http://download.skype.com/SkypeSetup.exe
 	http://download.skype.com/linux/skype-ubuntu-precise_4.2.0.11-1_i386.deb
 	http://download.skype.com/linux/skype-debian_4.2.0.11-1_i386.deb
 	http://download.skype.com/linux/skype-ubuntu_4.0.0.7-1_i386.deb
 	http://download.skype.com/linux/skype-debian_4.0.0.7-1_i386.deb
 	http://download.skype.com/linux/skype-debian_4.1.0.20-1_i386.deb
-	http://download.skype.com/linux/skype-ubuntu_2.2.0.35-1_i386.deb # i386-> amd64
-	http://download.skype.com/linux/skype-debian_2.2.0.35-1_i386.deb # i386-> amd64
 
 hosts:
 	--huhamhire-hosts--
