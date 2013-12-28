@@ -126,7 +126,7 @@
 	[codec]
 		$ pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
 	[sound]
-		$ pacman -S alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix \
+		$ pacman -S alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
 			gst-plugins-good gstreamer0.10-good-plugins
 		$ amixer sset Master unmute
 	[video]

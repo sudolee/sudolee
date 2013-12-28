@@ -51,7 +51,7 @@ Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
 [ "$TTOUCHPAD" ]   && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
-$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-vlc ttf-dejavu \
+$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-gstreamer ttf-dejavu \
 	ttf-liberation wqy-zenhei archlinux-themes-kdm kdeplasma-applets-plasma-nm \
 	appmenu-qt
 $archinstallcmd networkmanager openssh
@@ -63,7 +63,7 @@ systemctl enable sshd.socket
 $archinstallcmd \
 	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
-	alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix \
+	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
 	gst-plugins-good gstreamer0.10-good-plugins \
 	vlc \
 	fcitx-im fcitx-googlepinyin kcm-fcitx \
