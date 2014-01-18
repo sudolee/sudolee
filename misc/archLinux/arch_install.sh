@@ -29,8 +29,8 @@ pacman -Syy
 read -p "--> Enter your new user name : " NewUserName
 Confirm "Will create new user \"$NewUserName\"," || { echo "Cannot continue without new UserName. :("; exit; }
 
-useradd -m -g $NewUserName -s /bin/bash
-passwd $NewUserName
+useradd -m -g users -s /bin/bash $NewUserName
+echo "--> Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
 for i in network video audio disk floppy storage uucp
 do
 	echo add $NewUserName into group $i
