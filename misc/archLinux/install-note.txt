@@ -52,9 +52,13 @@
 
 9, set /etc/pacman.d/mirrorlist (one of them)
 	Server = http://mirrors.kernel.org/archlinux/$repo/os/$arch
-	Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
 	Server = http://mirrors.163.com/archlinux/$repo/os/$arch
+	Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch
 	$ pacman -Syy
+
+9.1, Open repo in /etc/pacman.conf
+	[multilib]
+	Include = /etc/pacman.d/mirrorlist
 
 10, install base system
 	$ pacstrap /mnt base \

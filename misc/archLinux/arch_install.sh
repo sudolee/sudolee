@@ -17,12 +17,9 @@ Confirm () {
 
 Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
 
-if [ 0 -eq $(grep -cE '^\[multilib\]$' /etc/pacman.conf) ]; then
-	cat > /etc/pacman.conf <<- EOF
-	[multilib]
-	Include = /etc/pacman.d/mirrorlist
-	EOF
-fi
+# Open repo in /etc/pacman.conf
+#[multilib]
+#Include = /etc/pacman.d/mirrorlist
 
 pacman -Syy
 
@@ -71,13 +68,11 @@ $archinstallcmd \
 
 . /usr/share/bash-completion/bash_completion
 
-if [ 0 -eq $(grep -cE 'export GTK_IM_MODULE=fcitx$' /home/$NewUserName/.xprofile) ]; then
-	cat > /home/$NewUserName/.xprofile <<- EOF
-	export GTK_IM_MODULE=fcitx
-	export QT_IM_MODULE=fcitx
-	export XMODIFIERS="@im=fcitx"
-	EOF
-fi
+cat > /home/$NewUserName/.xprofile <<- EOF
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+EOF
 
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
