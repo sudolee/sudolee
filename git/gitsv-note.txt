@@ -1,0 +1,76 @@
+
+2, git online book:
+	http://git-scm.com/book/zh/
+
+3, add host for git server:
+	useradd -m -g users -d /new/home/path -s /bin/bash NewUsrName
+	passwd NewUsrName
+
+4, login as new user.
+	ssh gitsv@127.0.0.1
+
+5, set env:
+	echo 'PATH=${PATH}:~/bin' >> ~/.bashrc
+	source ~/.bashrc
+	mkdir -p ~/bin
+
+6, get gitolite:
+	git clone git://github.com/sitaramc/gitolite
+
+7, install gitolite:
+	mkdir -p ~/bin
+	gitolite/install -ln ~/bin
+
+8, genarate ssh key (on your local workstation):
+	cd ~/.ssh
+	ssh-keygen -t rsa -C "your@email.com"
+	scp id_rsa.pub gitsv@127.0.0.1:~/YourName.pub
+	
+9, setup the initial repos with your key:
+	gitolite setup -pk ~/YourName.pub
+
+10, clone the admin repo so you can start adding stuff (on your local workstation):
+	git clone gitsv@127.0.0.1:gitolite-admin.git
+
+	[note]: If everything okay, there is no password needed.
+
+11, install apache:
+	pacman -S --needed apache
+
+12, configure apache:
+	/etc/httpd/conf/httpd.conf
+	set : User as gitsv, Group as http.
+
+13, start httpd:
+	systemctl start httpd.service
+
+14, link gitweb:
+	ln -s /usr/share/gitweb/ /srv/http/gitweb
+
+15, configure gitweb:
+	set /etc/gitweb.conf as below:
+		$git_temp = "/tmp";
+		$projectroot = "/home/gitsv/repositories/open";
+		our @git_base_url_list = qw(gitsv@127.0.0.1:open);
+
+	[Note] :
+		- Don't set as the root dir.
+		- repo description
+			/home/gitsv/repositories/open/github.git/description
+
+16, set httpd virtual host:
+	- uncommit "Include conf/extra/httpd-vhosts.conf" in /etc/http/conf/httpd.conf
+	- add virtual host in conf/extra/httpd-vhosts.conf:
+
+<VirtualHost *:80>
+    ServerName gitserver
+    DocumentRoot /srv/http/gitweb
+    <Directory /srv/http/gitweb>
+        Options ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+        AllowOverride All
+        order allow,deny
+        Allow from all
+        AddHandler cgi-script cgi
+        DirectoryIndex gitweb.cgi
+    </Directory>
+</VirtualHost>
