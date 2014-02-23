@@ -54,7 +54,7 @@
 		$git_temp = "/tmp";
 		$projectroot = "/home/gitsv/repositories/open";
 		# our @git_base_url_list = qw(gitsv@127.0.0.1:open);
-		our @git_base_url_list = qw(gitsv@127.0.0.1:open, git://127.0.0.1);
+		our @git_base_url_list = qw(gitsv@127.0.0.1:open git://127.0.0.1);
 		$site_name = "matti's git trees.";
 		# enable pretty URLs
 		$feature{'pathinfo'}{'default'} = [1];
