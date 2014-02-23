@@ -53,7 +53,8 @@
 	[2] set /etc/gitweb.conf as below:
 		$git_temp = "/tmp";
 		$projectroot = "/home/gitsv/repositories/open";
-		our @git_base_url_list = qw(gitsv@127.0.0.1:open);
+		# our @git_base_url_list = qw(gitsv@127.0.0.1:open);
+		our @git_base_url_list = qw(gitsv@127.0.0.1:open, git://127.0.0.1);
 		$site_name = "matti's git trees.";
 		# enable pretty URLs
 		$feature{'pathinfo'}{'default'} = [1];
@@ -101,3 +102,21 @@
 
 			</Directory>
 		</VirtualHost>
+
+9, git daemon:
+	[1] Edit /usr/lib/systemd/system/git-daemon@.service:
+		[Unit]
+		Description=Git Daemon Instance
+
+		[Service]
+		User=gitsv
+		Group=http
+		# The '-' is to ignore non-zero exit statuses
+		#ExecStart=-/usr/lib/git-core/git-daemon --inetd --export-all --base-path=/srv/git
+		ExecStart=-/usr/lib/git-core/git-daemon --inetd --export-all --base-path=/home/gitsv/repositories/open
+		StandardInput=socket
+		StandardOutput=inherit
+		StandardError=journal
+
+	[2] Start git daemon:
+		systemctl start git-daemon.socket
