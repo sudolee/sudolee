@@ -54,6 +54,7 @@
 		$git_temp = "/tmp";
 		$projectroot = "/home/gitsv/repositories/open";
 		our @git_base_url_list = qw(gitsv@127.0.0.1:open);
+		$site_name = "matti's git trees.";
 
 	[3] note:
 		- Don't set $projectroot as the root dir for safe.
@@ -64,7 +65,7 @@
 				[gitweb]
 					owner = "Matti Lee"
 
-16, set httpd virtual host:
+8, set httpd virtual host:
 	- uncommit "Include conf/extra/httpd-vhosts.conf" in /etc/http/conf/httpd.conf
 	- add virtual host in conf/extra/httpd-vhosts.conf:
 
