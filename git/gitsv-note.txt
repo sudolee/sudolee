@@ -73,6 +73,10 @@
 				[gitweb]
 					owner = "Matti Lee"
 
+	[4] gitweb theme:
+		https://github.com/kogakure/gitweb-theme
+		https://bitbucket.org/kogakure/gitweb-theme
+
 8, set httpd virtual host:
 	- uncommit "Include conf/extra/httpd-vhosts.conf" in /etc/http/conf/httpd.conf
 	- add virtual host in conf/extra/httpd-vhosts.conf:
