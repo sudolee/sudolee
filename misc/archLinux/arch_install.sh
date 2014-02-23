@@ -101,7 +101,8 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
 	m4 gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim meld indent kdiff3 \
-	bash-completion linux-manpages minicom ntp
+	bash-completion linux-manpages minicom ntp \
+	sox netpbm  # for fax
 
 gpasswd -a $NewUserName wireshark
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
