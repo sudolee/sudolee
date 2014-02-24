@@ -1,3 +1,4 @@
+- Howto setup git server on ubuntu with git, ssh protocol & gitweb -
 
 1, add host for git server:
 	sudo adduser -system --shell /bin/bash --gecos 'git SCM user' --group --disabled-password --home /var/git git
@@ -20,7 +21,9 @@
 	[3] clone the admin repo so you can start adding stuff (on your local workstation):
 		git clone git@127.0.0.1:gitolite-admin.git
 
-7, git daemon:
+		[note]: If everything okay, there is no password needed.
+
+5, git daemon:
 	[1] install git daemon:
 		sudo apt-get install git-daemon-sysvinit
 
@@ -40,12 +43,11 @@
 	[3] let git daemon run:
 		sudo /etc/init.d/git-daemon restart
 
-8, apache2:
+6, apache2:
 	[1] install apache2:
 		sudo apt-get install apache2
 
-	[2] create new virtual host:
-		- create /etc/apache2/sites-available/gitweb as below:
+	[2] create new virtual host via set /etc/apache2/sites-available/gitweb as below:
 			# if use diff port from 80.
 			Listen 8087
 			<VirtualHost *:8087>
@@ -53,7 +55,6 @@
 					ServerName  127.0.0.1
 
 					DocumentRoot /var/www/gitweb
-
 					<Directory /var/www/gitweb>
 							Options ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
 							AllowOverride None
@@ -79,7 +80,7 @@
 	[5] give access to apache2:
 		set apache2 User as "git" in /etc/apache2/apache2.conf
 
-	( this solution not work.
+	( this solution below not work, :(
 		add the www-data user to the git group (so gitweb can access the git repos in RO mode):
 		adduser www-data git
 	)
@@ -87,7 +88,7 @@
 	[6] let apache2 daemon run:
 		sudo /etc/init.d/apache2 restart
 
-9, gitweb:
+7, gitweb:
 	[1] install gitweb:
 		sudo apt-get install gitweb
 
@@ -111,4 +112,3 @@
 
 		# enable syntax highlighting
 		$feature{'highlight'}{'default'} = [1];
-
