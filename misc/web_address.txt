@@ -34,8 +34,8 @@ python:
 	http://sebug.net/paper/python/
 
 Windows:
-	http://www.msfn.org/	## Microsoft Software Forum Network
-	http://code.google.com/p/msysgit/	##git for windows
+	http://www.msfn.org/ ## Microsoft Software Forum Network
+	http://code.google.com/p/msysgit/ ##git for windows
 	http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=11800	##WinDDK download
 
 skype without tom:

@@ -17,21 +17,17 @@ Confirm () {
 
 Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
 
-if [ 0 -eq $(grep -cE '^\[multilib\]$' /etc/pacman.conf) ]; then
-	cat > /etc/pacman.conf <<- EOF
-	[multilib]
-	Include = /etc/pacman.d/mirrorlist
-	EOF
-fi
+# Open repo in /etc/pacman.conf
+#[multilib]
+#Include = /etc/pacman.d/mirrorlist
 
 pacman -Syy
 
 read -p "--> Enter your new user name : " NewUserName
 Confirm "Will create new user \"$NewUserName\"," || { echo "Cannot continue without new UserName. :("; exit; }
 
-useradd -m -s /bin/bash $NewUserName
-echo "--> Set password for new user \"$NewUserName\"."
-passwd $NewUserName
+useradd -m -g users -s /bin/bash $NewUserName
+echo "--> Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
 for i in network video audio disk floppy storage uucp
 do
 	echo "Add $NewUserName into group $i"
@@ -52,7 +48,7 @@ Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
 [ "$TTOUCHPAD" ]   && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
-$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-vlc ttf-dejavu \
+$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-gstreamer ttf-dejavu \
 	ttf-liberation wqy-zenhei archlinux-themes-kdm kdeplasma-applets-plasma-nm \
 	appmenu-qt
 $archinstallcmd networkmanager openssh
@@ -64,7 +60,7 @@ systemctl enable sshd.socket
 $archinstallcmd \
 	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
-	alsa-utils alsa-plugins dbus libsamplerate pulseaudio kdemultimedia-kmix \
+	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
 	gst-plugins-good gstreamer0.10-good-plugins \
 	vlc \
 	fcitx-im fcitx-googlepinyin kcm-fcitx \
@@ -72,13 +68,11 @@ $archinstallcmd \
 
 . /usr/share/bash-completion/bash_completion
 
-if [ 0 -eq $(grep -cE 'export GTK_IM_MODULE=fcitx$' /home/$NewUserName/.xprofile) ]; then
-	cat > /home/$NewUserName/.xprofile <<- EOF
-	export GTK_IM_MODULE=fcitx
-	export QT_IM_MODULE=fcitx
-	export XMODIFIERS="@im=fcitx"
-	EOF
-fi
+cat > /home/$NewUserName/.xprofile <<- EOF
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+EOF
 
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
@@ -107,7 +101,8 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
 	m4 gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim meld indent kdiff3 \
-	bash-completion linux-manpages minicom ntp
+	bash-completion linux-manpages minicom ntp \
+	sox netpbm  # for fax
 
 gpasswd -a $NewUserName wireshark
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
