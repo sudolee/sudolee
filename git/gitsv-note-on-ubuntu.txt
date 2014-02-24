@@ -1,0 +1,114 @@
+
+1, add host for git server:
+	sudo adduser -system --shell /bin/bash --gecos 'git SCM user' --group --disabled-password --home /var/git git
+
+2, create repo dir:
+	sudo -u git mkdir -p /var/git/repositories/open
+
+3, genarate ssh key (on your local workstation):
+		cd ~/.ssh
+		ssh-keygen -t rsa -C "your@email.com"
+		scp id_rsa.pub git@127.0.0.1:~/YourName.pub
+
+4, gitolite:
+	[1] install gitolite:
+		sudo apt-get install gitolite
+
+	[2] setup gitolite with admin's public key:
+		sudo -H -u git gl-setup /var/git/YourName.pub
+
+	[3] clone the admin repo so you can start adding stuff (on your local workstation):
+		git clone git@127.0.0.1:gitolite-admin.git
+
+7, git daemon:
+	[1] install git daemon:
+		sudo apt-get install git-daemon-sysvinit
+
+	[2] configure git daemon, in /etc/default/git-daemon:
+		# Defaults for git-daemon initscript
+		# sourced by /etc/init.d/git-daemon
+		# installed at /etc/default/git-daemon by the maintainer scripts
+
+		# This is a POSIX shell fragment
+		GIT_DAEMON_ENABLE=true
+		GIT_DAEMON_USER=git
+		GIT_DAEMON_BASE_PATH=/var/git/repositories/open
+		GIT_DAEMON_DIRECTORY=/var/git/repositories/open
+		# Additional options that are passed to the Daemon
+		GIT_DAEMON_OPTIONS="--export-all"
+
+	[3] let git daemon run:
+		sudo /etc/init.d/git-daemon restart
+
+8, apache2:
+	[1] install apache2:
+		sudo apt-get install apache2
+
+	[2] create new virtual host:
+		- create /etc/apache2/sites-available/gitweb as below:
+			# if use diff port from 80.
+			Listen 8087
+			<VirtualHost *:8087>
+					ServerAdmin your@email.com
+					ServerName  127.0.0.1
+
+					DocumentRoot /var/www/gitweb
+
+					<Directory /var/www/gitweb>
+							Options ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+							AllowOverride None
+							order allow,deny
+							Allow from all
+
+							AddHandler cgi-script cgi
+							DirectoryIndex gitweb.cgi
+
+							RewriteEngine On
+							RewriteCond %{REQUEST_FILENAME} !-f
+							RewriteCond %{REQUEST_FILENAME} !-d
+							RewriteRule ^.* /gitweb.cgi/$0 [L,PT]
+					</Directory>
+			</VirtualHost>
+
+	[3] enable the new virtual host:
+		sudo ln -s /etc/apache2/sites-available/gitweb /etc/apache2/sites-enabled/gitweb
+
+	[4] enable rewrite module:
+		sudo ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+
+	[5] give access to apache2:
+		set apache2 User as "git" in /etc/apache2/apache2.conf
+
+	( this solution not work.
+		add the www-data user to the git group (so gitweb can access the git repos in RO mode):
+		adduser www-data git
+	)
+
+	[6] let apache2 daemon run:
+		sudo /etc/init.d/apache2 restart
+
+9, gitweb:
+	[1] install gitweb:
+		sudo apt-get install gitweb
+
+	[2] link gitweb to apache's dir:
+		sudo ln -s /usr/share/gitweb/ /var/www/gitweb
+
+	[3] set /etc/gitweb.conf as below:
+		$git_temp = "/tmp";
+		$projectroot = "/var/git/repositories/open";
+		our @git_base_url_list = qw(gitsv@127.0.0.1:open git://127.0.0.1);
+		$site_name = "matti's git trees";
+
+		# enable pretty URLs
+		$feature{'pathinfo'}{'default'} = [1];
+
+		$feature{'blame'}{'default'} = [1];
+
+		# disable/enable snapshot downloads
+		#$feature{'snapshot'}{'default'} = ['zip', 'tgz'];
+		$feature{'snapshot'}{'default'} = [undef];
+
+		# enable syntax highlighting
+		$feature{'highlight'}{'default'} = [1];
+

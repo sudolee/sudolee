@@ -60,8 +60,11 @@
 		$feature{'pathinfo'}{'default'} = [1];
 
 		$feature{'blame'}{'default'} = [1];
-		# enable snapshot downloads
-		$feature{'snapshot'}{'default'} = ['zip', 'tgz'];
+
+		# disable/enable snapshot downloads
+		#$feature{'snapshot'}{'default'} = ['zip', 'tgz'];
+		$feature{'snapshot'}{'default'} = [undef];
+
 		# enable syntax highlighting
 		$feature{'highlight'}{'default'} = [1];
 
@@ -87,7 +90,7 @@
 			DocumentRoot /srv/http/gitweb
 			<Directory /srv/http/gitweb>
 				Options ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
-				AllowOverride All
+				AllowOverride none
 				order allow,deny
 				Allow from all
 
