@@ -11,4 +11,5 @@ else
 	echo "GEN cscope"
 fi
 (cscope -bqk)
+
 (echo "ctags -R"; ctags -R)

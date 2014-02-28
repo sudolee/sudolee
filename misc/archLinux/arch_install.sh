@@ -15,11 +15,12 @@ Confirm () {
 	esac
 }
 
-Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
-
 # Open repo in /etc/pacman.conf
 #[multilib]
 #Include = /etc/pacman.d/mirrorlist
+Confirm 'Make sure multilib in /etc/pacman.conf opened,' || { echo '[Warning] - multilib must enabled.'; exit 0; }
+
+Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
 
 pacman -Syy
 
@@ -62,7 +63,7 @@ $archinstallcmd \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
 	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
 	gst-plugins-good gstreamer0.10-good-plugins \
-	vlc \
+	vlc skype \
 	fcitx-im fcitx-googlepinyin kcm-fcitx \
 	bash-completion screenfetch cpupower flashplugin
 
@@ -85,11 +86,6 @@ $archinstallcmd virtualbox virtualbox-host-modules
 gpasswd -a $NewUserName vboxusers
 [ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
 
-pushd /usr/bin/
-[ -f python2 ] && { rm -fv python; ln -sv python2 python; }
-[ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
-popd
-
 $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	libtool autogen autoconf automake patchutils elfutils gdb diffutils \
 	gnupg gperf expect dejagnu guile gperftools \
@@ -107,7 +103,13 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 gpasswd -a $NewUserName wireshark
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
+pushd /usr/bin/
+[ -f python2 ] && { rm -fv python; ln -sv python2 python; }
+[ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
+popd
+
 ntpd -gq
 hwclock -w
 
+echo '--> Installations complete, :)'
 exit 0
