@@ -15,10 +15,7 @@ Confirm () {
 	esac
 }
 
-# Open repo in /etc/pacman.conf
-#[multilib]
-#Include = /etc/pacman.d/mirrorlist
-Confirm 'Make sure multilib in /etc/pacman.conf opened,' || { echo '[Warning] - multilib must enabled.'; exit 0; }
+Confirm 'Make sure [multilib] in /etc/pacman.conf opened,' || { echo '[Warning] - multilib must enabled.'; exit 0; }
 
 Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
 
