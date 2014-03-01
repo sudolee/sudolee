@@ -14,6 +14,7 @@
 	[2] changed ownership of ‘var/cache/cgit’ from root:root to http:http
 
 	[3] /etc/cgitrc:
+
 		#css=/cgit.css
 		#logo=/cgit.png
 		# Following lines work with the above Apache config
@@ -23,15 +24,24 @@
 		root-title=matti's git trees
 		root-desc=tracking matti's development
 
-		cache-root=/tmp/cgit
-		# Enable caching of up to 1000 output entries
-		cache-size=1000
+		#cache-root=/tmp/cgit
+		# Enable caching of up to 1024 output entries
+		cache-size=1024
 
 		# don't remove repositories's suffix of ".git"
 		remove-suffix=0
 
+		# Allow http transport git clone
+		enable-http-clone=1
+
+		#snapshots=zip tar.gz
+
 		# Show extra links for each repository on the index page
 		enable-index-links=1
+
+		branch-sort=age
+		head-include=1
+		index-header=1
 
 		enable-tree-linenumbers=1
 		# Show number of affected files per commit on the log pages
@@ -41,30 +51,23 @@
 		# Enable ASCII art commit history graph on the log pages
 		enable-commit-graph=1
 
-		head-include=1
-		index-header=1
+		# shows side-by-side diffs instead of unidiffs per default
+		side-by-side-diffs=1
 
-		# Allow http transport git clone
-		enable-http-clone=1
-
-		# Specify some default clone urls using macro expansion
-		clone-url=git://127.0.0.1/$CGIT_REPO_URL git@127.0.0.1:$CGIT_REPO_URL
-		#snapshots=zip tar.gz
+		# cgit use the subject of the parent commit as link text
+		enable-subject-links=1
 
 		# syntax highlighting when viewing blobs
 		source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
 
+		# Commits per author per week.month.quarter.year
+		max-stats=week
+
 		virtual-root=/
 		scan-path=/opt
 
-		repository-sort=name
-		branch-sort=age
-
-		# shows side-by-side diffs instead of unidiffs per default
-		#side-by-side-diffs=1
-
-		max-stats=week
-		enable-subject-links=1
+		# Specify some default clone urls using macro expansion
+		clone-url=git://127.0.0.1/$CGIT_REPO_URL git@127.0.0.1:$CGIT_REPO_URL
 
 4, nginx virtual host:
     server {
