@@ -63,11 +63,11 @@
 		# Commits per author per week.month.quarter.year
 		max-stats=week
 
-		virtual-root=/
-		scan-path=/opt
-
 		# Specify some default clone urls using macro expansion
 		clone-url=git://127.0.0.1/$CGIT_REPO_URL git@127.0.0.1:$CGIT_REPO_URL
+
+		virtual-root=/
+		scan-path=/opt
 
 4, nginx virtual host:
     server {
