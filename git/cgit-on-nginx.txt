@@ -1,0 +1,112 @@
+- Howto setup git repos web browser cgit over nginx -
+
+1, nginx:
+	pacman -S --needed nginx
+	systemctl start nginx.service
+	[check] : 127.0.0.1 in browser
+
+2, fcgiwrap & spawn-fcgi:
+	pacman -S --needed fcgiwrap spawn-fcgi
+	systemctl start fcgiwrap.socket
+
+3, cgit:
+	[1] pacman -S --needed cgit
+	[2] changed ownership of ‘var/cache/cgit’ from root:root to http:http
+
+	[3] /etc/cgitrc:
+		#css=/cgit.css
+		#logo=/cgit.png
+		# Following lines work with the above Apache config
+		#css=/cgit-css/cgit.css
+		#logo=/cgit-css/cgit.png
+
+		root-title=matti's git trees
+		root-desc=tracking matti's development
+
+		cache-root=/tmp/cgit
+		# Enable caching of up to 1000 output entries
+		cache-size=1000
+
+		# don't remove repositories's suffix of ".git"
+		remove-suffix=0
+
+		# Show extra links for each repository on the index page
+		enable-index-links=1
+
+		enable-tree-linenumbers=1
+		# Show number of affected files per commit on the log pages
+		enable-log-filecount=1
+		# Show number of added/removed lines per commit on the log pages
+		enable-log-linecount=1
+		# Enable ASCII art commit history graph on the log pages
+		enable-commit-graph=1
+
+		head-include=1
+		index-header=1
+
+		# Allow http transport git clone
+		enable-http-clone=1
+
+		# Specify some default clone urls using macro expansion
+		clone-url=git://127.0.0.1/$CGIT_REPO_URL git@127.0.0.1:$CGIT_REPO_URL
+		#snapshots=zip tar.gz
+
+		# syntax highlighting when viewing blobs
+		source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
+
+		virtual-root=/
+		scan-path=/opt
+
+		repository-sort=name
+		branch-sort=age
+
+		# shows side-by-side diffs instead of unidiffs per default
+		#side-by-side-diffs=1
+
+		max-stats=week
+		enable-subject-links=1
+
+4, nginx virtual host:
+    server {
+        listen                80 default_server;
+        server_name           git.example.com;
+        root                  /usr/share/webapps/cgit;
+
+        if (-f $request_filename) {
+            break;
+        }
+        if (!-f $request_filename) {
+            rewrite ^/(.*)$ /cgit.cgi?url=$1 last;
+            rewrite ^/$ /cgit.cgi last;
+            break;
+        }
+
+        location ~ \.cgi$ {
+            fastcgi_pass    unix:/run/fcgiwrap.sock;
+            fastcgi_param   SCRIPT_FILENAME /usr/share/webapps/cgit/cgit.cgi;
+            fastcgi_param   PATH_INFO       $uri;
+            fastcgi_param   QUERY_STRING    $args;
+        }
+    }
+
+5, Syntax highlighting:
+	[1] Cgit supports syntax highlighting when viewing blobs. To enable syntax highlighting,
+        you have to install the highlight package.
+
+	    # pacman -S highlight
+
+	[2] Edit /usr/lib/cgit/filters/syntax-highlighting.sh. Comment out version 2 and comment
+        in version 3. You may want to add --inline-css to the options of highlight for a more
+        colorfull output without editing cgit's css file.
+
+			# This is for version 2
+			#exec highlight --force -f -I -X -S "$EXTENSION" 2>/dev/null
+
+			# This is for version 3
+			exec highlight --force --inline-css -f -I -O xhtml -S "$EXTENSION" 2>/dev/null
+
+	[3] Enable the filter in /etc/cgitrc
+			source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
+
+6, Reference:
+	[1] http://polemon.org/cgit_nginx
