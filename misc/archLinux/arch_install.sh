@@ -43,13 +43,14 @@ Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
 	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
 [ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
 
-[ "$TTOUCHPAD" ]   && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
-
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
 $archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-gstreamer ttf-dejavu \
 	ttf-liberation wqy-zenhei archlinux-themes-kdm kdeplasma-applets-plasma-nm \
 	appmenu-qt
 $archinstallcmd networkmanager openssh
+
+# thinkpad touchpad setting
+[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 
 systemctl enable NetworkManager
 systemctl enable kdm.service
@@ -109,4 +110,3 @@ ntpd -gq
 hwclock -w
 
 echo '--> Installations complete, :)'
-exit 0
