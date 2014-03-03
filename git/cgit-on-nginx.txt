@@ -106,7 +106,8 @@
 			#exec highlight --force -f -I -X -S "$EXTENSION" 2>/dev/null
 
 			# This is for version 3
-			exec highlight --force --inline-css -f -I -O xhtml -S "$EXTENSION" 2>/dev/null
+			# -s/--style set highlight theme, more in "highlight -w".
+			exec highlight --force -s edit-vim --inline-css -f -I -O xhtml -S "$EXTENSION" 2>/dev/null
 
 	[3] Enable the filter in /etc/cgitrc
 			source-filter=/usr/lib/cgit/filters/syntax-highlighting.sh
