@@ -24,6 +24,13 @@
 		root-title=matti's git trees
 		root-desc=tracking matti's development
 
+		# allow to use git config to set repo settings, e.g.
+		# [gitweb]
+		#      category = **
+		#      owner = **
+		#      description = **
+		enable-git-config=1
+
 		#cache-root=/tmp/cgit
 		# Enable caching of up to 1024 output entries
 		cache-size=1024
