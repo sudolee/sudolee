@@ -1,7 +1,8 @@
 /*
  * Note:
- *  Bit only set type as unsigned short [0~65535],
- *  because it's enough for udp port.
+ *  - Bit 0 is the LSB of addr; bit 32 is the LSB of (addr+1).
+ *  - Bit only set type as unsigned short [0~65535],
+ *    because it's enough for udp port.
  */
 
 #include <stdio.h>
@@ -15,7 +16,7 @@
  */
 static inline unsigned int check_bit(unsigned int *arr, unsigned short bit)
 {
-	return (*(arr + (bit >> 5)) & (1 << (bit % 32))) ? 1 : 0;
+	return (*(arr + (bit >> 5)) & (1U << (bit % 32))) != 0;
 }
 
 /*
@@ -23,7 +24,10 @@ static inline unsigned int check_bit(unsigned int *arr, unsigned short bit)
  */
 static inline void set_bit(unsigned int *arr, unsigned short bit)
 {
-	*(arr + (bit >> 5)) |= 1 << (bit % 32);
+	unsigned int  mask = 1U << (bit % 32);
+	unsigned int *pos  = arr + (bit >> 5);
+
+	*pos |= mask;
 }
 
 /*
@@ -31,7 +35,10 @@ static inline void set_bit(unsigned int *arr, unsigned short bit)
  */
 static inline void clear_bit(unsigned int *arr, unsigned short bit)
 {
-	*(arr + (bit >> 5)) &= ~(1 << (bit % 32));
+	unsigned int  mask = 1U << (bit % 32);
+	unsigned int *pos  = arr + (bit >> 5);
+
+	*pos &= ~mask;
 }
 
 /*
@@ -40,8 +47,7 @@ static inline void clear_bit(unsigned int *arr, unsigned short bit)
  * @ Start : the bit to start counting from
  * @ End   : the bit to end   counting
  */
-static inline void set_bit_range(unsigned int *arr,
-		unsigned short Start, unsigned short End)
+static inline void set_bit_range(unsigned int *arr, unsigned short Start, unsigned short End)
 {
 	do {
 		set_bit(arr, Start++);
@@ -51,8 +57,7 @@ static inline void set_bit_range(unsigned int *arr,
 /*
  * Clear range of bit in bitmap
  */
-static inline void clear_bit_range(unsigned int *arr,
-		unsigned short Start, unsigned short End)
+static inline void clear_bit_range(unsigned int *arr, unsigned short Start, unsigned short End)
 {
 	do {
 		clear_bit(arr, Start++);
@@ -89,7 +94,7 @@ int get_range(unsigned char *src, unsigned short *range)
 
 	range[0] = -1;
 
-	/* 0-65535 only need 2 tokens. */
+	/* {0-65535} only need 2 tokens. */
 	for (i = 0, str = src; i < 2; i++, str = NULL) {
 		token = strtok(str, "-");
 		if(token == NULL) {
