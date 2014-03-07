@@ -104,6 +104,7 @@ int get_range(unsigned char *src, unsigned short *range)
 
 int main(int argc, char **argv)
 {
+//	unsigned int arr[0x10000 >> 5] = {0};
 	unsigned int arr[8] = {0};
 	unsigned int max_bit = (sizeof(arr) << 3) - 1;
 
