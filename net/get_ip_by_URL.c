@@ -1,4 +1,3 @@
-/* 通过域名获取ip */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
