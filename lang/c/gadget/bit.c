@@ -1,20 +1,20 @@
 /*
- * Note:
- *  - Bit 0 is the LSB of addr; bit 32 is the LSB of (addr+1).
- *  - Bit only set type as unsigned short [0~65535],
- *    because it's enough for udp port.
+ * Note: Bit 0 is the LSB of addr; bit 32 is the LSB of (addr+1).
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+typedef unsigned int _u32;
+typedef int          _s32;
+
 /*
  * Check a bit in bitmap:
  * @ arr: bitmap
  * @ bit: the bit to set
  */
-static inline unsigned int check_bit(unsigned int *arr, unsigned short bit)
+inline _u32 check_bit(_u32 *arr, _s32 bit)
 {
 	return (*(arr + (bit >> 5)) & (1U << (bit % 32))) != 0;
 }
@@ -22,10 +22,10 @@ static inline unsigned int check_bit(unsigned int *arr, unsigned short bit)
 /*
  * Set a bit in bitmap
  */
-static inline void set_bit(unsigned int *arr, unsigned short bit)
+inline void set_bit(_u32 *arr, _s32 bit)
 {
-	unsigned int  mask = 1U << (bit % 32);
-	unsigned int *pos  = arr + (bit >> 5);
+	_u32  mask = 1U << (bit % 32);
+	_u32 *pos  = arr + (bit >> 5);
 
 	*pos |= mask;
 }
@@ -33,10 +33,10 @@ static inline void set_bit(unsigned int *arr, unsigned short bit)
 /*
  * Clear a bit in bitmap
  */
-static inline void clear_bit(unsigned int *arr, unsigned short bit)
+inline void clear_bit(_u32 *arr, _s32 bit)
 {
-	unsigned int  mask = 1U << (bit % 32);
-	unsigned int *pos  = arr + (bit >> 5);
+	_u32  mask = 1U << (bit % 32);
+	_u32 *pos  = arr + (bit >> 5);
 
 	*pos &= ~mask;
 }
@@ -47,7 +47,7 @@ static inline void clear_bit(unsigned int *arr, unsigned short bit)
  * @ Start : the bit to start counting from
  * @ End   : the bit to end   counting
  */
-static inline void set_bit_range(unsigned int *arr, unsigned short Start, unsigned short End)
+inline void set_bit_range(_u32 *arr, _s32 Start, _s32 End)
 {
 	do {
 		set_bit(arr, Start++);
@@ -57,16 +57,16 @@ static inline void set_bit_range(unsigned int *arr, unsigned short Start, unsign
 /*
  * Clear range of bit in bitmap
  */
-static inline void clear_bit_range(unsigned int *arr, unsigned short Start, unsigned short End)
+inline void clear_bit_range(_u32 *arr, _s32 Start, _s32 End)
 {
 	do {
 		clear_bit(arr, Start++);
 	} while (Start <= End);
 }
 
-static void bits_dump(unsigned int *arr, size_t size)
+static void bits_dump(_u32 *arr, size_t size)
 {
-	int i;
+	_s32 i;
 
 	for(i = (size << 3) - 1; i >= 0; i--) {
 		printf("%u", check_bit(arr, i));
@@ -83,9 +83,9 @@ static void bits_dump(unsigned int *arr, size_t size)
 /*
  * return -1 when error detect.
  */
-int get_range(unsigned char *src, unsigned short *range)
+int get_range(char *src, _s32 *range)
 {
-	int i;
+	_s32 i;
 	char *str, *token;
 
 	if(!src) {
@@ -109,9 +109,9 @@ int get_range(unsigned char *src, unsigned short *range)
 
 int main(int argc, char **argv)
 {
-//	unsigned int arr[0x10000 >> 5] = {0};
-	unsigned int arr[8] = {0};
-	unsigned int max_bit = (sizeof(arr) << 3) - 1;
+//	_u32 arr[0x10000 >> 5] = {0};
+	_u32 arr[8] = {0};
+	_s32 max_bit = (sizeof(arr) << 3) - 1;
 
 	if(argc < 2) {
 		printf("Pls enter bit number {0-%u} to set/clear/check.\n", max_bit);
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 		printf("Bit [%s] will be set and clear.\n", argv[1]);
 	}
 
-	unsigned short range[2] = {0};
+	int range[2] = {0, 0};
 
 	if(-1 == get_range(argv[1], range)) {
 		printf("Oops, invalid range, :(\n");
