@@ -30,9 +30,6 @@ struct list_info
 	_u32 lock;
 };
 
-void list_info_init(struct list_info *listinfo);
-void list_free_item(struct list_info *listinfo, _u32 idx);
-_u32 list_alloc_item(struct list_info *listinfo);
 
 /*
  * Index table management apis.
@@ -56,17 +53,5 @@ struct index_table
  * Return 1 when same, else return 0.
  */
 typedef int (*func_is_same_item)(struct list_info *listinfo, _u32 pos, void *data);
-
-void index_table_init(struct index_table *itb);
-
-void index_list_do_link(_u32 *dest_addr, _u32 new);
-
-_u32 *index_list_prelink(struct list_info *listinfo,
-	struct index_item *tb_entry,
-	func_is_same_item is_same_item, void *cmpdata);
-
-_u32 index_list_unlink(struct list_info *listinfo,
-		struct index_item *tb_entry,
-		func_is_same_item is_same_item, void *cmpdata);
 
 #endif /* _LIST_H_ */

@@ -6,25 +6,40 @@
 /*
  * Main pool management apis.
  */
-static inline void item_set_next(struct list_info *listinfo, _u32 idx, _u32 next)
+inline void item_set_next2(struct list_info *listinfo, _u32 idx, _u32 next, _u32 next_offset)
 {
 	_u8 *base = (_u8 *)listinfo->item_base;
 
-	*((_u32 *)(base + (idx * listinfo->item_size) + listinfo->next_offset)) = next;
+	*((_u32 *)(base + (idx * listinfo->item_size) + next_offset)) = next;
 }
 
-static inline _u32 item_get_next(struct list_info *listinfo, _u32 idx)
+inline void item_set_next(struct list_info *listinfo, _u32 idx, _u32 next)
 {
-	_u8 *base = (_u8 *)listinfo->item_base;
-
-	return *((_u32 *)(base + (idx * listinfo->item_size) + listinfo->next_offset));
+	item_set_next2(listinfo, idx, next, listinfo->next_offset);
 }
 
-static inline _u32 *item_get_next_addr(struct list_info *listinfo, _u32 idx)
+inline _u32 item_get_next2(struct list_info *listinfo, _u32 idx, _u32 next_offset)
 {
 	_u8 *base = (_u8 *)listinfo->item_base;
 
-	return (_u32 *)(base + (idx * listinfo->item_size) + listinfo->next_offset);
+	return *((_u32 *)(base + (idx * listinfo->item_size) + next_offset));
+}
+
+inline _u32 item_get_next(struct list_info *listinfo, _u32 idx)
+{
+	return item_get_next2(listinfo, idx, listinfo->next_offset);
+}
+
+inline _u32 *item_get_next_addr2(struct list_info *listinfo, _u32 idx, _u32 next_offset)
+{
+	_u8 *base = (_u8 *)listinfo->item_base;
+
+	return (_u32 *)(base + (idx * listinfo->item_size) + next_offset);
+}
+
+inline _u32 *item_get_next_addr(struct list_info *listinfo, _u32 idx)
+{
+	return item_get_next_addr2(listinfo, idx, listinfo->next_offset);
 }
 
 void list_info_init(struct list_info *listinfo)
@@ -83,14 +98,15 @@ _u32 list_alloc_item(struct list_info *listinfo)
 /*
  * Index table management apis.
  */
-void index_table_init(struct index_table *itb)
+void index_table_init(struct index_item *itb, _u32 total)
 {
 	int i;
 
-	for(i = 0; i < itb->total; i++) {
+	for(i = 0; i < total; i++)
+	{
 		/* TODO: get_lock(itb->base[i].lock) */
 
-		itb->base[i].idx = INVALID_LIST_HEAD;
+		itb[i].idx = INVALID_LIST_HEAD;
 
 		/* TODO: release_lock(itb->base[i].lock) */
 	}
@@ -115,31 +131,45 @@ void index_list_do_link(_u32 *dest_addr, _u32 new)
  *
  * p.s. this function could also be used for finding exist item in index(match) list.
  */
-_u32 *index_list_prelink(struct list_info *listinfo,
-	struct index_item *tb_entry,
-	func_is_same_item is_same_item, void *cmpdata)
+_u32 *index_list_prelink2(struct list_info *listinfo,
+	struct index_item *itb, _u32 itb_idx,
+	void *data, func_is_same_item is_same_item, int next_offset)
 {
-	/* TODO: get_lock(tb_entry->lock) */
+//	_u32 head = itb->table[itb_idx].idx;
+	_u32 head = itb[itb_idx].idx;
 
-	_u32 head = tb_entry->idx;
-
-	if(head != INVALID_LIST_HEAD) {
-		if(is_same_item(listinfo, head, cmpdata)) {
+	/* get lock */
+	if(head != INVALID_LIST_HEAD)
+	{
+		if(is_same_item(listinfo, head, data))
+		{
 			return NULL;
-		} else {
-			while(item_get_next(listinfo, head) != INVALID_LIST_HEAD) {
-				head = item_get_next(listinfo, head);
-				if(is_same_item(listinfo, head, cmpdata)) {
+		}
+		else
+		{
+			while(item_get_next2(listinfo, head, next_offset) != INVALID_LIST_HEAD)
+			{
+				head = item_get_next2(listinfo, head, next_offset);
+				if(is_same_item(listinfo, head, data))
+				{
 					return NULL;
 				}
 			}
-			/* reach list tail */
-			return item_get_next_addr(listinfo, head);
+			return item_get_next_addr2(listinfo, head, next_offset);
 		}
-	} else {
-		return &tb_entry->idx;
 	}
-	/* TODO: release_lock(tb_entry->lock) */
+	else
+	{
+		return &itb[itb_idx].idx;
+	}
+}
+
+_u32 *index_list_prelink(struct list_info *listinfo,
+	struct index_item *itb, _u32 itb_idx,
+	void *data, func_is_same_item is_same_item)
+{
+	return index_list_prelink2(listinfo, itb, itb_idx, data,
+			is_same_item, listinfo->next_offset);
 }
 
 /*
@@ -148,24 +178,33 @@ _u32 *index_list_prelink(struct list_info *listinfo,
  * else, return invalid.
  * Note: after unlink the item is not in any list.
  */
-_u32 index_list_unlink(struct list_info *listinfo,
-		struct index_item *tb_entry,
-		func_is_same_item is_same_item, void *cmpdata)
+_u32 index_list_unlink2(struct list_info *listinfo,
+		struct index_item *itb, _u32 itb_idx, void *data,
+		func_is_same_item is_same_item, _u32 next_offset)
 {
 	_u32 head, current;
 
-	/* TODO: get_lock(tb_entry->lock) */
-	head = tb_entry->idx;
+	head = itb[itb_idx].idx;
 
-	if(head != INVALID_LIST_HEAD) {
-		if(is_same_item(listinfo, head, cmpdata)) {
-			tb_entry->idx = item_get_next(listinfo, head);
+	if(head != INVALID_LIST_HEAD)
+	{
+		if(is_same_item(listinfo, head, data))
+		{
+			itb[itb_idx].idx = item_get_next2(listinfo, head, next_offset);
+
+			item_set_next2(listinfo, head, INVALID_LIST_HEAD, next_offset);
 			return head;
-		} else {
-			while(item_get_next(listinfo, head) != INVALID_LIST_HEAD) {
-				current = item_get_next(listinfo, head);
-				if(is_same_item(listinfo, current, cmpdata)) {
-					item_set_next(listinfo, head, item_get_next(listinfo, current));
+		}
+		else
+		{
+			while(item_get_next2(listinfo, head, next_offset) != INVALID_LIST_HEAD)
+			{
+				current = item_get_next2(listinfo, head, next_offset);
+				if(is_same_item(listinfo, current, data))
+				{
+					item_set_next2(listinfo, head, item_get_next2(listinfo, current, next_offset), next_offset);
+
+					item_set_next2(listinfo, current, INVALID_LIST_HEAD, next_offset);
 					return current;
 				}
 				head = current;
@@ -174,7 +213,13 @@ _u32 index_list_unlink(struct list_info *listinfo,
 	}
 
 	return INVALID_LIST_HEAD;
-	/* TODO: release_lock(tb_entry->lock) */
+}
+_u32 index_list_unlink(struct list_info *listinfo,
+		struct index_item *itb, _u32 itb_idx, void *data,
+		func_is_same_item is_same_item)
+{
+	return index_list_unlink2(listinfo, itb, itb_idx, data,
+		is_same_item, listinfo->next_offset);
 }
 
 /*
@@ -228,7 +273,7 @@ int main()
 	inst->table.total = sizeof(inst->match) / sizeof(struct index_item);
 	inst->table.base  = inst->match;
 
-	index_table_init(&inst->table);
+	index_table_init(inst->match, sizeof(inst->match) / sizeof(struct index_item));
 
 	/* then use the common APIs */
 	_u32 i, new;
