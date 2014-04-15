@@ -87,7 +87,7 @@ gpasswd -a $NewUserName vboxusers
 $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	libtool autogen autoconf automake patchutils elfutils gdb diffutils \
 	gnupg gperf expect dejagnu guile gperftools \
-	tar zip unzip bzip2 libzip zlib \
+	tar zip unzip bzip2 p7zip libzip zlib \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
 	git subversion mercurial quilt \
 	gawk sed lua tcl tk python perl python-markdown \
