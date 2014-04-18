@@ -59,38 +59,12 @@ glibc 安装时prefix=/usr, install_root=$SYSROOT可以解决找不到so库的�
 lto-compress.c:28:18: fatal error: zlib.h: No such file or directory
 --> install zlib1g zlib1g-dev
 
--6-
-./arm-linux-gnueabi-gcc: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.14' not found (required by ./arm-linux-gnueabi-gcc)
-
-
---gcc final--
-11.2
-checking for objdir... .libs
-checking for the correct version of gmp.h... yes
-checking for the correct version of mpfr.h... yes
-checking for the correct version of mpc.h... yes
-checking for the correct version of the gmp/mpfr/mpc libraries... yes
-checking for PWL_handle_timeout in -lpwl... yes
-checking for version 0.11 (revision 0 or later) of PPL... yes
-checking for installed CLooG PPL Legacy... PPL Legacy
-checking for version 0.15.5 (or later revision) of CLooG... yes
-*** This configuration is not supported in the following subdirectories:
-     gnattools target-libada target-libgfortran target-libgo target-libffi target-zlib target-libjava target-libobjc target-boehm-gc
-    (Any other directories should still work fine.)
-
-
-
 --packages--
-
 # binutils gcc glibc gmp m4 mpfr ncurses
 ftp://ftp.gnu.org/gnu/
 
 # mpc
 http://www.multiprecision.org/
-
-# PPL
-http://bugseng.com/products/ppl/
-ftp://ftp.cs.unipr.it/pub/ppl/releases/
 
 # file
 http://www.darwinsys.com/file

@@ -2,45 +2,45 @@
 
 PACKAGES=$HOME/cross/packages
 
-KERNEL_VERSION=linux-3.0.41
-#5.09
-FILE_VERSION=file-5.11
+# Packages....
+BC_VERSION=bc-1.06
+KERNEL_VERSION=linux-3.12.12
+FILE_VERSION=file-5.15
+M4_VERSION=m4-1.4.17
+GMP_VERSION=gmp-5.1.3
+MPFR_VERSION=mpfr-3.1.2
+MPC_VERSION=mpc-1.0.1
+ISL_VERSION=isl-0.12.1
+CLOOG_VERSION=cloog-0.18.0
+BINUTILS_VERSION=binutils-2.23.2
+GCC__VERSION=gcc-4.8.1
+GLIBC_VERSION=glibc-2.18
 NCURSES_VERSION=ncurses-5.9
-#5.02
-GMP_VERSION=gmp-5.0.4
-#3.0.1
-MPFR_VERSION=mpfr-3.1.1
-MPC_VERSION=mpc-0.9
-#0.12
-PPL_VERSION=ppl-0.12
-CLOOG_VERSION=cloog-ppl-0.15.11
-BINUTILS_VERSION=binutils-2.21.1a
-GCC__VERSION=gcc-4.6.3
-#2.15 this version cannt be compiled ???
-GLIBC_VERSION=2.14.1
-M4_VERSION=m4-1.4.16
-GDB_VERSION=gdb-7.3.1
-LIBELF_VERSION=libelf-0.8.13
 
 ## Request softwares...
-sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
-	zip unzip autoconf m4 automake gettext gperf dejagnu expect tcl autogen \
-	guile-2.0 flex texinfo subversion ssh diffutils patch ecj libtool byacc bison fixincludes \
-	git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib \
-	axel
+#sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
+#	zip unzip autoconf m4 automake gettext gperf dejagnu expect tcl autogen \
+#	guile-2.0 flex texinfo subversion ssh diffutils patch ecj libtool byacc bison fixincludes \
+#	git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib \
+#	axel wget
 
 ## Prepare packages...
-mkdir $PACKAGES
-cd $PACKAGES
+mkdir -p $PACKAGES
+pushd $PACKAGES
+
+# bc
+if [ ! -f $BC_VERSION.tar.gz ];then
+	axel -a ftp://ftp.gnu.org/gnu/bc/$BC_VERSION.tar.gz
+fi
 
 # kernel (long term kernel)
-if [ ! -f ${KERNEL_VERSION}.tar.bz2 ];then
+if [ ! -f ${KERNEL_VERSION}.tar.gz ];then
 	case $KERNEL_VERSION in
 		*-2.6.*)
-			axel -a http://www.kernel.org/pub/linux/kernel/v2.6/${KERNEL_VERSION}.tar.bz2
+			wget http://www.kernel.org/pub/linux/kernel/v2.6/${KERNEL_VERSION}.tar.gz
 			;;
 		*-3.*)
-			axel -a http://www.kernel.org/pub/linux/kernel/v3.x/${KERNEL_VERSION}.tar.bz2
+			wget http://www.kernel.org/pub/linux/kernel/v3.x/${KERNEL_VERSION}.tar.gz
 			;;
 		*)
 			echo "No kernel matched. Abort..."
@@ -49,7 +49,7 @@ if [ ! -f ${KERNEL_VERSION}.tar.bz2 ];then
 	esac
 fi
 if [ ! -e $KERNEL_VERSION ];then
-	tar -jxf ${KERNEL_VERSION}.tar.bz2
+	tar -zxf ${KERNEL_VERSION}.tar.gz
 fi
 
 # file
@@ -82,14 +82,13 @@ if [ ! -f $MPC_VERSION.tar.gz ];then
 	axel -a http://www.multiprecision.org/mpc/download/$MPC_VERSION.tar.gz
 fi
 
-# ppl (with pwl)
-if [ ! -f ppl-0.12.tar.bz2 ];then
-	axel -a ftp://ftp.cs.unipr.it/pub/ppl/releases/0.12/ppl-0.12.tar.bz2
-fi
-
-# cloog (base on ppl)
+# cloog
 if [ ! -f $CLOOG_VERSION.tar.gz ];then
 	axel -a ftp://gcc.gnu.org/pub/gcc/infrastructure/$CLOOG_VERSION.tar.gz
+fi
+
+if [ ! -f $ISL_VERSION.tar.bz2 ];then
+	axel -a http://isl.gforge.inria.fr/$ISL_VERSION.tar.bz2
 fi
 
 # binutils
@@ -103,17 +102,8 @@ if [ ! -f $GCC__VERSION.tar.bz2 ];then
 fi
 
 # glibc
-if [ ! -f glibc-${GLIBC_VERSION}.tar.bz2 ];then
-	axel -a ftp://ftp.gnu.org/gnu/glibc/glibc-${GLIBC_VERSION}.tar.bz2
-	axel -a ftp://ftp.gnu.org/gnu/glibc/glibc-ports-${GLIBC_VERSION}.tar.bz2
+if [ ! -f ${GLIBC_VERSION}.tar.bz2 ];then
+	axel -a ftp://ftp.gnu.org/gnu/glibc/${GLIBC_VERSION}.tar.bz2
 fi
 
-# gdb
-#if [ ! -f $GDB_VERSION.tar.bz2 ];then
-#	axel -a ftp://ftp.gnu.org/gnu/gdb/$GDB_VERSION.tar.bz2
-#fi
-
-# libelf-0.8.13
-if [ ! -f $LIBELF_VERSION.tar.gz ];then
-	axel -a http://www.mr511.de/software/$LIBELF_VERSION.tar.gz
-fi
+popd
