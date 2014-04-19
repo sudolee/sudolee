@@ -93,9 +93,10 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	gawk sed lua tcl tk python perl python-markdown \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
 	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
-	m4 gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
+	m4 bc gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim meld indent kdiff3 \
 	bash-completion linux-manpages minicom ntp \
+	pm-utils acpid \
 	sox netpbm  # for fax
 
 gpasswd -a $NewUserName wireshark
