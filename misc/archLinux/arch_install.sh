@@ -15,9 +15,9 @@ Confirm () {
 	esac
 }
 
-Confirm 'Make sure [multilib] in /etc/pacman.conf opened,' || { echo '[Warning] - multilib must enabled.'; exit 0; }
+Confirm 'Make sure [multilib] in /etc/pacman.conf enabled,' || { echo '[Warning] - multilib must enabled on x86_64.'; exit; }
 
-Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit 0; }
+Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit; }
 
 pacman -Syy
 
@@ -43,23 +43,55 @@ Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
 	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
 [ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
 
+# desktop setting
+DESKTOPNAME="gnome"
+read -p ":: witch desktop do you want ?
+1) gnome, 2) kde
+
+Enter a selection (default=gnome): " DESKTOPNAME
+case $DESKTOPNAME in
+	[gG][nN][oO][mM][eE]|1)
+		DESKTOPNAME="gnome"
+		echo ":: desktop gnome chose"
+		;;
+	[kK][dD][eE]|2)
+		DESKTOPNAME="kde"
+		echo ":: desktop kde chose"
+		;;
+	*)
+		DESKTOPNAME="gnome"
+		echo ":: Defaultly, set desktop as gnome"
+		;;
+esac
+
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
-$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia phonon-gstreamer ttf-dejavu \
-	ttf-liberation wqy-zenhei archlinux-themes-kdm kdeplasma-applets-plasma-nm \
-	appmenu-qt
+
+if [ "$DESKTOPNAME" = "gnome" ];then
+	$archinstallcmd gnome gnome-extra \
+		libreoffice-gnome
+	systemctl enable gdm.service
+	# gnome-terminal: keep track of directory in new tab
+	[[ -f config/bashrc ]] && echo '. /etc/profile.d/vte.sh' >> config/bashrc
+elif [ "$DESKTOPNAME" = "kde" ];then
+	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
+		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
+		libreoffice-kde4 kdiff3
+	systemctl enable kdm.service
+fi
+
+$archinstallcmd phonon-gstreamer ttf-dejavu ttf-liberation wqy-zenhei
+
 $archinstallcmd networkmanager openssh
+systemctl enable NetworkManager
+systemctl enable sshd.socket
 
 # thinkpad touchpad setting
 [ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 
-systemctl enable NetworkManager
-systemctl enable kdm.service
-systemctl enable sshd.socket
-
 $archinstallcmd \
 	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
-	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
+	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
 	gst-plugins-good gstreamer0.10-good-plugins \
 	vlc skype \
 	fcitx-im fcitx-googlepinyin kcm-fcitx \
@@ -67,16 +99,10 @@ $archinstallcmd \
 
 . /usr/share/bash-completion/bash_completion
 
-cat > /home/$NewUserName/.xprofile <<- EOF
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS="@im=fcitx"
-EOF
-
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
 $archinstallcmd chromium thunderbird thunderbird-i18n-zh-cn \
-	libreoffice-en-US libreoffice-kde4 libreoffice-writer \
+	libreoffice-en-US libreoffice-writer \
 	libreoffice-calc libreoffice-draw libreoffice-impress \
 	poppler-data
 
@@ -90,12 +116,13 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	tar zip unzip bzip2 p7zip libzip zlib \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
 	git subversion mercurial quilt \
-	gawk sed lua tcl tk python perl python-markdown \
+	gawk sed lua tcl tk perl markdown \
+	python python2 python-markdown python2-pyopenssl python-pyopenssl \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
 	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
 	m4 bc gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
-	vim meld indent kdiff3 \
-	bash-completion linux-manpages minicom ntp \
+	vim meld indent jdk7-openjdk \
+	linux-manpages minicom ntp \
 	pm-utils acpid \
 	sox netpbm  # for fax
 
@@ -106,6 +133,9 @@ pushd /usr/bin/
 [ -f python2 ] && { rm -fv python; ln -sv python2 python; }
 [ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
 popd
+
+[ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
+[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 
 ntpd -gq
 hwclock -w

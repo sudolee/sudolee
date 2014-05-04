@@ -256,3 +256,8 @@ EndSection
 	[a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
 		Add code below into /etc/default/grub:
 		"GRUB_DISABLE_SUBMENU=y"
+	[b].
+		[archlinuxcn]
+		#The Chinese Arch Linux communities packages.
+		SigLevel = Optional TrustAll
+		Server   = http://repo.archlinuxcn.org/$arch
