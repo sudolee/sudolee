@@ -15,33 +15,29 @@ Confirm () {
 	esac
 }
 
-Confirm 'Make sure [multilib] in /etc/pacman.conf enabled,' || { echo '[Warning] - multilib must enabled on x86_64.'; exit; }
+Confirm ':: Make sure [multilib] in /etc/pacman.conf enabled,' || { echo '[Warning] - multilib must enabled on x86_64.'; exit; }
 
-Confirm 'Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit; }
+Confirm ':: Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit; }
 
 pacman -Syy
 
-read -p "--> Enter your new user name : " NewUserName
-Confirm "Will create new user \"$NewUserName\"," || { echo "Cannot continue without new UserName. :("; exit; }
+read -p ":: Enter your new user name : " NewUserName
+[[ -z "$NewUserName" ]] && { echo ":: [Warning] - Cannot coutinue without new user name, :("; exit; }
+Confirm ":: Will create new user \"$NewUserName\"," || { echo ":: [Warning] - Cannot continue without new UserName. :("; exit; }
 
 useradd -m -g users -s /bin/bash $NewUserName
-echo "--> Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
+echo ":: Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
 for i in network video audio disk floppy storage uucp
 do
 	echo "Add $NewUserName into group $i"
 	gpasswd -a $NewUserName $i
 done
 
-Confirm "Have intel  GPU ?"         && GPU_INTEL=true
-Confirm "Have nivida GPU ?"         && GPU_NIVIDA=true
-Confirm "Have ati    GPU ?"         && GPU_ATI=true
-Confirm "Have bluetooth hardware ?" && BLUETOOTH=true
-Confirm "Have thinkpad touchpad ?"  && TTOUCHPAD=true
-
-[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
-[ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri;
-	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
-[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+Confirm ":: Have intel  GPU ?"         && GPU_INTEL=true
+Confirm ":: Have nivida GPU ?"         && GPU_NIVIDA=true
+Confirm ":: Have ati    GPU ?"         && GPU_ATI=true
+Confirm ":: Have bluetooth hardware ?" && BLUETOOTH=true
+Confirm ":: Have thinkpad touchpad ?"  && TTOUCHPAD=true
 
 # desktop setting
 DESKTOPNAME="gnome"
@@ -64,18 +60,25 @@ case $DESKTOPNAME in
 		;;
 esac
 
+[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
+[ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri;
+	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
+[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+
 $archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
 
 if [ "$DESKTOPNAME" = "gnome" ];then
 	$archinstallcmd gnome gnome-extra \
-		libreoffice-gnome
+		libreoffice-gnome \
+		fcitx fcitx-gtk2 fcitx-gtk3 fcitx-googlepinyin fcitx-configtool
 	systemctl enable gdm.service
 	# gnome-terminal: keep track of directory in new tab
 	[[ -f config/bashrc ]] && echo '. /etc/profile.d/vte.sh' >> config/bashrc
 elif [ "$DESKTOPNAME" = "kde" ];then
 	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
 		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
-		libreoffice-kde4 kdiff3
+		libreoffice-kde4 kdiff3 \
+		fcitx fcitx-qt4 fcitx-googlepinyin kcm-fcitx
 	systemctl enable kdm.service
 fi
 
@@ -94,10 +97,7 @@ $archinstallcmd \
 	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
 	gst-plugins-good gstreamer0.10-good-plugins \
 	vlc skype \
-	fcitx-im fcitx-googlepinyin kcm-fcitx \
 	bash-completion screenfetch cpupower flashplugin
-
-. /usr/share/bash-completion/bash_completion
 
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
@@ -115,7 +115,7 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	gnupg gperf expect dejagnu guile gperftools \
 	tar zip unzip bzip2 p7zip libzip zlib \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
-	git subversion mercurial quilt \
+	git gitg subversion mercurial quilt \
 	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
@@ -137,7 +137,9 @@ popd
 [ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
 [ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 
+. /usr/share/bash-completion/bash_completion
+
 ntpd -gq
 hwclock -w
 
-echo '--> Installations complete, :)'
+echo ':: Installations complete, :)'
