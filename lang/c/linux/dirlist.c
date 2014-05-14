@@ -40,6 +40,94 @@ inline int is_hide_file(char *pathname)
 	}
 }
 
+inline int is_directory(char *pathname)
+{
+	struct stat stat_buf;
+
+	if(lstat(pathname, &stat_buf) == -1)
+	{
+		perror(":: lstat ");
+	}
+	else
+	{
+		if(S_ISDIR(stat_buf.st_mode))
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/* scandir (optional, sort) files under directory "pathname" */
+int _scandir(char *pathname)
+{
+	DIR *dirp;
+	struct dirent **namelist;
+	char *currentpath;
+	long max_pathname, namelen, orig_offset;
+	int count;
+
+	dirp = opendir(pathname);
+	if(dirp == NULL)
+	{
+		perror(":: opendir ");
+		return RET_ERROR;
+	}
+
+	max_pathname = dirent_buf_size(dirp);
+
+	namelen = strlen(pathname) + max_pathname + 1;
+
+	currentpath = malloc(namelen);
+	if(currentpath == NULL)
+	{
+		perror(":: malloc ");
+
+		closedir(dirp);
+		return RET_ERROR;
+	}
+	memset(currentpath, 0, namelen);
+
+	orig_offset = sprintf(currentpath, "%s/", pathname);
+
+	//	count = scandir(currentpath, &namelist, NULL, alphasort);
+	count = scandir(currentpath, &namelist, NULL, NULL);
+	if (count == -1)
+	{
+		perror(":: scandir ");
+	}
+	else
+	{
+		while (count--)
+		{
+			if(is_hide_file(namelist[count]->d_name))
+			{
+				continue;
+				free(namelist[count]);
+			}
+
+			sprintf(currentpath + orig_offset, "%s", namelist[count]->d_name);
+			printf("%s\n", currentpath);
+
+			free(namelist[count]);
+
+#ifdef DIRLIST_RECURSIVE
+			if(is_directory(currentpath))
+			{
+				_scandir(currentpath);
+			}
+#endif
+		}
+		free(namelist);
+	}
+
+	closedir(dirp);
+	free(currentpath);
+
+	return RET_OKAY;
+}
+
 /* reentrant version */
 int dirlist_r(char *pathname)
 {
@@ -93,18 +181,9 @@ int dirlist_r(char *pathname)
 		printf("%s\n", currentpath);
 
 #ifdef DIRLIST_RECURSIVE
-		struct stat stat_buf;
-
-		if(lstat(currentpath, &stat_buf) == -1)
+		if(is_directory(currentpath))
 		{
-			perror(":: lstat ");
-		}
-		else
-		{
-			if(S_ISDIR(stat_buf.st_mode))
-			{
-				dirlist_r(currentpath);
-			}
+			dirlist_r(currentpath);
 		}
 #endif
 	}
@@ -174,18 +253,9 @@ int dirlist(char *pathname)
 		printf("%s\n", currentpath);
 
 #ifdef DIRLIST_RECURSIVE
-		struct stat stat_buf;
-
-		if(lstat(currentpath, &stat_buf) == -1)
+		if(is_directory(currentpath))
 		{
-			perror(":: lstat ");
-		}
-		else
-		{
-			if(S_ISDIR(stat_buf.st_mode))
-			{
-				dirlist(currentpath);
-			}
+			dirlist(currentpath);
 		}
 #endif
 	}
@@ -201,10 +271,14 @@ int main(int argc, char **argv)
 	if(argc > 1 && argv[1])
 	{
 		dirlist_r(argv[1]);
+//		dirlist(argv[1]);
+//		_scandir(argv[1]);
 	}
 	else
 	{
 		dirlist_r(".");
+//		dirlist(".");
+//		_scandir(".");
 	}
 
 	return 0;
