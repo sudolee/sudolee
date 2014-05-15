@@ -13,47 +13,38 @@
 
 #define DIRLIST_RECURSIVE
 
+#define ISSLASH(C) ((C) == '/')
+
 inline long dirent_buf_size(DIR *dirp)
 {
 	long name_max, len;
 
 	name_max = fpathconf(dirfd(dirp), _PC_NAME_MAX);
-	if(name_max == -1)  /* Limit not defined, or error */
-	{
+	if (name_max == -1)  /* Limit not defined, or error */
 		name_max = 255; /* Take a guess */
-	}
 	len = offsetof(struct dirent, d_name) + name_max + 1;
 
 	return len;
 }
 
-inline int is_hide_file(char *pathname)
+inline int is_dot_or_dotdot(char *pathname)
 {
-	if(pathname[0] == '.' && (pathname[1] == '\0' ||
-				(pathname[1] == '.' && pathname[2] == '\0')))
-	{
-		return 1;
-	}
-	else
-	{
+	if (pathname[0] == '.') {
+		char sep = pathname[(pathname[1] == '.') + 1];
+		return !sep;
+	} else
 		return 0;
-	}
 }
 
 inline int is_directory(char *pathname)
 {
 	struct stat stat_buf;
 
-	if(lstat(pathname, &stat_buf) == -1)
-	{
+	if (lstat(pathname, &stat_buf) == -1)
 		perror(":: lstat ");
-	}
-	else
-	{
-		if(S_ISDIR(stat_buf.st_mode))
-		{
+	else {
+		if (S_ISDIR(stat_buf.st_mode))
 			return 1;
-		}
 	}
 
 	return 0;
@@ -69,8 +60,7 @@ int _scandir(char *pathname)
 	int count;
 
 	dirp = opendir(pathname);
-	if(dirp == NULL)
-	{
+	if (dirp == NULL) {
 		perror(":: opendir ");
 		return RET_ERROR;
 	}
@@ -80,8 +70,7 @@ int _scandir(char *pathname)
 	namelen = strlen(pathname) + max_pathname + 1;
 
 	currentpath = malloc(namelen);
-	if(currentpath == NULL)
-	{
+	if (currentpath == NULL) {
 		perror(":: malloc ");
 
 		closedir(dirp);
@@ -94,15 +83,10 @@ int _scandir(char *pathname)
 	//	count = scandir(currentpath, &namelist, NULL, alphasort);
 	count = scandir(currentpath, &namelist, NULL, NULL);
 	if (count == -1)
-	{
 		perror(":: scandir ");
-	}
-	else
-	{
-		while (count--)
-		{
-			if(is_hide_file(namelist[count]->d_name))
-			{
+	else {
+		while (count--) {
+			if (is_dot_or_dotdot(namelist[count]->d_name)) {
 				continue;
 				free(namelist[count]);
 			}
@@ -113,10 +97,8 @@ int _scandir(char *pathname)
 			free(namelist[count]);
 
 #ifdef DIRLIST_RECURSIVE
-			if(is_directory(currentpath))
-			{
+			if (is_directory(currentpath))
 				_scandir(currentpath);
-			}
 #endif
 		}
 		free(namelist);
@@ -137,8 +119,7 @@ int dirlist_r(char *pathname)
 	char *currentpath;
 
 	dirp = opendir(pathname);
-	if(dirp == NULL)
-	{
+	if (dirp == NULL) {
 		perror(":: opendir ");
 		return RET_ERROR;
 	}
@@ -146,8 +127,7 @@ int dirlist_r(char *pathname)
 	max_pathname = dirent_buf_size(dirp);
 
 	entry = malloc(max_pathname);
-	if(entry == NULL)
-	{
+	if (entry == NULL) {
 		perror(":: malloc ");
 		closedir(dirp);
 		return RET_ERROR;
@@ -156,8 +136,7 @@ int dirlist_r(char *pathname)
 	namelen = strlen(pathname) + max_pathname + 1;
 
 	currentpath = malloc(namelen);
-	if(currentpath == NULL)
-	{
+	if (currentpath == NULL) {
 		perror(":: malloc ");
 
 		free(entry);
@@ -168,23 +147,18 @@ int dirlist_r(char *pathname)
 
 	orig_offset = sprintf(currentpath, "%s/", pathname);
 
-	while((readdir_r(dirp, entry, &dt) == 0) && (dt != NULL))
-	{
+	while ((readdir_r(dirp, entry, &dt) == 0) && (dt != NULL)) {
 		/* hide . & .. */
-		if(is_hide_file(dt->d_name))
-		{
+		if (is_dot_or_dotdot(dt->d_name))
 			continue;
-		}
 
 		sprintf(currentpath + orig_offset, "%s", dt->d_name);
 
 		printf("%s\n", currentpath);
 
 #ifdef DIRLIST_RECURSIVE
-		if(is_directory(currentpath))
-		{
+		if (is_directory(currentpath))
 			dirlist_r(currentpath);
-		}
 #endif
 	}
 
@@ -204,8 +178,7 @@ int dirlist(char *pathname)
 	int olderrno;
 
 	dirp = opendir(pathname);
-	if(dirp == NULL)
-	{
+	if (dirp == NULL) {
 		perror(":: opendir ");
 		return RET_ERROR;
 	}
@@ -215,8 +188,7 @@ int dirlist(char *pathname)
 	namelen = strlen(pathname) + max_pathname + 1;
 
 	currentpath = malloc(namelen);
-	if(currentpath == NULL)
-	{
+	if (currentpath == NULL) {
 		perror(":: malloc ");
 
 		closedir(dirp);
@@ -226,37 +198,29 @@ int dirlist(char *pathname)
 
 	orig_offset = sprintf(currentpath, "%s/", pathname);
 
-	for(;;)
-	{
+	for (;;) {
 		olderrno = errno;
 
 		dt = readdir(dirp);
-		if(dt == NULL)
-		{
+		if (dt == NULL) {
 			/* error detected when errno changed with readdir return NULL. */
-			if(errno != olderrno)
-			{
+			if (errno != olderrno)
 				perror(":: readdir ");
-			}
 			/* else, end of stream reached */
 			break;
 		}
 
 		/* hide . & .. */
-		if(is_hide_file(dt->d_name))
-		{
+		if (is_dot_or_dotdot(dt->d_name))
 			continue;
-		}
 
 		sprintf(currentpath + orig_offset, "%s", dt->d_name);
 
 		printf("%s\n", currentpath);
 
 #ifdef DIRLIST_RECURSIVE
-		if(is_directory(currentpath))
-		{
+		if (is_directory(currentpath))
 			dirlist(currentpath);
-		}
 #endif
 	}
 
@@ -268,14 +232,11 @@ int dirlist(char *pathname)
 
 int main(int argc, char **argv)
 {
-	if(argc > 1 && argv[1])
-	{
+	if (argc > 1 && argv[1]) {
 		dirlist_r(argv[1]);
 //		dirlist(argv[1]);
 //		_scandir(argv[1]);
-	}
-	else
-	{
+	} else {
 		dirlist_r(".");
 //		dirlist(".");
 //		_scandir(".");
