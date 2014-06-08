@@ -1,12 +1,14 @@
-ifeq ($(KERNELRELEASE),)
-modules:
-	$(MAKE) -C /home/sudolee/workstation/kernel_msm/ M=$(shell pwd) $@
+# Details in: kernel/Documentation/kbuild/modules.txt
+
+ifneq ($(KERNELRELEASE),)
+include Kbuild
+else
+
+KDIR ?= /lib/modules/`uname -r`/build
+default:
+	$(MAKE) -C $(KDIR) M=$$PWD
 
 clean:
-	rm -f *.o *.cmd *.mod.* modules.order Module.symvers *.ko .*.cmd
-	rm -rf .tmp_versions/
+	$(MAKE) -C $(KDIR) M=$$PWD clean
 
-else
-	obj-m := debugfs.o
 endif
-.PHONY:modules clean

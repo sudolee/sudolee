@@ -1,11 +1,14 @@
-ifeq ($(KERNELRELEASE),)
-modules:
-	$(MAKE) -C /home/sudolee/workspace/linux-source-2.6.35/ M=$(shell pwd) $@
+# Details in: kernel/Documentation/kbuild/modules.txt
+
+ifneq ($(KERNELRELEASE),)
+include Kbuild
 else
-	obj-m := my_timer.o
-endif
+
+KDIR ?= /lib/modules/`uname -r`/build
+default:
+	$(MAKE) -C $(KDIR) M=$$PWD
 
 clean:
-	rm -f *.o *.cmd *.mod.* modules.order Module.symvers *.ko .*.cmd
-	rm -rf .tmp_versions/
-.PHONY:clean modules
+	$(MAKE) -C $(KDIR) M=$$PWD clean
+
+endif
