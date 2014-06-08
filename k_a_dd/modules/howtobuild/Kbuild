@@ -1,0 +1,9 @@
+
+# If we moved header files into subdirectory named include.
+# The resulting kbuild file would look like:
+
+ccflags-y := -I$(src)/include
+
+obj-m := mti.o
+mti-y := src/mti.1.o
+mti-y += src/mti.2.o
