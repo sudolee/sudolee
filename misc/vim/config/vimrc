@@ -14,13 +14,13 @@ highlight CursorLine ctermbg=darkblue ctermfg=grey cterm=bold
 "highlight CursorColumn ctermbg=darkblue ctermfg=grey cterm=bold
 set tabstop=4
 set shiftwidth=4
+set expandtab
 set hlsearch
 set incsearch
 set bg=dark
 set history=1024
 set wrap
 "set nowrap
-set noexpandtab
 set laststatus=2
 set showcmd
 set smartcase

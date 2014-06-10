@@ -1,9 +1,13 @@
 
 # If we moved header files into subdirectory named include.
 # The resulting kbuild file would look like:
-
 ccflags-y := -I$(src)/include
+# ccflags-y += -I$(src)/other/path/include
 
+# When the module is built from multiple sources, an additional line is
+# needed listing the files:
 obj-m := mti.o
-mti-y := src/mti.1.o
-mti-y += src/mti.2.o
+mti-y := src/mti.1.o src/mti.2.o
+# Or, like this:
+# mti-y := src/mti.1.o
+# mti-y += src/mti.2.o
