@@ -82,7 +82,7 @@ elif [ "$DESKTOPNAME" = "kde" ];then
 	systemctl enable kdm.service
 fi
 
-$archinstallcmd phonon-gstreamer ttf-dejavu ttf-liberation wqy-zenhei
+$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei
 
 $archinstallcmd networkmanager openssh
 systemctl enable NetworkManager
