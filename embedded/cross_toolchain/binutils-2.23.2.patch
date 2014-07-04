@@ -1,0 +1,109 @@
+diff --git a/bfd/opncls.c b/bfd/opncls.c
+index d35aa42..64c5988 100644
+--- a/bfd/opncls.c
++++ b/bfd/opncls.c
+@@ -258,7 +258,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
+      then it may have been opened with special flags that make it
+      unsafe to close and reopen the file.  */
+   if (fd == -1)
+-    bfd_set_cacheable (nbfd, TRUE);
++    (void)bfd_set_cacheable (nbfd, TRUE);
+ 
+   return nbfd;
+ }
+diff --git a/binutils/objcopy.c b/binutils/objcopy.c
+index 020d54d..73f1614 100644
+--- a/binutils/objcopy.c
++++ b/binutils/objcopy.c
+@@ -1806,7 +1806,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
+ 	    /* Umm, not sure what to do in this case.  */
+ 	    debuglink_vma = 0x1000;
+ 
+-	  bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
++	  (void)bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
+ 	}
+     }
+ 
+diff --git a/gas/config/obj-elf.c b/gas/config/obj-elf.c
+index d7c7665..2f87356 100644
+--- a/gas/config/obj-elf.c
++++ b/gas/config/obj-elf.c
+@@ -1789,7 +1789,7 @@ obj_elf_init_stab_section (segT seg)
+ 
+   /* Force the section to align to a longword boundary.  Without this,
+      UnixWare ar crashes.  */
+-  bfd_set_section_alignment (stdoutput, seg, 2);
++  (void)bfd_set_section_alignment (stdoutput, seg, 2);
+ 
+   /* Make space for this first symbol.  */
+   p = frag_more (12);
+diff --git a/gas/subsegs.c b/gas/subsegs.c
+index 30f8704..562d91b 100644
+--- a/gas/subsegs.c
++++ b/gas/subsegs.c
+@@ -67,7 +67,7 @@ subseg_change (register segT seg, register int subseg)
+     {
+       seginfo = (segment_info_type *) xcalloc (1, sizeof (*seginfo));
+       seginfo->bfd_section = seg;
+-      bfd_set_section_userdata (stdoutput, seg, seginfo);
++      (void)bfd_set_section_userdata (stdoutput, seg, seginfo);
+     }
+ }
+ 
+@@ -169,7 +169,7 @@ subseg_get (const char *segname, int force_new)
+       secptr->output_section = secptr;
+       seginfo = (segment_info_type *) xcalloc (1, sizeof (*seginfo));
+       seginfo->bfd_section = secptr;
+-      bfd_set_section_userdata (stdoutput, secptr, seginfo);
++      (void)bfd_set_section_userdata (stdoutput, secptr, seginfo);
+     }
+   return secptr;
+ }
+diff --git a/gas/write.c b/gas/write.c
+index 56ebb6c..ca164ae 100644
+--- a/gas/write.c
++++ b/gas/write.c
+@@ -363,7 +363,7 @@ record_alignment (/* Segment to which alignment pertains.  */
+     return;
+ 
+   if ((unsigned int) align > bfd_get_section_alignment (stdoutput, seg))
+-    bfd_set_section_alignment (stdoutput, seg, align);
++    (void)bfd_set_section_alignment (stdoutput, seg, align);
+ }
+ 
+ int
+diff --git a/ld/emultempl/armelf.em b/ld/emultempl/armelf.em
+index 7f7d2cc..d9c9259 100644
+--- a/ld/emultempl/armelf.em
++++ b/ld/emultempl/armelf.em
+@@ -201,7 +201,7 @@ elf32_arm_add_stub_section (const char *stub_sec_name,
+   if (stub_sec == NULL)
+     goto err_ret;
+ 
+-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
++  (void)bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+ 
+   output_section = input_section->output_section;
+   secname = bfd_get_section_name (output_section->owner, output_section);
+diff --git a/ld/ldlang.c b/ld/ldlang.c
+index 459f277..42e1981 100644
+--- a/ld/ldlang.c
++++ b/ld/ldlang.c
+@@ -4831,7 +4831,7 @@ lang_size_sections_1
+ 			   " section %s\n"), os->name);
+ 
+ 		input = os->children.head->input_section.section;
+-		bfd_set_section_vma (os->bfd_section->owner,
++		(void)bfd_set_section_vma (os->bfd_section->owner,
+ 				     os->bfd_section,
+ 				     bfd_section_vma (input->owner, input));
+ 		os->bfd_section->size = input->size;
+@@ -4916,7 +4916,7 @@ lang_size_sections_1
+ 			     os->name, (unsigned long) (newdot - savedot));
+ 		  }
+ 
+-		bfd_set_section_vma (0, os->bfd_section, newdot);
++		(void)bfd_set_section_vma (0, os->bfd_section, newdot);
+ 
+ 		os->bfd_section->output_offset = 0;
+ 	      }

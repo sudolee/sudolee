@@ -117,9 +117,9 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
 	git gitg subversion mercurial quilt \
 	gawk sed lua tcl tk perl markdown \
-	python python2 python-markdown python2-pyopenssl python-pyopenssl \
+	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
-	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
+	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
 	m4 bc gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim meld indent tree jdk7-openjdk \
 	linux-manpages minicom ntp \

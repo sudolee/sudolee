@@ -35,11 +35,23 @@ GCC__VERSION=gcc-4.8.1
 GLIBC_VERSION=glibc-2.18
 FILE_VERSION=file-5.15
 NCURSES_VERSION=ncurses-5.9
+MAKE_VERSION=make-3.82
 
 cd $PRO_PACKAGES
 
+## make-3.82
+## glibc, require make 3.[789], 4.x not okay.
+rm -rf  $MAKE_VERSION
+tar xzf $MAKE_VERSION.tar.gz
+pushd $MAKE_VERSION
+
+./configure --prefix=$TMP_INSTALL
+make -j$JOBS
+make install-strip
+popd
+
 ## bc
-rm -rf $BC_VERSION
+rm -rf  $BC_VERSION
 tar xzf $BC_VERSION.tar.gz
 pushd $BC_VERSION
 
@@ -154,6 +166,8 @@ pushd $BINUTILS_VERSION
 
 # bug fix, see: http://cross-lfs.org
 sed -i -e 's/@colophon/@@colophon/' -e 's/doc@cygnus.com/doc@@cygnus.com/' bfd/doc/bfd.texinfo
+# fix issues build by gcc 4.9+
+patch -p1 < ../binutils-2.23.2.patch
 popd
 
 rm -rf binutils_build
@@ -163,7 +177,7 @@ pushd  binutils_build
 AR=ar AS=as \
 	$PRO_PACKAGES/binutils_build/../$BINUTILS_VERSION/configure --prefix=$PREFIX \
 	--target=$TARGET --build=$HOST --with-sysroot=$SYSROOT \
-	--with-lib-path=$TMP_INSTALL/lib --disable-nls --enable-64-bit-bfd
+	--with-lib-path=$TMP_INSTALL/lib --disable-nls --disable-shared --enable-64-bit-bfd
 make -j$JOBS
 make configure-host
 make install

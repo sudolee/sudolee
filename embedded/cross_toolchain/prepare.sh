@@ -16,6 +16,7 @@ BINUTILS_VERSION=binutils-2.23.2
 GCC__VERSION=gcc-4.8.1
 GLIBC_VERSION=glibc-2.18
 NCURSES_VERSION=ncurses-5.9
+MAKE_VERSION=make-3.82
 
 ## Request softwares...
 #sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
@@ -104,6 +105,10 @@ fi
 # glibc
 if [ ! -f ${GLIBC_VERSION}.tar.bz2 ];then
 	axel -a ftp://ftp.gnu.org/gnu/glibc/${GLIBC_VERSION}.tar.bz2
+fi
+
+if [ ! -f ${MAKE_VERSION}.tar.gz ];then
+    axel -a ftp://ftp.gnu.org/gnu/make/${MAKE_VERSION}.tar.gz
 fi
 
 popd
