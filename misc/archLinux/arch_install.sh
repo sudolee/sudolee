@@ -78,7 +78,7 @@ elif [ "$DESKTOPNAME" = "kde" ];then
 	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
 		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
 		libreoffice-kde4 kdiff3 \
-		fcitx fcitx-qt4 fcitx-googlepinyin kcm-fcitx
+		fcitx-im fcitx-googlepinyin kcm-fcitx
 	systemctl enable kdm.service
 fi
 
@@ -125,6 +125,7 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	linux-manpages minicom ntp \
 	pm-utils acpid \
 	sox netpbm  # for fax
+## calibre <- for ebook
 
 gpasswd -a $NewUserName wireshark
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
@@ -139,7 +140,7 @@ popd
 
 . /usr/share/bash-completion/bash_completion
 
-ntpd -gq
+ntpd -g
 hwclock -w
 
 echo ':: Installations complete, :)'

@@ -261,3 +261,7 @@ EndSection
 		#The Chinese Arch Linux communities packages.
 		SigLevel = Optional TrustAll
 		Server   = http://repo.archlinuxcn.org/$arch
+
+		[archlinuxfr]
+		Server = http://repo.archlinux.fr/$arch
+
