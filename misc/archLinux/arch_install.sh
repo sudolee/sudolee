@@ -95,7 +95,7 @@ $archinstallcmd \
 	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
 	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
-	gst-plugins-good gstreamer0.10-good-plugins \
+	gst-plugins-good gstreamer0.10-good-plugins gst-libav \
 	vlc skype \
 	bash-completion screenfetch cpupower flashplugin
 
@@ -116,7 +116,7 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	tar zip unzip bzip2 p7zip libzip zlib \
 	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
 	git gitg subversion mercurial quilt \
-	gawk sed lua tcl tk perl markdown \
+	gawk sed clang lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
