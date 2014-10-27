@@ -1,6 +1,5 @@
 1, 配置和插件
-	- svn co http://sudolee.googlecode.com/svn/trunk/misc/sys-setting/vim_setting/
-	- 下载完后: cd vim_setting; ./do_vim_setting.sh
+	- 运行: ./config/do_vim_setting.sh
 		(将插件安装到~/.vim/, 更新配置文件~/.vimrc)
 	- 更多插件见: http://www.vim.org/scripts/
 
