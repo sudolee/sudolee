@@ -1,6 +1,6 @@
-"
-" Just copy this text document to ~/.vimrc for setting vim
-"
+""
+"" Just copy this text document to ~/.vimrc for setting vim
+""
 
 if v:lang =~ "utf8$" || v:lang =~ "UTF-8$"
 	set fileencodings=utf-8,latin1
@@ -31,24 +31,29 @@ filetype plugin indent on
 "set statusline=%<%F%h%m%r%h%w%y\ %=\ line:%l\,%L\ %P
 set statusline=%<%F%h%m%r%h%w%y\ %{&ff}\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}%=\ ascii:%b\ lin:%l\,%L\ %P
 
-"del ^M
+"" delete ^M
 set fileformat=unix
 
-"ignore case when search
+"" ignore case when search
 set ignorecase
 
-"switch between two windows, as ctrl+ww
+"" switch between two windows, as ctrl+ww
 nmap <F4> <C-W>w
+
+"" Taglist
 nmap <F3> :Tlist<ENTER>
 "map <silent> <F4> :TlistToggle<cr>
 let Tlist_Exit_OnlyWindow=1
 "let Tlist_Use_Right_Window=1
 let Tlist_File_Fold_Auto_Close=1
 
-"for NERDTree
-nmap <F5> :NERDTree<ENTER>
-nmap <F6> :NERDTreeClose<ENTER>
-let NERDTreeWinPos='right'
-
 set list
 set listchars=tab:¦\ ,trail:~,extends:»,precedes:«
+
+"" Clang compete
+let g:clang_complete_auto = 1
+"" open quickfix window on error
+"let g:clang_complete_copen = 1
+let g:clang_snippets = 1
+"" the preview window will be close automatically after a completion
+let g:clang_close_preview = 1
