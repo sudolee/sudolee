@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 archinstallcmd='pacman -S --needed --noconfirm -q'
 
 Confirm () {
@@ -96,7 +98,7 @@ $archinstallcmd \
 	libtheora libvorbis libxv wavpack x264 xvidcore \
 	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
 	gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
-	vlc skype \
+	skype \
 	bash-completion screenfetch cpupower flashplugin
 
 [ "$BLUETOOTH" ] && $archinstallcmd bluedevil
