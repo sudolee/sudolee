@@ -74,8 +74,6 @@ if [ "$DESKTOPNAME" = "gnome" ];then
 		libreoffice-gnome \
 		fcitx fcitx-gtk2 fcitx-gtk3 fcitx-googlepinyin fcitx-configtool
 	systemctl enable gdm.service
-	# gnome-terminal: keep track of directory in new tab
-	[[ -f config/bashrc ]] && echo '. /etc/profile.d/vte.sh' >> config/bashrc
 elif [ "$DESKTOPNAME" = "kde" ];then
 	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
 		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
@@ -137,7 +135,12 @@ pushd /usr/bin/
 [ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
 popd
 
-[ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
+# gnome-terminal: keep track of directory in new tab
+if [ "$DESKTOPNAME" = "gnome" -a -f config/bashrc ]; then
+    cp config/bashrc /home/$NewUserName/.bashrc
+    echo '. /etc/profile.d/vte.sh' >> /home/$NewUserName/.bashrc
+fi
+
 [ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 
 . /usr/share/bash-completion/bash_completion
@@ -145,4 +148,4 @@ popd
 ntpd -g
 hwclock -w
 
-echo ':: Installations complete, :)'
+echo ':: Installations complete, :-)'
