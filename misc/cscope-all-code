@@ -10,6 +10,6 @@ else
 	find . | grep -E $GREP_OPT > cscope.files
 	echo "GEN cscope"
 fi
-(cscope -bqk)
+(cscope -bq)
 
 (echo "ctags -R"; ctags -R)

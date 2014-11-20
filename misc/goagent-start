@@ -1,0 +1,4 @@
+#!/bin/bash -e
+
+# https://github.com/goagent/goagent.git
+[[ -d ~/open/goagent ]] && (cd ~/open/goagent/local && python2 proxy.py 2>&1 1>&/dev/null &)
