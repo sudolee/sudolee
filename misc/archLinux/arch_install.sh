@@ -121,7 +121,7 @@ $archinstallcmd linux-headers gcc binutils gcc-libs bison make \
 	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
 	m4 bc gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
-	vim meld indent tree jdk7-openjdk \
+	vim meld ghex indent tree jdk7-openjdk \
 	linux-manpages minicom ntp \
 	pm-utils acpid \
 	sox netpbm  # for fax
