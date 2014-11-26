@@ -265,3 +265,9 @@ EndSection
 		[archlinuxfr]
 		Server = http://repo.archlinux.fr/$arch
 
+    [c].
+        Chromium no longer supports the Netscape plugin API (NPAPI), so flashplugin
+        from the repositories cannot be used.
+        pepper-flash is the Flash Player plugin(install from [archlinuxcn])
+
+        Details: https://wiki.archlinux.org/index.php/Chromium#Flash_Player_plugin
