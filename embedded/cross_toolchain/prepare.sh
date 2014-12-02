@@ -5,16 +5,16 @@ PACKAGES=$HOME/cross/packages
 # Packages....
 BC_VERSION=bc-1.06
 KERNEL_VERSION=linux-3.12.12
-FILE_VERSION=file-5.15
+FILE_VERSION=file-5.20
 M4_VERSION=m4-1.4.17
-GMP_VERSION=gmp-5.1.3
+GMP_VERSION=gmp-6.0.0
 MPFR_VERSION=mpfr-3.1.2
-MPC_VERSION=mpc-1.0.1
-ISL_VERSION=isl-0.12.1
-CLOOG_VERSION=cloog-0.18.0
-BINUTILS_VERSION=binutils-2.23.2
-GCC__VERSION=gcc-4.8.1
-GLIBC_VERSION=glibc-2.18
+MPC_VERSION=mpc-1.0.2
+ISL_VERSION=isl-0.12.2
+CLOOG_VERSION=cloog-0.18.1
+BINUTILS_VERSION=binutils-2.24
+GCC__VERSION=gcc-4.8.3
+GLIBC_VERSION=glibc-2.19
 NCURSES_VERSION=ncurses-5.9
 MAKE_VERSION=make-3.82
 
@@ -24,6 +24,7 @@ MAKE_VERSION=make-3.82
 #	guile-2.0 flex texinfo subversion ssh diffutils patch ecj libtool byacc bison fixincludes \
 #	git-core gnupg build-essential libc6 libc6-dev libncurses5-dev libreadline6-dev g++-multilib \
 #	axel wget
+#   pkg-config
 
 ## Prepare packages...
 mkdir -p $PACKAGES
@@ -70,7 +71,8 @@ fi
 
 # gmp
 if [ ! -f $GMP_VERSION.tar.bz2 ];then
-	axel -a ftp://ftp.gnu.org/gnu/gmp/${GMP_VERSION}.tar.bz2
+	axel -a ftp://ftp.gnu.org/gnu/gmp/${GMP_VERSION}a.tar.bz2
+    mv ${GMP_VERSION}a.tar.bz2 ${GMP_VERSION}.tar.bz2
 fi
 
 # mpfr
@@ -108,7 +110,7 @@ if [ ! -f ${GLIBC_VERSION}.tar.bz2 ];then
 fi
 
 if [ ! -f ${MAKE_VERSION}.tar.gz ];then
-    axel -a ftp://ftp.gnu.org/gnu/make/${MAKE_VERSION}.tar.gz
+#    axel -a ftp://ftp.gnu.org/gnu/make/${MAKE_VERSION}.tar.gz
 fi
 
 popd
