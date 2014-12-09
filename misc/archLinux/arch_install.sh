@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 archinstallcmd='pacman -S --needed --noconfirm -q'
 
@@ -18,11 +16,10 @@ Confirm () {
 }
 
 Confirm ':: Make sure [multilib] in /etc/pacman.conf enabled,' || { echo '[Warning] - multilib must enabled on x86_64.'; exit; }
-
 Confirm ':: Make sure network accessible,' || { echo '[Warning] - network must be configured, :('; exit; }
-
 pacman -Syy
 
+#### new user create ####
 read -p ":: Enter your new user name : " NewUserName
 [[ -z "$NewUserName" ]] && { echo ":: [Warning] - Cannot coutinue without new user name, :("; exit; }
 Confirm ":: Will create new user \"$NewUserName\"," || { echo ":: [Warning] - Cannot continue without new UserName. :("; exit; }
@@ -35,18 +32,11 @@ do
 	gpasswd -a $NewUserName $i
 done
 
-Confirm ":: Have intel  GPU ?"         && GPU_INTEL=true
-Confirm ":: Have nivida GPU ?"         && GPU_NIVIDA=true
-Confirm ":: Have ati    GPU ?"         && GPU_ATI=true
-Confirm ":: Have bluetooth hardware ?" && BLUETOOTH=true
-Confirm ":: Have thinkpad touchpad ?"  && TTOUCHPAD=true
-
-# desktop setting
-DESKTOPNAME="gnome"
+#### desktop setting ####
 read -p ":: witch desktop do you want ?
 1) gnome, 2) kde
 
-Enter a selection (default=gnome): " DESKTOPNAME
+Enter a selection (default=none): " DESKTOPNAME
 case $DESKTOPNAME in
 	[gG][nN][oO][mM][eE]|1)
 		DESKTOPNAME="gnome"
@@ -57,21 +47,42 @@ case $DESKTOPNAME in
 		echo ":: desktop kde chose"
 		;;
 	*)
-		DESKTOPNAME="gnome"
-		echo ":: Defaultly, set desktop as gnome"
+        DESKTOPNAME=
+		echo ":: Defaultly, set desktop as none"
 		;;
 esac
 
-[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
-[ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri;
-	$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
-[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+#### VGA driver & xorg & ttf ####
+if [ -n "$DESKTOPNAME" ]; then
+	GPU_INTEL=
+	GPU_NIVIDA=
+	GPU_ATI=
+	BLUETOOTH=
+	TTOUCHPAD=
 
-$archinstallcmd base-devel xorg-server mesa xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
+	Confirm ":: Have intel  GPU ?"         && GPU_INTEL=true
+	Confirm ":: Have nivida GPU ?"         && GPU_NIVIDA=true
+	Confirm ":: Have ati    GPU ?"         && GPU_ATI=true
+	Confirm ":: Have bluetooth hardware ?" && BLUETOOTH=true
+	Confirm ":: Have thinkpad touchpad ?"  && TTOUCHPAD=true
 
+	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
+	[ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri; \
+		$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
+	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+
+	$archinstallcmd xorg-server xorg-server mesa \
+		ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation wqy-zenhei
+	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
+fi
+
+#### base package ####
+$archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
+
+#### desktop env ####
 if [ "$DESKTOPNAME" = "gnome" ];then
 	$archinstallcmd gnome gnome-extra \
-		libreoffice-gnome \
+		libreoffice-gnome meld \
 		fcitx fcitx-gtk2 fcitx-gtk3 fcitx-googlepinyin fcitx-configtool
 	systemctl enable gdm.service
 elif [ "$DESKTOPNAME" = "kde" ];then
@@ -82,68 +93,76 @@ elif [ "$DESKTOPNAME" = "kde" ];then
 	systemctl enable kdm.service
 fi
 
-$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei
-
+#### networkmanager & ssh ####
 $archinstallcmd networkmanager openssh
 systemctl enable NetworkManager
 systemctl enable sshd.socket
 
-# thinkpad touchpad setting
-[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
+#### multimedia, virtualbox & office applications ####
+if [ -n "$DESKTOPNAME" ]; then
+	$archinstallcmd \
+		a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
+		libtheora libvorbis libxv wavpack x264 xvidcore \
+		alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
+		gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
+		skype flashplugin \
+		chromium thunderbird thunderbird-i18n-zh-cn \
+		libreoffice-en-US libreoffice-writer \
+		libreoffice-calc libreoffice-draw libreoffice-impress \
+		poppler-data
+	## calibre     <- for ebook
+	## sox netpbm  <- for fax
 
+	[ "$BLUETOOTH" ] && $archinstallcmd bluedevil
+
+	$archinstallcmd virtualbox virtualbox-host-modules
+	gpasswd -a $NewUserName vboxusers
+	[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
+fi
+
+#### development tools ####
 $archinstallcmd \
-	a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
-	libtheora libvorbis libxv wavpack x264 xvidcore \
-	alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
-	gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
-	skype \
-	bash-completion screenfetch cpupower flashplugin
-
-[ "$BLUETOOTH" ] && $archinstallcmd bluedevil
-
-$archinstallcmd chromium thunderbird thunderbird-i18n-zh-cn \
-	libreoffice-en-US libreoffice-writer \
-	libreoffice-calc libreoffice-draw libreoffice-impress \
-	poppler-data
-
-$archinstallcmd virtualbox virtualbox-host-modules
-gpasswd -a $NewUserName vboxusers
-[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
-
-$archinstallcmd linux-headers gcc binutils gcc-libs bison make \
-	libtool autogen autoconf automake patchutils elfutils gdb diffutils \
+	linux-headers linux-manpages \
+	gcc binutils gcc-libs bison jdk7-openjdk clang \
+	make libtool autogen autoconf automake patchutils elfutils gdb diffutils \
 	gnupg gperf expect dejagnu guile gperftools \
+	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
-	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
-	git gitg subversion mercurial quilt \
-	gawk sed clang lua tcl tk perl markdown \
+	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
+	git subversion mercurial quilt tig \
+	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
-	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
-	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk \
-	m4 bc gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
-	vim meld ghex indent tree jdk7-openjdk \
-	linux-manpages minicom ntp \
+	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
+	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
+	vim ctags cscope indent tree \
+	minicom ntp \
 	pm-utils acpid \
-	sox netpbm  # for fax
-## calibre <- for ebook
+	bash-completion screenfetch cpupower
 
-gpasswd -a $NewUserName wireshark
-setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+. /usr/share/bash-completion/bash_completion
 
 pushd /usr/bin/
 [ -f python2 ] && { rm -fv python; ln -sv python2 python; }
 [ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
 popd
 
-# gnome-terminal: keep track of directory in new tab
-if [ "$DESKTOPNAME" = "gnome" -a -f config/bashrc ]; then
-    cp config/bashrc /home/$NewUserName/.bashrc
-    echo '. /etc/profile.d/vte.sh' >> /home/$NewUserName/.bashrc
+#### wireshark & misc ####
+if [ -n "$DESKTOPNAME" ]; then
+	$archinstallcmd \
+		wireshark-cli wireshark-gtk \
+		gitg ghex
+
+	gpasswd -a $NewUserName wireshark
+	setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 fi
 
-[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
-
-. /usr/share/bash-completion/bash_completion
+# gnome-terminal: keep track of directory in new tab
+if [ "$DESKTOPNAME" = "gnome" -a -f config/bashrc ]; then
+	cp config/bashrc /home/$NewUserName/.bashrc
+	echo '. /etc/profile.d/vte.sh' >> /home/$NewUserName/.bashrc
+elif [ -n "$DESKTOPNAME" ]; then
+	[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
+fi
 
 ntpd -g
 hwclock -w
