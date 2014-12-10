@@ -156,11 +156,9 @@ if [ -n "$DESKTOPNAME" ]; then
 	setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 fi
 
-# gnome-terminal: keep track of directory in new tab
-if [ "$DESKTOPNAME" = "gnome" -a -f config/bashrc ]; then
-	cp config/bashrc /home/$NewUserName/.bashrc
-	echo '. /etc/profile.d/vte.sh' >> /home/$NewUserName/.bashrc
-elif [ -n "$DESKTOPNAME" ]; then
+[ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
+
+if [ -n "$DESKTOPNAME" ]; then
 	[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 fi
 

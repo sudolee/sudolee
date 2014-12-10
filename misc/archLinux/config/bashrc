@@ -49,7 +49,8 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 # PS1='\u@\h:\w\$ '
-PS1='\[\e[1;35m\]\u@\h:\[\e[33m\]\w\$\[\e[0m\] '
+# PS1='\[\e[1;35m\]\u@\h:\[\e[33m\]\w\$\[\e[0m\] '
+PS1='\[\e[1;35m\]\u:\[\e[33m\]\w\$\[\e[0m\] '
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -86,4 +87,9 @@ if ! shopt -oq posix; then
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
+fi
+
+# gnome-terminal: keep track of directory in new tab
+if [ -f /etc/profile.d/vte.sh ]; then
+    . /etc/profile.d/vte.sh
 fi
