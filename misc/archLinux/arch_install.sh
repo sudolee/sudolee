@@ -139,8 +139,6 @@ $archinstallcmd \
 	pm-utils acpid \
 	bash-completion screenfetch cpupower
 
-. /usr/share/bash-completion/bash_completion
-
 pushd /usr/bin/
 [ -f python2 ] && { rm -fv python; ln -sv python2 python; }
 [ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
