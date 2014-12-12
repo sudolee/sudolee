@@ -89,136 +89,25 @@
 		$ cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
 	[k] $ exit; umount -R /mnt; reboot
 
-12, useradd
-	$ useradd -m -g users -s /bin/bash YourUserName
-	$ passwd YourUserName
-	$ gpasswd -a YourUserName network,video,audio,disk,floppy,storage,uucp
 
-13, network
-	$ pacman -S NetworkManager iw
-	$ systemctl enable NetworkManager    # must be preform as is. this is for GUI, not use this stage.
-
-14, video drivers
-	$ pacman -S xf86-video-intel \       # Intel  only
-		lib32-intel-dri          \       # For 32-bit 3D support on x86_64, multilib
-		xf86-video-nouveau       \       # Nvidia only
-		lib32-nouveau-dri        \       # For 32-bit 3D support on x86_64, multilib
-		xf86-video-ati           \       # Ati    only
-		lib32-ati-dri                    # For 32-bit 3D support on x86_64, multilib
-
-14.1, xorg & input
-	$ pacman -S base-devel xorg-server mesa \    # xorg-server-utils xorg-xinit
-		xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
-
-15, bumblebee    # nivida only
-	pacman -S bumblebee bbswitch
-	gpasswd -a $USER bumblebee
-
+12, bumblebee    # nivida only
 	Details -> https://github.com/Bumblebee-Project/Bumblebee/wiki/Install-and-usage
 
-16, kde
-	$ pacman -S kde-meta kde-l10n-zh_cn kdemultimedia \
-		phonon-vlc/phonon-gstreamer \           # If both installed, set SystemSetting->MultiMedia->AudioAndVideoSettings->Backend
-		ttf-dejavu ttf-liberation wqy-zenhei \
-		archlinux-themes-kdm kdeplasma-applets-plasma-nm \
-		appmenu-qt
-	$ systemctrl enable kdm.service
+13, Input method
+  [a] fcitx
+	Details -> https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
+
+14, System setting
 	- set /etc/sudoers
 	    YourUserName ALL=(ALL:ALL) ALL
 
-17, Multimedia
-	[codec]
-		$ pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
-	[sound]
-		$ pacman -S alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa kdemultimedia-kmix \
-			gst-plugins-good gstreamer0.10-good-plugins
-		$ amixer sset Master unmute
-	[video]
-		$ pacman -S vlc
-
-18, Touchpad
-	- pacman -S xf86-input-synaptics
-	- /etc/X11/xorg.conf.d/synaptics.conf
-Section "InputClass"
-        Identifier      "Touchpad"                      # required
-        MatchIsTouchpad "yes"                           # required
-        Driver          "synaptics"                     # required
-        Option          "MinSpeed"              "0.5"
-        Option          "MaxSpeed"              "1.0"
-        Option          "AccelFactor"           "0.075"
-        Option          "TapButton1"            "1"
-        Option          "TapButton2"            "2"     # multitouch
-        Option          "TapButton3"            "3"     # multitouch
-        Option          "VertTwoFingerScroll"   "1"     # multitouch
-        Option          "HorizTwoFingerScroll"  "1"     # multitouch
-        Option          "VertEdgeScroll"        "1"
-        Option          "CoastingSpeed"         "8"
-        Option          "CornerCoasting"        "1"
-        Option          "CircularScrolling"     "1"
-        Option          "CircScrollTrigger"     "7"
-        Option          "EdgeMotionUseAlways"   "1"
-        Option          "LBCornerButton"        "8"     # browser "back" btn
-        Option          "RBCornerButton"        "9"     # browser "forward" btn
-EndSection
-
-	- /etc/X11/xorg.conf.d/20-thinkpad.conf
-Section "InputClass"
-    	Identifier "Trackpoint Wheel Emulation"
-    	MatchProduct       "TPPS/2 IBM TrackPoint|DualPoint Stick|Synaptics Inc. Composite TouchPad / TrackPoint|ThinkPad USB Keyboard with TrackPoint|USB Trackpoint pointing device"
-    	MatchDevicePath    "/dev/input/event*"
-    	Option             "EmulateWheel"          "true"
-    	Option             "EmulateWheelButton"    "2"
-    	Option             "Emulate3Buttons"       "false"
-    	Option             "XAxisMapping"          "6 7"
-    	Option             "YAxisMapping"          "4 5"
-EndSection
-
-19, Input method
-  [a] fcitx
-    $ pacman -S fcitx-im fcitx-googlepinyin kcm-fcitx
-		(will install: fcitx fcitx-gtk2 fcitx-gtk3 fcitx-qt4)
-
-    Add the three lines into ~/.xprofile:
-		export GTK_IM_MODULE=fcitx
-		export QT_IM_MODULE=fcitx
-		export XMODIFIERS="@im=fcitx"
-
-	Details -> https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
-
-20, Misc
-	$ pacman -S bash-completion
-		$ . /usr/share/bash-completion/bash_completion
-	$ pacman -S screenfetch cpupower
-	$ pacman -S flashplugin  # adobe flash plugin
-	$ pacman -S bluedevil    # bluetooth
-
-21, $ pacman -S --needed linux-headers gcc binutils gcc-libs bison make \
-	libtool autogen autoconf automake patchutils elfutils gdb diffutils \
-	gnupg gperf expect dejagnu guile gperftools \
-	tar zip unzip bzip2 libzip zlib \
-	flex gettext ncurses readline asciidoc rsync ctags cscope rrdtool texinfo \
-	git subversion mercurial quilt \
-	gawk sed lua tcl tk python perl python-markdown \
-	ntfs-3g exfat-utils e2fsprogs util-linux dosfstools \
-	net-tools axel wget curl tcpdump tcpreplay acl iw ethtool wireshark-cli wireshark-gtk openssh \
-	m4 gmp mpfr mpc ppl cloog lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
-	vim meld indent kdiff3 \
-	bash-completion linux-manpages minicom ntp
-
-22, System setting
 	-- time
-		$ ntpd -gq
+		$ ntpd -g
 		$ hwclock -w
 
 	-- utc time in windows7
 		Using regedit, add a DWORD value with hexadecimal value 1 to the registry
 		HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal
-
-	-- chrome
-		$ pacman -S chromium
-
-	-- thunderbird
-		$ pacman -S thunderbird thunderbird-i18n-zh-cn
 
 	-- openssh
 		$ pacman -S openssh
@@ -227,32 +116,10 @@ EndSection
 		banner /path/of/banner       # for welcome message
 		PermitRootLogin no
 
-	-- skype
-		$ vim /etc/pacman.conf
-			[multilib]
-			Include = /etc/pacman.d/mirrorlist
-		$ pacman -Syy; pacman -S skype  # lib32-libpulse needed by skype ?
-
-	-- office suite
-		$ pacman -S libreoffice-en-US libreoffice-kde4 libreoffice-writer libreoffice-calc libreoffice-draw
-
-	-- wireshark
-		$ pacman -S --needed wireshark-gtk
-		$ gpasswd -a $USER wireshark
-		$ setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
-
-	-- virtualbox
-		$ pacman -S --needed virtualbox virtualbox-host-modules
-		$ gpasswd -a mti vboxusers
-		$ echo vboxdrv > /etc/modules-load.d/virtualbox.conf
-
-	-- Okular pdf issue
-		$ pacman -S poppler-data
-
 	-- E.G.
 		$ /etc/skel/
 
-23, Issues
+15, Issues
 	[a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
 		Add code below into /etc/default/grub:
 		"GRUB_DISABLE_SUBMENU=y"
@@ -268,6 +135,6 @@ EndSection
     [c].
         Chromium no longer supports the Netscape plugin API (NPAPI), so flashplugin
         from the repositories cannot be used.
-        pepper-flash is the Flash Player plugin(install from [archlinuxcn])
+        chromium-pepper-flash is the Flash Player plugin(install from [archlinuxcn])
 
         Details: https://wiki.archlinux.org/index.php/Chromium#Flash_Player_plugin
