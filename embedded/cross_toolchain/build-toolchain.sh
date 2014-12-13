@@ -1,23 +1,23 @@
-#!/bin/bash
+#!/bin/bash -e
 # build arm cross toolchain from source code by <desoxydate@gmail.com>
-
-set -e
 
 # make -- Specifies the number of jobs to run simultaneously.
 CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$((2*$CPUS))
-_DATE_=$(date +%Y%m%e)
+PKGVERSION="Matti Lee @ $(date +%Y%m%e)"
 
 TARGET=arm-linux-gnueabi
 HOST=$MACHTYPE
 BUILD=$MACHTYPE
 
-PRO_ROOT=$HOME/cross
-PREFIX=$PRO_ROOT/arm-cross-toolchain
-PRO_PACKAGES=$PRO_ROOT/packages
+CTC_PRO_ROOT=$HOME/ctc
+PREFIX=$CTC_PRO_ROOT/arm-cross-toolchain
+PRO_PACKAGES=$CTC_PRO_ROOT/packages
 SYSROOT=$PREFIX/$TARGET/sys-root
-TMP_INSTALL=$PRO_ROOT/tmp-install
+TMP_INSTALL=$CTC_PRO_ROOT/tmp-install
 
+# export project root for uclibc
+export CTC_PRO_ROOT
 export PATH=$TMP_INSTALL/bin:$PREFIX/bin:$PREFIX/bin:$PATH
 
 rm    -rf $PREFIX $TMP_INSTALL $SYSROOT
@@ -25,7 +25,7 @@ mkdir -pv $PREFIX $TMP_INSTALL $SYSROOT/usr
 
 # Packages version define....
 BC_VERSION=bc-1.06
-KERNEL_VERSION=linux-3.12.12
+KERNEL_VERSION=linux-3.17.6
 M4_VERSION=m4-1.4.17
 GMP_VERSION=gmp-6.0.0
 MPFR_VERSION=mpfr-3.1.2
@@ -34,7 +34,7 @@ ISL_VERSION=isl-0.12.2
 CLOOG_VERSION=cloog-0.18.1
 BINUTILS_VERSION=binutils-2.24
 GCC__VERSION=gcc-4.8.3
-GLIBC_VERSION=glibc-2.19
+UCLIBC_VERSION=uClibc-0.9.33.2
 FILE_VERSION=file-5.20
 NCURSES_VERSION=ncurses-5.9
 
@@ -157,10 +157,12 @@ mkdir  binutils_build
 pushd  binutils_build
 
 AR=ar AS=as \
-    $PRO_PACKAGES/binutils_build/../$BINUTILS_VERSION/configure --prefix=$PREFIX \
-    --host=$HOST --target=$TARGET --with-sysroot=$SYSROOT \
-    --with-lib-path=$TMP_INSTALL/lib:$TMP_INSTALL/lib64 --disable-nls --disable-shared --enable-64-bit-bfd \
-    --disable-werror
+	$PRO_PACKAGES/binutils_build/../$BINUTILS_VERSION/configure --prefix=$PREFIX \
+	--build=$HOST --target=$TARGET --with-sysroot=$SYSROOT \
+	--with-mpc=$TMP_INSTALL --with-mpfr=$TMP_INSTALL --with-gmp=$TMP_INSTALL \
+	--with-cloog=$TMP_INSTALL --with-isl=$TMP_INSTALL --disable-isl-version-check \
+	--disable-nls --disable-shared --enable-64-bit-bfd \
+	--disable-werror
 make -j$JOBS
 make install
 popd
@@ -182,28 +184,22 @@ AR=ar LDFLAGS="-Wl,-rpath,$PREFIX/lib" \
     --with-newlib --without-headers --disable-threads --enable-languages=c \
     --disable-nls --disable-shared \
     --disable-libgomp --disable-libmudflap --disable-libssp \
-    --enable-lto --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm"
-#	--with-gnu-ld --with-gnu-as --with-system-zlib \
-    ##--with-ecj-jar= # for java support
+    --enable-lto
+#--with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm"
 make all-gcc all-target-libgcc -j$JOBS
 make install-gcc install-target-libgcc
 popd
 
-############### glibc ###############
-rm -rf $GLIBC_VERSION
-tar xf ${GLIBC_VERSION}.tar.bz2
+############### uclibc ###############
+rm -rf $UCLIBC_VERSION
+tar xf $UCLIBC_VERSION.tar.xz
 
-rm -rf glibc_build
-mkdir glibc_build
-pushd glibc_build
+pushd $UCLIBC_VERSION
+patch -p1 < ../uClibc_sysinfo.h_unknown_type_name__kernel_long_t.patch
+cp -vf ../uClibc-0.9.33.2_config .config
 
-BUILD_CC="gcc" CC="${TARGET}-gcc" AR="${TARGET}-ar" RANLIB="${TARGET}-ranlib" \
-    $PRO_PACKAGES/glibc_build/../${GLIBC_VERSION}/configure --prefix=/usr \
-    --host=$TARGET --build=$BUILD --with-binutils=$PREFIX/bin --enable-add-ons \
-    --disable-profile --with-tls --enable-kernel=2.6.32 --with-__thread --with-headers=$SYSROOT/usr/include \
-    --enable-obsolete-rpc
 make -j$JOBS
-make install install_root=$SYSROOT
+make install
 popd
 
 ############### gcc final ###############
@@ -222,10 +218,9 @@ AR=ar LDFLAGS="-Wl,-rpath,$PREFIX/lib" \
     --enable-languages=c,c++ --enable-__cxa_atexit \
     --with-mpfr=$TMP_INSTALL --with-gmp=$TMP_INSTALL --with-mpc=$TMP_INSTALL --with-isl=$TMP_INSTALL --with-cloog=$TMP_INSTALL \
     --enable-c99 --enable-threads=posix --enable-lto \
-    --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" \
-    --with-pkgversion="By Matti Lee @ ${_DATE_}"
-#	--disable-nls --disable-libssp --disable-libmudflap --disable-libgomp \
-    # --enable-languages=c,c++,fortran,objc,obj-c++
+	--with-pkgversion="${PKGVERSION}"
+#    --with-host-libstdcxx="-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm" \
+# --enable-languages=c,c++,fortran,objc,obj-c++
 make -j$JOBS
 make install
 popd

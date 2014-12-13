@@ -59,6 +59,10 @@ glibc 安装时prefix=/usr, install_root=$SYSROOT可以解决找不到so库的�
 lto-compress.c:28:18: fatal error: zlib.h: No such file or directory
 --> install zlib1g zlib1g-dev
 
+-6-
+sysinfo.h:9:2: error: unknown type name '__kernel_ulong_t'
+--> see: uClibc_sysinfo.h_unknown_type_name__kernel_long_t.patch
+
 --packages--
 # binutils gcc glibc gmp m4 mpfr ncurses
 ftp://ftp.gnu.org/gnu/

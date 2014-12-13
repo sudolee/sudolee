@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
 
-PACKAGES=$HOME/cross/packages
+PACKAGES=$HOME/ctc/packages
 
 # Packages....
 BC_VERSION=bc-1.06
-KERNEL_VERSION=linux-3.12.12
+KERNEL_VERSION=linux-3.17.6
 FILE_VERSION=file-5.20
 M4_VERSION=m4-1.4.17
 GMP_VERSION=gmp-6.0.0
@@ -14,9 +14,10 @@ ISL_VERSION=isl-0.12.2
 CLOOG_VERSION=cloog-0.18.1
 BINUTILS_VERSION=binutils-2.24
 GCC__VERSION=gcc-4.8.3
-GLIBC_VERSION=glibc-2.19
+#GLIBC_VERSION=glibc-2.19
+UCLIBC_VERSION=uClibc-0.9.33.2
 NCURSES_VERSION=ncurses-5.9
-MAKE_VERSION=make-3.82
+#MAKE_VERSION=make-3.82
 
 ## Request softwares...
 #sudo apt-get install gcc gnat gawk binutils gzip bzip2 make tar perl \
@@ -90,6 +91,7 @@ if [ ! -f $CLOOG_VERSION.tar.gz ];then
 	axel -a ftp://gcc.gnu.org/pub/gcc/infrastructure/$CLOOG_VERSION.tar.gz
 fi
 
+# isl
 if [ ! -f $ISL_VERSION.tar.bz2 ];then
 	axel -a http://isl.gforge.inria.fr/$ISL_VERSION.tar.bz2
 fi
@@ -105,12 +107,13 @@ if [ ! -f $GCC__VERSION.tar.bz2 ];then
 fi
 
 # glibc
-if [ ! -f ${GLIBC_VERSION}.tar.bz2 ];then
+if [ -n "${GLIBC_VERSION}" -a ! -f ${GLIBC_VERSION}.tar.bz2 ];then
 	axel -a ftp://ftp.gnu.org/gnu/glibc/${GLIBC_VERSION}.tar.bz2
 fi
 
-if [ ! -f ${MAKE_VERSION}.tar.gz ];then
-#    axel -a ftp://ftp.gnu.org/gnu/make/${MAKE_VERSION}.tar.gz
+# uclibc
+if [ ! -f ${UCLIBC_VERSION}.tar.xz ]; then
+	axel -a http://uclibc.org/downloads/${UCLIBC_VERSION}.tar.xz
 fi
 
 popd
