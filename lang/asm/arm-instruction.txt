@@ -1,0 +1,250 @@
+
+== overview ==
+<opcode>{<cond}{S} <Rd>, <Rn>, <shifter_operand>
+	opcode: 操作符编码
+	cond: 条件符
+	S: 是否影响cpsr标志位
+	Rd: 目标寄存器
+	Rn: 地一个操作数寄存器
+	shifter_operand: 第二个操作数
+
+== 寻址方式 ==
+= 数据处理指令寻址方式 =
+	<opcode>{<cond>}{S} <Rd>, <Rn>, <shift_operand>
+	寻址方式指shift_operand的寻址方式.
+
+1, 立即数
+2, 寄存器方式
+	e.g:
+	mov r3, r2
+	add r0, r1, r2
+
+3, 寄存器移位方式: shift_operand为移位后的值
+	逻辑移位:
+		lsl: 逻辑左移
+		lsr: 逻辑右移
+
+	算数移位:
+		asr: 算数右移
+		asl: 算数左移
+
+	循环移位:
+		ror: 循环右移
+		rol: 循环左移
+
+	扩展循环移位:
+		rrx: 扩展循环右移
+	e.g:
+	mov r0, r1, lsl #3      @ r0 = r1 << 3
+	add r0, r1, r2, lsl #3  @ r0 = r1 + (r2 << 3)
+	mov r0, r1, lsl r2      @ r0 = r1 << r2
+	sub r0, r1, r2, lsl r3  @ r0 = r1 - (r2 << r3)
+
+= 字/无符号子的load/store指令的寻址方式 =
+	load指令:  从内存读取数据, 放入寄存器.
+	store指令: 从寄存器读取数据, 放入内存.
+
+	该类指令的寻址由两部分组成:基址寄存器+地址偏移量
+	基址寄存器: 任一通用寄存器
+	地址偏移量: 3种寻址方式
+
+1, "3种"地址偏移量寻址方式
+	[立即数]
+	[寄存器]
+	[寄存器及1个偏移常数]
+
+2, "3种寻址方式"的"3种"地址计算方法
+	偏移量方法:
+		[<Rn>, #+/-<offset_12>]
+		[<Rn>, #+/-<Rm>]
+		[<Rn>, #+/-<Rm>, <shift> #<shift_imm>]
+	e.g
+		ldr r0, [r1, #-12]        @ 将内存单元r1-12中的字读取到r0
+		ldr r0, [r1, #12]        @ 将内存单元r1+12中的字读取到r0
+
+	事后更新/事先访问:
+		[<Rn>, #+/-<offset_12>]!
+		[<Rn>, #+/-<Rm>]!
+		[<Rn>, #+/-<Rm>, <shift> #<shift_imm>]!
+	e.g
+		ldr r0, [r1, r2]!        @ 将内存单元r1+r2中的字读取到r0, 如果cond满足, r1=r1+r2
+
+	事先更新/事后访问:
+		[<Rn>], #+/-<offset_12>
+		[<Rn>], #+/-<Rm>
+		[<Rn>], #+/-<Rm>, <shift> #<shift_imm>
+	e.g
+		ldr r0, [r1], r2 lsl #1        @ 将内存单元r1中的字读取到r0,如果cond满足,r1=r1+(r2<<1)
+
+= 批量load/store指令的寻址方式 =
+(p.s 这部分ARM体系结构一书上错误比较多, 详见armv4/5 spec第5章第4节.)
+
+LDM|STm{<COND>}<addressing_mode> <Rn>{!}, <reg_list>{^}
+    列表用"{}"括起来, 多个reg用","隔开, 连续的寄存器用"-"连接.
+    e.g ldm r0!, {r2-r5,r7} ; 把r0到r0+16所指向的内存单元, 依次拷贝到r2~r5,r6; r0=r0+16.
+
+1, 指令编码:
++---------+----+----+----+----+----+----+----+----+---------+----------+
+| 31 ~ 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 ~ 16 | 15 ~ 0   |
++---------+----+----+----+----+----+----+----+----+---------+----------+
+|   cond  |  1 |  0 |  0 |  P |  U |  S |  W |  L |    Rn   | reg-list |
++---------+----+----+----+----+----+----+----+----+---------+----------+
+  L: L=1, load; L=0, store.
+  U: 表示该指令所要操作的内存块在基址寄存器Rn所指向内存单元的上方(U=1), 或者下方(U=0).
+
+  P:
+    P=0, 表示基址寄存器Rn所指向的内存单元, 包含在该指令所要操作的内存块里面.
+      U=0, Rn指向要操作的内存块最上方的内存单元.
+      U=1, Rn指向要操作的内存块最下方的内存单元.
+    P=1, 表示基址寄存器Rn所指向的内存单元, 不包含在该指令所要操作的内存块里面.
+      U=0, 要操作的内存块在Rn指向的内存单元下方.
+      U=1, 要操作的内存块在Rn指向的内存单元上方.
+
+  S: /* 在user/system mode使用"^"将产生不可预期的后果 */
+    reg_list包含pc时, S表示把spsr load到cpsr.
+    reg_list不包含pc时, S表示cpu在特权模式时, 使用user mode的物理寄存器, 而不是当前mode的.
+
+  W: 操作完内存块后, 需要更新Rn.
+    U=1时, Rn=Rn+4*(reg个数); U=0时, Rn=Rn-4*(reg个数).
+
+  reg_list: [15：0], 每个bit表示一个reg; bit0->reg0, bit15->r15.
+
+2, <addressing_mode>的4种计算方法
+i), IA(Increment After)
+  start_address = Rn
+  end_address = Rn + (Number_of_set_bits_in(reg_list) * 4) - 4
+  if ConditionPassed(cond) and W == 1; then
+    Rn = Rn + (Number_of_set_bits_in(reg_list) * 4)
+
+ii), IB(Increment Before)
+  start_address = Rn + 4
+  end_address = Rn + (Number_of_set_bits_in(reg_list) * 4)
+  if ConditionPassed(cond) and W == 1; then
+    Rn = Rn + (Number_of_set_bits_in(reg_list) * 4)
+
+iii), DA(Decrement After)
+  start_address = Rn - (Number_of_set_bits_in(reg_list) * 4) + 4
+  end_address = Rn
+  if ConditionPassed(cond) and W == 1; then
+    Rn = Rn - (Number_of_set_bits_in(reg_list) * 4)
+
+iv), DB(Decrement Before)
+  start_address = Rn - (Number_of_set_bits_in(reg_list) * 4)
+  end_address = Rn - 4
+  if ConditionPassed(cond) and W == 1; then
+    Rn = Rn - (Number_of_set_bits_in(reg_list) * 4)
+
+3, 堆栈(stack): ATPCS使用FD栈.
+i), 堆栈类型: FD, ED, FA, EA
+Full stack:  sp(stack point)指向最后一个已用单元.
+Empty stack: sp指向第一个未用单元.
+Descending stack: 向低内存地址增长
+Ascending stack: 向高内存地址增长
+
+ii), 堆栈操作:
+LDM addressing mode
++-----------+-------+---+---+---+
+| Non-stack | stack | L | P | U |
++-----------+-------+---+---+---+
+| LDMDA     | LDMFA | 1 | 0 | 0 |
+| LDMIA     | LDMFD | 1 | 0 | 1 |
+| LDMDB     | LDMEA | 1 | 1 | 0 |
+| LDMDA     | LDMED | 1 | 1 | 1 |
++-----------+-------+---+---+---+
+
+STM addressing mode
++-----------+-------+---+---+---+
+| Non-stack | stack | L | P | U |
++-----------+-------+---+---+---+
+| STMDA     | STMED | 0 | 0 | 0 |
+| STMIA     | STMEA | 0 | 0 | 1 |
+| STMDB     | STMFD | 0 | 1 | 0 |
+| STMIB     | STMFA | 0 | 1 | 1 |
++-----------+-------+---+---+---+
+
+4, 总结
+before: P=1, Rn不包含在该指令所要操作的内存块里面
+after:  P=0, Rn包含在该指令所要操作的内存块里面
+Decrement: U=0, 内存块在Rn下方
+Increment: U=1, 内存块在Rn上方
+
+== ARM指令 ==
+1, bic 位清除指令
+	bic{<cond>}{S} <Rd>, <Rn>, <shifter_operand>
+	将shifter_operand的反码和Rn按位做逻辑与运算, 结果存入Rd.
+
+2, orr 逻辑或操作
+	orr{<cond>}{S} <Rd>, <Rn>, <shifter_operand>
+	将shifter_operand和Rn按位逻辑或, 结果存入Rd.
+
+2, msr / mrs
+	cpsr寄存器到cpu寄存器的读写指令.
+	[Note]:
+		msr{<cond>} CPSR_<fields>, #<immediate>/<Rm>
+		msr{<cond>} SPSR_<fields>, #<immediate>/<Rm>
+		fields列表:
+		c, cpsr_c, cpsr中的控制位[0:7]
+		x, cpsr_x, cpsr中的扩展位
+		s, cpsr_s, cpsr中的状态位
+		f, cpsr_f, cpsr中的标志位
+
+3, mcr / mrc
+	协处理器寄存器到cpu寄存器的读写指令 (如果操作失败将产生指令异常中断)
+
+
+== condition codes ==
++---------------+--------------+-----------------------------------+--------------------------------------+
+| cond[31:28]   | symbol       | meaning                           | *psr flag state                      |
++---------------+--------------+-----------------------------------+--------------------------------------+
+| 0000          | eq           | equal                             | Z=1                                  |
+| 0001          | ne           | not equal                         | Z=0                                  |
+| 0010          | cs/hs        | carry set/unsigned higher or same | C=1                                  |
+| 0011          | cc/lo        | carry clear/unsigned lower        | C=0                                  |
+| 0100          | mi           | minus/negative                    | N=1                                  |
+| 0101          | pl           | plus/positive or zero             | N=0                                  |
+| 0110          | vs           | overflow                          | V=1                                  |
+| 0111          | vc           | no overflow                       | V=0                                  |
+| 1000          | hi           | unsigned higher                   | C=1 and Z=0                          |
+| 1001          | ls           | unsigned lower or same            | C=0 and Z=1                          |
+| 1010          | ge           | signed greater than or equal      | (N=V=1) or (N=V=0)                   |
+| 1011          | lt           | signed less than                  | (N=1 and V=0) or (N=0 && V=1)        |
+| 1100          | gt           | signed greater than               | (Z=1 && N=1 && V=0) or (N=0 && V=0)  |
+| 1101          | le           | signed less than or equal         | Z=1 or N!=V                          |
+| 1110          | al           | Always                                                                   |
+| 1111          | not define in ARMV4. the same to "al" in ARMV5 or above                                 |
++---------------+--------------+----------------------+---------------------------------------------------+
+
+== register naming ==
++----------+-----------+--------------------------------------------------+
+| Register | APCS name | APCS role                                        |
++----------+-----------+--------------------------------------------------+
+| r0       | a1        | argument 1/scratch register/result               |
+| r1       | a2        | argument 2/scratch register/result               |
+| r2       | a3        | argument 3/scratch register/result               |
+| r3       | a4        | argument 4/scratch register/result               |
+| r4       | v1        | register variable                                |
+| r5       | v2        | register variable                                |
+| r6       | v3        | register variable                                |
+| r7       | v4        | register variable                                |
+| r8       | v5        | register variable                                |
+| r9       | sb/v6     | static base/register variable                    |
+| r10      | sl/v7     | stack limit/stack chunk handle/register variable |
+| r11      | fp/v8     | frame pointer/register variable                  |
+| r12      | ip        | scratch register/new-sb in inter-link-unit calls |
+| r13      | sp        | lower end of the current stack frame             |
+| r14      | lr        | link register/scratch register                   |
+| r15      | pc        | program counter                                  |
++----------+-----------+--------------------------------------------------+
+
+== *psr defintoin ==
++----+----+----+----+----+-------+----+----------+---------+----------+----+----+----+----+----+----+----+----+----+----+
+| 31 | 30 | 29 | 28 | 27 | 26~25 | 24 | 23~20    | 19~16   | 15~10    |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
++----+----+----+----+----+-------+----+----------+---------+----------+----+----+----+----+----+----+----+----+----+----+
+| N  | Z  | C  | V  | Q  |  Res  | J  | reserved | GE[3:0] | reserved |  E |  A |  I |  F |  T | M4 | M3 | M2 | M1 | M0 |
++----+----+----+----+----+-------+----+----------+---------+----------+----+----+----+----+----+----+----+----+----+----+
+
++---------+---------+---------+--------+
+| 31 ~ 24 | 23 ~ 16 | 15 ~  8 |  7 ~ 0 |
++---------+---------+---------+--------+
+| *psr_f  | *psr_s  | *psr_x  | *psr_c |
++---------+---------+---------+--------+
