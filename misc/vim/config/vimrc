@@ -10,6 +10,8 @@ set nu
 syntax on
 set cursorline
 highlight CursorLine ctermbg=darkblue ctermfg=grey cterm=bold
+set colorcolumn=80
+highlight ColorColumn ctermbg=red
 "set cursorline cursorcolumn
 "highlight CursorColumn ctermbg=darkblue ctermfg=grey cterm=bold
 set tabstop=4
