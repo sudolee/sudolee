@@ -7,6 +7,7 @@ if v:lang =~ "utf8$" || v:lang =~ "UTF-8$"
 endif
 
 set nu
+set title
 syntax on
 set cursorline
 highlight CursorLine ctermbg=darkblue ctermfg=grey cterm=bold
@@ -43,7 +44,7 @@ set ignorecase
 nmap <F4> <C-W>w
 
 "" Taglist
-nmap <F3> :Tlist<ENTER>
+nmap tl :Tlist<ENTER>
 "map <silent> <F4> :TlistToggle<cr>
 let Tlist_Exit_OnlyWindow=1
 "let Tlist_Use_Right_Window=1

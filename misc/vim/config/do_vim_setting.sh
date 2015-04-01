@@ -8,10 +8,8 @@ cp -f vimrc ~/.vimrc
 echo \
 '::Installed plugins for vim:
     + cscope_macros.vim
-    + taglist.vim
-    + snipMate
-    + snippets
+    + taglist-plus
     + clang_complete
-    + tlib
-    + mw-utils
+    + minibufexplorerpp
+    + better-snipmate-snippet
 :: Any issure, pls see ~/.vim/doc/ for detials.'

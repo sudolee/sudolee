@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
+import os
 import sys
 
 CONFIG_NAME = ".clang_complete"
@@ -14,8 +15,8 @@ def readConfiguration():
   result = []
   for line in f.readlines():
     strippedLine = line.strip()
-    if strippedLine:
-      result.append(strippedLine)
+    if len(strippedLine) > 0:
+      result += [strippedLine]
   f.close()
   return result
 
@@ -32,7 +33,6 @@ def parseArguments(arguments):
   includes = []
   defines = []
   include_file = []
-  options = []
 
   for arg in arguments:
     if nextIsInclude:
@@ -54,23 +54,20 @@ def parseArguments(arguments):
       defines += [arg[2:]]
     elif arg == "-include":
       nextIsIncludeFile = True
-    elif arg.startswith('-std='):
-      options.append(arg)
-    elif arg.startswith('-W'):
-      options.append(arg)
 
   result = list(map(lambda x: "-I" + x, includes))
   result.extend(map(lambda x: "-D" + x, defines))
   result.extend(map(lambda x: "-include " + x, include_file))
-  result.extend(options)
 
   return result
 
 def mergeLists(base, new):
   result = list(base)
   for newLine in new:
-    if newLine not in result:
-      result.append(newLine)
+    try:
+      result.index(newLine)
+    except ValueError:
+      result += [newLine]
   return result
 
 configuration = readConfiguration()
