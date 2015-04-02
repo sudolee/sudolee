@@ -71,10 +71,13 @@ if [ -n "$DESKTOPNAME" ]; then
 		$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
 	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
 
-	$archinstallcmd xorg-server xorg-server mesa \
-		ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation wqy-zenhei
+	$archinstallcmd xorg-server xorg-server mesa
 	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 fi
+
+$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation \
+	font-bh-ttf ttf-hannom ttf-oxygen opendesktop-fonts ttf-anonymous-pro \
+	ttf-fira-mono ttf-fira-sans ttf-inconsolata wqy-zenhei
 
 #### base package ####
 $archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
@@ -82,13 +85,11 @@ $archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-m
 #### desktop env ####
 if [ "$DESKTOPNAME" = "gnome" ];then
 	$archinstallcmd gnome gnome-extra \
-		libreoffice-gnome meld \
 		fcitx fcitx-gtk2 fcitx-gtk3 fcitx-googlepinyin fcitx-configtool
 	systemctl enable gdm.service
 elif [ "$DESKTOPNAME" = "kde" ];then
 	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
 		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
-		libreoffice-kde4 kdiff3 \
 		fcitx-im fcitx-googlepinyin kcm-fcitx
 	systemctl enable kdm.service
 fi
@@ -98,7 +99,7 @@ $archinstallcmd networkmanager openssh
 systemctl enable NetworkManager
 systemctl enable sshd.socket
 
-#### multimedia, virtualbox & office applications ####
+#### multimedia & virtualbox ####
 if [ -n "$DESKTOPNAME" ]; then
 	$archinstallcmd \
 		a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
@@ -107,8 +108,6 @@ if [ -n "$DESKTOPNAME" ]; then
 		gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
 		skype flashplugin \
 		chromium thunderbird thunderbird-i18n-zh-cn \
-		libreoffice-en-US libreoffice-writer \
-		libreoffice-calc libreoffice-draw libreoffice-impress \
 		poppler-data
 	## calibre     <- for ebook
 	## sox netpbm  <- for fax
@@ -117,24 +116,24 @@ if [ -n "$DESKTOPNAME" ]; then
 
 	$archinstallcmd virtualbox virtualbox-host-modules
 	gpasswd -a $NewUserName vboxusers
-	[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
+#	[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
 fi
 
 #### development tools ####
 $archinstallcmd \
 	linux-headers linux-manpages \
-	gcc binutils gcc-libs bison jdk7-openjdk clang \
-	make libtool autogen autoconf automake patchutils elfutils gdb diffutils \
+	gcc binutils gcc-libs bison jdk8-openjdk clang \
+	make cmake libtool autogen autoconf automake patchutils elfutils gdb diffutils \
 	gnupg gperf expect dejagnu guile gperftools \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
 	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
-	git subversion mercurial quilt tig \
+	git subversion mercurial quilt tig gitg \
 	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
 	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
-	vim ctags cscope indent tree \
+	vim ghex ctags cscope indent tree \
 	minicom ntp \
 	pm-utils acpid \
 	bash-completion screenfetch cpupower
@@ -146,16 +145,17 @@ popd
 
 #### wireshark & misc ####
 if [ -n "$DESKTOPNAME" ]; then
-	$archinstallcmd \
-		wireshark-cli wireshark-gtk \
-		gitg ghex
-
+	$archinstallcmd wireshark-cli libreoffice-fresh libreoffice-fresh-zh-CN
+	if [ "$DESKTOPNAME" = "gnome" ];then
+		$archinstallcmd wireshark-gtk meld
+	elif [ "$DESKTOPNAME" = "kde" ];then
+		$archinstallcmd wireshark-qt kdiff3
+	fi
 	gpasswd -a $NewUserName wireshark
 	setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 fi
 
 [ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
-
 if [ -n "$DESKTOPNAME" ]; then
 	[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 fi
