@@ -67,17 +67,15 @@ if [ -n "$DESKTOPNAME" ]; then
 	Confirm ":: Have thinkpad touchpad ?"  && TTOUCHPAD=true
 
 	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
-	[ "$GPU_NIVIDA" ] && { $archinstallcmd xf86-video-nouveau lib32-nouveau-dri; \
-		$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
+	[ "$GPU_NIVIDA" ] && $archinstallcmd xf86-video-nouveau
 	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
 
-	$archinstallcmd xorg-server xorg-server mesa
+	$archinstallcmd xorg-server xorg-utils mesa mesa-libgl lib32-mesa lib32-mesa-libgl
 	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 fi
 
-$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation \
-	font-bh-ttf ttf-hannom ttf-oxygen opendesktop-fonts ttf-anonymous-pro \
-	ttf-fira-mono ttf-fira-sans ttf-inconsolata wqy-zenhei
+#### fonts ####
+$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation wqy-zenhei
 
 #### base package ####
 $archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
@@ -159,6 +157,9 @@ fi
 if [ -n "$DESKTOPNAME" ]; then
 	[ -f config/xprofile ] && cp config/xprofile /home/$NewUserName/.xprofile
 fi
+
+#### life style ####
+$archinstallcmd fortune-mod
 
 ntpd -g
 hwclock -w
