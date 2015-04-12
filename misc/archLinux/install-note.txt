@@ -138,3 +138,12 @@
         chromium-pepper-flash is the Flash Player plugin(install from [archlinuxcn])
 
         Details: https://wiki.archlinux.org/index.php/Chromium#Flash_Player_plugin
+
+    [d]. private video driver for nvidia
+        - remove: xf86-video-nouveau lib32-nouveau-dri
+        - install: mesa lib32-mesa-libgl xf86-video-intel \
+            nvidia lib32-nvidia-utils bumblebee
+            [Note]: reinstall mesa lib32-mesa-libgl, and don't install lib32-nvidia-libgl
+        - gpasswd -a USERNAME bumblebee
+        - systemctl enable bumblebeed.service
+    Details: https://wiki.archlinux.org/index.php/NVIDIA
