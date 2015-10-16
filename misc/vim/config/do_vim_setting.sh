@@ -9,7 +9,6 @@ echo \
 '::Installed plugins for vim:
     + cscope_macros.vim
     + taglist-plus
-    + clang_complete
     + minibufexplorerpp
     + better-snipmate-snippet
 :: Any issure, pls see ~/.vim/doc/ for detials.'
