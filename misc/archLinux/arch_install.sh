@@ -66,9 +66,14 @@ if [ -n "$DESKTOPNAME" ]; then
 	Confirm ":: Have bluetooth hardware ?" && BLUETOOTH=true
 	Confirm ":: Have thinkpad touchpad ?"  && TTOUCHPAD=true
 
-	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
-	[ "$GPU_NIVIDA" ] && $archinstallcmd xf86-video-nouveau
+    # don't intall lib32-nvidia-libgl
+	[ "$GPU_NIVIDA" ] && { \
+        $archinstallcmd nvidia nvidia-utils lib32-nvidia-utils bumblebee; \
+		$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
+
 	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+    # install intel after nvidia
+	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
 
 	$archinstallcmd xorg-server xorg-utils mesa mesa-libgl lib32-mesa lib32-mesa-libgl
 	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
@@ -122,7 +127,7 @@ $archinstallcmd \
 	linux-headers linux-manpages \
 	gcc binutils gcc-libs bison jdk8-openjdk clang \
 	make cmake libtool autogen autoconf automake patchutils elfutils gdb diffutils \
-	gnupg gperf expect dejagnu guile gperftools \
+	php gnupg gperf expect dejagnu guile gperftools \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
 	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
@@ -132,7 +137,7 @@ $archinstallcmd \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
 	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim ghex ctags cscope indent tree \
-	minicom ntp \
+	minicom ntp tftp-hpa \
 	pm-utils acpid \
 	bash-completion screenfetch cpupower
 
