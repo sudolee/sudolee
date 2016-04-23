@@ -114,6 +114,7 @@ if [ -n "$DESKTOPNAME" ]; then
 		poppler-data
 	## calibre     <- for ebook
 	## sox netpbm  <- for fax
+    ## cmatrix
 
 	[ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
@@ -142,8 +143,7 @@ $archinstallcmd \
 	bash-completion screenfetch cpupower
 
 pushd /usr/bin/
-[ -f python2 ] && { rm -fv python; ln -sv python2 python; }
-[ -f vim ]     && { rm -fv vi;     ln -sv vim vi; }
+[ -f vim ] && { rm -fv vi; ln -sv vim vi; }
 popd
 
 #### wireshark & misc ####

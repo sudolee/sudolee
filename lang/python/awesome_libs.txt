@@ -1,0 +1,4 @@
+https://github.com/vinta/awesome-python
+
+python-pyinotify
+python-pyserial
