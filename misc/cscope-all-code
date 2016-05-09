@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.ld*|\.chh$|\.cc$'
+GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$'
 
 if test -n "$1" -a -d "arch/$1";then
 	find . -path "./arch/" -prune -o -print | grep -E $GREP_OPT > cscope.files
