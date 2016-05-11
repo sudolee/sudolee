@@ -118,9 +118,10 @@ if [ -n "$DESKTOPNAME" ]; then
 
 	[ "$BLUETOOTH" ] && $archinstallcmd bluedevil
 
-	$archinstallcmd virtualbox virtualbox-host-modules
+    # /usr/lib/virtualbox/additions/VBoxGuestAdditions.iso
+	$archinstallcmd virtualbox virtualbox-host-modules-arch virtualbox-guest-iso
 	gpasswd -a $NewUserName vboxusers
-#	[ -f /etc/modules-load.d/virtualbox.conf ] || echo vboxdrv > /etc/modules-load.d/virtualbox.conf
+	systemctl enable systemd-modules-load.service
 fi
 
 #### development tools ####
