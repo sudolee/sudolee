@@ -12,4 +12,4 @@ else
 fi
 (cscope -bq)
 
-(echo "ctags -R"; ctags -R)
+(echo "ctags -R --fields=+lS"; ctags -R --fields=+lS)
