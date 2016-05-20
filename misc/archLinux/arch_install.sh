@@ -88,12 +88,12 @@ $archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-m
 #### desktop env ####
 if [ "$DESKTOPNAME" = "gnome" ];then
 	$archinstallcmd gnome gnome-extra \
-		fcitx fcitx-gtk2 fcitx-gtk3 fcitx-googlepinyin fcitx-configtool
+		fcitx-im fcitx-configtool fcitx-cloudpinyin
 	systemctl enable gdm.service
 elif [ "$DESKTOPNAME" = "kde" ];then
 	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
 		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
-		fcitx-im fcitx-googlepinyin kcm-fcitx
+		fcitx-im kcm-fcitx fcitx-cloudpinyin
 	systemctl enable kdm.service
 fi
 
@@ -133,7 +133,7 @@ $archinstallcmd \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
 	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
-	git subversion mercurial quilt tig gitg \
+	git subversion mercurial quilt tig gitg perl-term-readkey perl-term-read-password \
 	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
