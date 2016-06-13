@@ -107,6 +107,7 @@ if [ -n "$DESKTOPNAME" ]; then
 	$archinstallcmd \
 		a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
 		libtheora libvorbis libxv wavpack x264 xvidcore \
+		mplayer \
 		alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
 		gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
 		skype flashplugin \
