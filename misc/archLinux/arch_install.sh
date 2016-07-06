@@ -130,19 +130,21 @@ $archinstallcmd \
 	linux-headers linux-manpages \
 	gcc binutils gcc-libs bison jdk8-openjdk clang \
 	make cmake libtool autogen autoconf automake patchutils elfutils gdb diffutils \
+	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	php gnupg gperf expect dejagnu guile gperftools \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
 	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
-	git subversion mercurial quilt tig gitg perl-term-readkey perl-term-read-password \
+	git subversion mercurial quilt cvs tig gitg perl-term-readkey perl-term-read-password \
 	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
-	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
 	vim ghex ctags cscope indent tree \
 	minicom ntp tftp-hpa \
 	pm-utils acpid \
+	zsh zsh-completions zsh-doc zsh-lovers zsh-syntax-highlighting \
 	bash-completion screenfetch cpupower
+# zsh configure see: oh-my-zsh
 
 pushd /usr/bin/
 [ -f vim ] && { rm -fv vi; ln -sv vim vi; }
@@ -166,7 +168,7 @@ if [ -n "$DESKTOPNAME" ]; then
 fi
 
 #### life style ####
-$archinstallcmd fortune-mod
+$archinstallcmd fortune-mod cmatrix figlet figlet-fonts
 
 ntpd -g
 hwclock -w
