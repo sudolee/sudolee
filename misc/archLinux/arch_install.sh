@@ -144,7 +144,7 @@ $archinstallcmd \
 	pm-utils acpid \
 	zsh zsh-completions zsh-doc zsh-lovers zsh-syntax-highlighting \
 	bash-completion screenfetch cpupower
-# zsh configure see: oh-my-zsh
+# zsh configure see: oh-my-zsh, theme: bira
 
 pushd /usr/bin/
 [ -f vim ] && { rm -fv vi; ln -sv vim vi; }
