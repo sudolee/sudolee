@@ -12,5 +12,4 @@ echo \
     + better-snipmate-snippet
     + l9
     + acp
-    + echofunc
 :: Any issure, pls see ~/.vim/doc/ for detials.'

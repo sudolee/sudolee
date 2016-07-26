@@ -15,7 +15,7 @@
 
 #define ISSLASH(C) ((C) == '/')
 
-inline long dirent_buf_size(DIR *dirp)
+long dirent_buf_size(DIR *dirp)
 {
 	long name_max, len;
 
@@ -27,7 +27,7 @@ inline long dirent_buf_size(DIR *dirp)
 	return len;
 }
 
-inline int is_dot_or_dotdot(char *pathname)
+int is_dot_or_dotdot(char *pathname)
 {
 	if (pathname[0] == '.') {
 		char sep = pathname[(pathname[1] == '.') + 1];
@@ -36,7 +36,7 @@ inline int is_dot_or_dotdot(char *pathname)
 		return 0;
 }
 
-inline int is_directory(char *pathname)
+int is_directory(char *pathname)
 {
 	struct stat stat_buf;
 

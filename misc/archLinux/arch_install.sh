@@ -91,10 +91,9 @@ if [ "$DESKTOPNAME" = "gnome" ];then
 		fcitx-im fcitx-configtool fcitx-cloudpinyin
 	systemctl enable gdm.service
 elif [ "$DESKTOPNAME" = "kde" ];then
-	$archinstallcmd kde-meta kde-l10n-zh_cn kdemultimedia kdeplasma-applets-plasma-nm \
-		kdemultimedia-kmix archlinux-themes-kdm appmenu-qt \
-		fcitx-im kcm-fcitx fcitx-cloudpinyin
-	systemctl enable kdm.service
+	$archinstallcmd plasma sddm kde-applications kde-l10n-zh_cn \
+		fcitx-im fcitx-cloudpinyin
+	systemctl enable sddm.service
 fi
 
 #### networkmanager & ssh ####
