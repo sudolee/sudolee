@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <unwind.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
@@ -14,6 +14,14 @@
 
 #define BT_BUFFER_SIZE 64
 
+char *getTimeString(void)
+{
+    time_t tm;
+    time(&tm);
+    return ctime(&tm);
+}
+
+#if 0
 void dump_backTrace1(void)
 {
     int i, nptrs;
@@ -38,6 +46,7 @@ void dump_backTrace1(void)
 
     free(strings);
 }
+#endif
 
 struct BacktraceState
 {
@@ -69,6 +78,8 @@ size_t captureBacktrace(void** buffer, size_t max)
 
 void dump_backtrace(std::ostream& os, void** buffer, size_t count)
 {
+    os << ">>> " << getTimeString() << "\n";
+
     for (size_t idx = 0; idx < count; ++idx) {
         const void* addr = buffer[idx];
         const char* symbol = "";
@@ -82,18 +93,28 @@ void dump_backtrace(std::ostream& os, void** buffer, size_t count)
     }
 }
 
-static void signal_handler(int signum)
+static void signal_handler(int signum, siginfo_t *sigInfo, void *ctx)
 {
     /* Take appropriate actions for signal delivery */
     if (signum == SIGSEGV) {
         printf("signal SIGSEGV catching\n");
 
+#if defined(__arm__)
+        struct ucontext *uc = (struct ucontext *)ctx;
+        unsigned long pc;
+        pc = uc->uc_mcontext.arm_pc;
+        printf("pc->: %#lx\n", pc);
+#elif defined(__aarch64__)
+        struct ucontext *uc = (struct ucontext *)ctx;
+        unsigned long pc;
+        pc = uc->uc_mcontext.pc;
+        printf("pc->: %#lx\n", pc);
+#else
         void* buffer[BT_BUFFER_SIZE];
         std::ostringstream oss;
-
         dump_backtrace(oss, buffer, captureBacktrace(buffer, BT_BUFFER_SIZE));
-
         printf("%s", oss.str().c_str());
+#endif
 
         printf("signal SIGSEGV handled\n");
         exit(EXIT_FAILURE);
@@ -104,9 +125,9 @@ void signal_init()
 {
     struct sigaction sa;
 
-    sa.sa_handler = signal_handler;
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags     = SA_SIGINFO;
+    sa.sa_sigaction = signal_handler;
 
     if (sigaction(SIGSEGV, &sa, NULL) == -1) {
         perror("sigaction");
@@ -130,7 +151,9 @@ void f1()
 
 int main(int argc, char const *argv[])
 {
+#if defined(__linux__) || defined(__apple__)
     signal_init();
+#endif
 
     f1();
 
