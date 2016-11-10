@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <signal.h>
 
-//#include <execinfo.h>
 #include <unwind.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
+//#include <ucontext.h>
 
 //-fvisibility=hidden
 
@@ -22,6 +22,8 @@ char *getTimeString(void)
 }
 
 #if 0
+#include <execinfo.h>
+
 void dump_backTrace1(void)
 {
     int i, nptrs;
@@ -50,13 +52,13 @@ void dump_backTrace1(void)
 
 struct BacktraceState
 {
-    void** current;
-    void** end;
+    void **current;
+    void **end;
 };
 
-static _Unwind_Reason_Code unwindCallback(struct _Unwind_Context* context, void* arg)
+static _Unwind_Reason_Code unwindCallback(struct _Unwind_Context *context, void *arg)
 {
-    BacktraceState* state = static_cast<BacktraceState*>(arg);
+    BacktraceState *state = static_cast<BacktraceState*>(arg);
     uintptr_t pc = _Unwind_GetIP(context);
     if (pc) {
         if (state->current == state->end) {
@@ -68,7 +70,7 @@ static _Unwind_Reason_Code unwindCallback(struct _Unwind_Context* context, void*
     return _URC_NO_REASON;
 }
 
-size_t captureBacktrace(void** buffer, size_t max)
+size_t captureBacktrace(void **buffer, size_t max)
 {
     BacktraceState state = {buffer, buffer + max};
     _Unwind_Backtrace(unwindCallback, &state);
@@ -76,9 +78,10 @@ size_t captureBacktrace(void** buffer, size_t max)
     return state.current - buffer;
 }
 
-void dump_backtrace(std::ostream& os, void** buffer, size_t count)
+void dump_backtrace(std::ostream &os, void **buffer, size_t count)
 {
-    os << ">>> " << getTimeString() << "\n";
+    os << "=================================================================\n"
+        << ">>> " << getTimeString() << "\n";
 
     for (size_t idx = 0; idx < count; ++idx) {
         const void* addr = buffer[idx];
@@ -104,6 +107,18 @@ static void signal_handler(int signum, siginfo_t *sigInfo, void *ctx)
         unsigned long pc;
         pc = uc->uc_mcontext.arm_pc;
         printf("pc->: %#lx\n", pc);
+        printf("lr->: %#lx\n", uc->uc_mcontext.arm_lr);
+        printf("sp->: %#lx\n", uc->uc_mcontext.arm_sp);
+        printf("ip->: %#lx\n", uc->uc_mcontext.arm_ip);
+        printf("fp->: %#lx\n", uc->uc_mcontext.arm_fp);
+
+        unsigned long *oldpc = (unsigned long *)uc->uc_mcontext.arm_fp;
+        int i, max;
+        max = (uc->uc_mcontext.arm_fp - uc->uc_mcontext.arm_sp) / sizeof(long);
+        for (i = 0; i <= max; i++) {
+            printf(" #%2d->: %#lx\n", i, *oldpc--);
+        }
+
 #elif defined(__aarch64__)
         struct ucontext *uc = (struct ucontext *)ctx;
         unsigned long pc;
@@ -134,28 +149,29 @@ void signal_init()
     }
 }
 
-void f3()
-{
+void f3() {
     *(int *)0 = 0;
+    printf("%s->%d\n", __func__, __LINE__);
 }
 
-void f2()
-{
+void f2() {
     f3();
+    printf("%s->%d\n", __func__, __LINE__);
 }
 
-void f1()
-{
+void f1() {
     f2();
+    printf("%s->%d\n", __func__, __LINE__);
 }
 
 int main(int argc, char const *argv[])
 {
-#if defined(__linux__) || defined(__apple__)
+#if defined(__linux__) || defined(__APPLE__)
     signal_init();
 #endif
 
     f1();
+    printf("%s->%d\n", __func__, __LINE__);
 
     return 0;
 }
