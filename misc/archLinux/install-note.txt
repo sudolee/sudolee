@@ -147,3 +147,9 @@
         - gpasswd -a USERNAME bumblebee
         - systemctl enable bumblebeed.service
     Details: https://wiki.archlinux.org/index.php/NVIDIA
+
+    [e]. fcitx not work with gdm
+        - gsettings set org.gnome.settings-daemon.plugins.xsettings overrides "{'Gtk/IMModule':<'fcitx'>}"
+        Details:
+            https://bbs.archlinux.org/viewtopic.php?id=196069
+            https://bugzilla.gnome.org/show_bug.cgi?id=747825
