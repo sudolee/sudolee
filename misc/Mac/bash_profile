@@ -1,0 +1,27 @@
+
+## ~/.bash_profile
+
+PS1='\[\e[1;35m\]\u:\[\e[33m\]\w\$\[\e[0m\] '
+
+alias ls='ls -G'
+
+# brew install bash-completion
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+    . $(brew --prefix)/etc/bash_completion
+fi
+
+cscope-create-all()
+{
+    GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.py$'
+    if test -n "$1" -a -d "arch/$1";then
+        find . -path "./arch/" -prune -o -print | grep -E $GREP_OPT > cscope.files
+        find ./arch/$1 | grep -E $GREP_OPT >> cscope.files
+        echo "GEN cscope <- arch/$1"
+    else
+        find . | grep -E $GREP_OPT > cscope.files
+        echo "GEN cscope"
+    fi
+    (cscope -bq)
+
+    (echo "GEN ctags"; ctags -R --fields=+lS)
+}

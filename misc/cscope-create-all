@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
 
-GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$'
+GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.py$'
 
 if test -n "$1" -a -d "arch/$1";then
 	find . -path "./arch/" -prune -o -print | grep -E $GREP_OPT > cscope.files
@@ -12,4 +12,4 @@ else
 fi
 (cscope -bq)
 
-(echo "ctags -R --fields=+lS"; ctags -R --fields=+lS)
+(echo "GEN ctags"; ctags -R --fields=+lS)
