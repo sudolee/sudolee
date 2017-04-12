@@ -43,6 +43,9 @@ set ignorecase
 "" switch between two windows, as ctrl+ww
 nmap <F4> <C-W>w
 
+nmap <Space> %
+vmap <Space> %
+
 "" Taglist
 nmap tl :Tlist<ENTER>
 "map <silent> <F4> :TlistToggle<cr>
