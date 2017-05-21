@@ -3,15 +3,18 @@
 ""
 
 if v:lang =~ "utf8$" || v:lang =~ "UTF-8$"
-	set fileencodings=utf-8,latin1
+    set fileencodings=utf-8,latin1
 endif
 
+syntax enable
+
+"color vividchalk
 set nu
 set title
 syntax on
 set cursorline
 highlight CursorLine ctermbg=darkblue ctermfg=grey cterm=bold
-set colorcolumn=80
+set colorcolumn=132
 highlight ColorColumn ctermbg=red
 "set cursorline cursorcolumn
 "highlight CursorColumn ctermbg=darkblue ctermfg=grey cterm=bold
@@ -43,9 +46,6 @@ set ignorecase
 "" switch between two windows, as ctrl+ww
 nmap <F4> <C-W>w
 
-nmap <Space> %
-vmap <Space> %
-
 "" Taglist
 nmap tl :Tlist<ENTER>
 "map <silent> <F4> :TlistToggle<cr>
@@ -55,3 +55,10 @@ let Tlist_File_Fold_Auto_Close=1
 
 set list
 set listchars=tab:¦\ ,trail:~,extends:»,precedes:«
+
+nmap <Space> %
+vmap <Space> %
+
+nmap ma :set mouse=a<CR>
+nmap m<Space> :set mouse=<CR>
+
