@@ -1,15 +1,14 @@
 #!/bin/bash -e
 
-GREP_OPT='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.py$'
+SOURCE_SUFFIX='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.py$'
+SOURCE_LIST="_source.list"
 
 if test -n "$1" -a -d "arch/$1";then
-	find -L . -path "./arch/" -prune -o -print | grep -E $GREP_OPT > cscope.files
-	find -L ./arch/$1 | grep -E $GREP_OPT >> cscope.files
-	echo "GEN cscope <- arch/$1"
+	find -L . -path "./arch/" -prune -o -print | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
+	find -L ./arch/$1 | grep -E $SOURCE_SUFFIX >> $SOURCE_LIST
 else
-	find -L . | grep -E $GREP_OPT > cscope.files
-	echo "GEN cscope"
+	find -L . | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
 fi
-(cscope -bq)
 
-(echo "GEN ctags"; ctags -R --fields=+lS)
+(echo "GEN cscope"; cscope -bq            -i $SOURCE_LIST)
+(echo "GEN ctags";  ctags -R --fields=+lS -L $SOURCE_LIST)
