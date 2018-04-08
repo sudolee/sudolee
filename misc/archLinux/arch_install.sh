@@ -75,7 +75,7 @@ if [ -n "$DESKTOPNAME" ]; then
     # install intel after nvidia
 	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
 
-	$archinstallcmd xorg-server xorg-utils mesa mesa-libgl lib32-mesa lib32-mesa-libgl
+	$archinstallcmd xorg-server mesa mesa-libgl lib32-mesa lib32-mesa-libgl
 	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 fi
 
@@ -108,8 +108,8 @@ if [ -n "$DESKTOPNAME" ]; then
 		libtheora libvorbis libxv wavpack x264 xvidcore \
 		mplayer \
 		alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
-		gst-plugins-good gstreamer0.10-good-plugins gst-libav gst-plugins-ugly \
-		skype flashplugin \
+		gst-plugins-good gst-libav gst-plugins-ugly \
+		flashplugin \
 		chromium thunderbird thunderbird-i18n-zh-cn \
 		poppler-data
 	## calibre     <- for ebook
@@ -129,7 +129,7 @@ $archinstallcmd \
 	linux-headers linux-manpages \
 	gcc binutils gcc-libs bison jdk8-openjdk clang \
 	make cmake libtool autogen autoconf automake patchutils elfutils gdb diffutils \
-	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 libestr \
+	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 \
 	php gnupg gperf expect dejagnu guile gperftools \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
@@ -138,9 +138,8 @@ $archinstallcmd \
 	gawk sed lua tcl tk perl markdown \
 	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
-	vim ghex ctags cscope indent tree \
-	minicom ntp tftp-hpa \
-	pm-utils acpid \
+	vim ghex ctags cscope tree \
+	minicom ntp tftp-hpa acpid \
 	zsh zsh-completions zsh-doc zsh-lovers zsh-syntax-highlighting \
 	bash-completion screenfetch cpupower
 # zsh configure see: oh-my-zsh, theme: bira
@@ -167,7 +166,7 @@ if [ -n "$DESKTOPNAME" ]; then
 fi
 
 #### life style ####
-$archinstallcmd fortune-mod cmatrix figlet figlet-fonts
+$archinstallcmd fortune-mod cmatrix figlet
 
 ntpd -g
 hwclock -w
