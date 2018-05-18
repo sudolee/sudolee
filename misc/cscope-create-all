@@ -12,3 +12,4 @@ fi
 
 (echo "GEN cscope"; cscope -bq            -i $SOURCE_LIST)
 (echo "GEN ctags";  ctags -R --fields=+lS -L $SOURCE_LIST)
+rm -f $SOURCE_LIST
