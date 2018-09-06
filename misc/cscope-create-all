@@ -4,12 +4,16 @@ SOURCE_SUFFIX='\.c$|\.h$|\.S$|\.cpp$|\.java$|\.lds$|\.chh$|\.cc$|\.py$'
 SOURCE_LIST="_source.list"
 
 if test -n "$1" -a -d "arch/$1";then
-	find -L . -path "./arch/" -prune -o -print | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
-	find -L ./arch/$1 | grep -E $SOURCE_SUFFIX >> $SOURCE_LIST
+	find -L . -path "./arch/" -prune -o -print 2>/dev/null | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
+	find -L ./arch/$1 2>/dev/null | grep -E $SOURCE_SUFFIX >> $SOURCE_LIST
 else
-	find -L . | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
+	find -L . 2>/dev/null | grep -E $SOURCE_SUFFIX > $SOURCE_LIST
 fi
+
+# skip tmp file list
+sed -i '/\/build/d' $SOURCE_LIST
+sed -i '/\/oe-workdir/d' $SOURCE_LIST
 
 (echo "GEN cscope"; cscope -bq            -i $SOURCE_LIST)
 (echo "GEN ctags";  ctags -R --fields=+lS -L $SOURCE_LIST)
-rm -f $SOURCE_LIST
+#rm -f $SOURCE_LIST
