@@ -1,0 +1,3 @@
+brew install ctags
+# add this line to ~/.bashrc or ~/.zshrc
+alias ctags="`brew --prefix`/bin/ctags"
