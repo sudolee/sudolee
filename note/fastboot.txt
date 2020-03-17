@@ -1,8 +1,0 @@
-bootable/bootloader/lk/app/aboot/aboot.c
-aboot_init()
-	- target_get_max_flash_size()
-		size = (512 - 64) * 1024 * 1024 - SCRATCH_ADDR = 448MB - SCRATCH_ADDR = 436.40625MB
-		SCRATCH_ADDR = 0xB98000(target/msm7627a/rules.mk)
-	- target_get_scratch_address()
-		scratch address = SCRATCH_ADDR
-	- 所以fastboot下载时可用的内存为: SCRATCH_ADDR ~ 448MB = 0xB98000~0x1C000000

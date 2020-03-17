@@ -1,0 +1,10 @@
+
+1, create new user:
+    $ sudo useradd -m -g users -s /bin/bash -d /path/of/user/home $new_user
+
+2, add user into group sudo:
+    $ sudo adduser $new_user sudo
+
+3, mount disk onto given place:
+    $ blkid
+    $ add /etc/fstab
