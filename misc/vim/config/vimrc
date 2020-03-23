@@ -63,4 +63,4 @@ nmap ma :set mouse=a<CR>
 nmap m<Space> :set mouse=<CR>
 
 "delete space end of line
-nmap ds :%s/\s\+$//<CR
+nmap ds :%s/\s\+$//<CR>
