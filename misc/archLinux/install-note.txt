@@ -61,8 +61,8 @@
 	Include = /etc/pacman.d/mirrorlist
 
 10, install base system
-	$ pacstrap /mnt base \
-		wpa_supplicant    # For wireless connective.
+	$ pacstrap /mnt base linux linux-firmware \
+		vim wpa_supplicant    # wpa_supplicant for wireless connective.
 	$ genfstab -U -p /mnt >> /mnt/etc/fstab
 	$ arch-chroot /mnt /bin/bash
 
@@ -80,7 +80,7 @@
 	[d] hwclock --systohc --utc
 	[e] echo YourHostName > /etc/hostname
 	[f] network configure : goto step [6]
-	[g] mkinitcpio -p linux
+	[g] mkinitcpio -P
 	[h] passwd
 	[i] GRUB
 		$ pacman -S grub-bios os-prober
@@ -120,17 +120,17 @@
 		$ /etc/skel/
 
 15, Issues
-	[a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
-		Add code below into /etc/default/grub:
-		"GRUB_DISABLE_SUBMENU=y"
-	[b].
-		[archlinuxcn]
-		#The Chinese Arch Linux communities packages.
-		SigLevel = Optional TrustAll
-		Server   = http://repo.archlinuxcn.org/$arch
+    [a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
+        Add code below into /etc/default/grub:
+            "GRUB_DISABLE_SUBMENU=y"
+    [b].
+        [archlinuxcn]
+        #The Chinese Arch Linux communities packages.
+        SigLevel = Optional TrustAll
+        Server   = http://repo.archlinuxcn.org/$arch
 
-		[archlinuxfr]
-		Server = http://repo.archlinux.fr/$arch
+        [archlinuxfr]
+        Server = http://repo.archlinux.fr/$arch
 
     [c].
         Chromium no longer supports the Netscape plugin API (NPAPI), so flashplugin
@@ -153,3 +153,7 @@
         Details:
             https://bbs.archlinux.org/viewtopic.php?id=196069
             https://bugzilla.gnome.org/show_bug.cgi?id=747825
+
+    [f]. archlinux libspeechd unknown trust:
+        pacman-key --init
+        pacman-key -populate archlinux

@@ -68,22 +68,22 @@ if [ -n "$DESKTOPNAME" ]; then
 
     # don't intall lib32-nvidia-libgl
 	[ "$GPU_NIVIDA" ] && { \
-        $archinstallcmd nvidia nvidia-utils lib32-nvidia-utils bumblebee; \
+        $archinstallcmd nvidia nvidia-utils bumblebee; \
 		$archinstallcmd bumblebee bbswitch && gpasswd -a $NewUserName bumblebee; }
 
-	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati lib32-ati-dri
+	[ "$GPU_ATI" ]    && $archinstallcmd xf86-video-ati
     # install intel after nvidia
-	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel lib32-intel-dri
+	[ "$GPU_INTEL" ]  && $archinstallcmd xf86-video-intel
 
-	$archinstallcmd xorg-server mesa mesa-libgl lib32-mesa lib32-mesa-libgl
+	$archinstallcmd xorg-server mesa
 	[ "$TTOUCHPAD" ] && mkdir -p /etc/X11/xorg.conf.d && cp -f ./config/{20-thinkpad.conf,synaptics.conf} /etc/X11/xorg.conf.d/
 fi
 
 #### fonts ####
-$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei ttf-dejavu ttf-liberation wqy-zenhei
+$archinstallcmd ttf-dejavu ttf-liberation wqy-zenhei
 
 #### base package ####
-$archinstallcmd base-devel xf86-input-synaptics xf86-input-keyboard xf86-input-mouse
+$archinstallcmd base-devel xf86-input-synaptics
 
 #### desktop env ####
 if [ "$DESKTOPNAME" = "gnome" ];then
@@ -99,58 +99,35 @@ fi
 #### networkmanager & ssh ####
 $archinstallcmd networkmanager openssh
 systemctl enable NetworkManager
-systemctl enable sshd.socket
-
-#### multimedia & virtualbox ####
-if [ -n "$DESKTOPNAME" ]; then
-	$archinstallcmd \
-		a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 \
-		libtheora libvorbis libxv wavpack x264 xvidcore \
-		mplayer \
-		alsa-utils alsa-plugins dbus libsamplerate pulseaudio pulseaudio-alsa \
-		gst-plugins-good gst-libav gst-plugins-ugly \
-		flashplugin \
-		chromium thunderbird thunderbird-i18n-zh-cn \
-		poppler-data
-	## calibre     <- for ebook
-	## sox netpbm  <- for fax
-    ## cmatrix
-
-	[ "$BLUETOOTH" ] && $archinstallcmd bluedevil
-
-    # /usr/lib/virtualbox/additions/VBoxGuestAdditions.iso
-	$archinstallcmd virtualbox virtualbox-host-modules-arch virtualbox-guest-iso
-	gpasswd -a $NewUserName vboxusers
-	systemctl enable systemd-modules-load.service
-fi
+systemctl enable sshd.service
 
 #### development tools ####
 $archinstallcmd \
-	linux-headers linux-manpages \
-	gcc binutils gcc-libs bison jdk8-openjdk clang \
+	linux-headers man-pages \
+	gcc binutils gcc-libs bison \
 	make cmake libtool autogen autoconf automake patchutils elfutils gdb diffutils \
-	m4 bc gmp mpfr mpc ppl lib32-ncurses lib32-readline lib32-zlib libx11 \
-	php gnupg gperf expect dejagnu guile gperftools \
+	m4 bc gmp mpfr mpc ppl \
+	gnupg gperf expect dejagnu guile gperftools \
 	mtd-utils util-linux ntfs-3g exfat-utils e2fsprogs dosfstools \
 	tar zip unzip bzip2 p7zip libzip zlib cpio \
-	flex gettext ncurses readline asciidoc rsync rrdtool texinfo \
-	git subversion mercurial quilt cvs tig gitg perl-term-readkey perl-term-read-password \
-	gawk sed lua tcl tk perl markdown \
-	python python2 python-markdown python2-pyopenssl python-pyopenssl scapy \
+	flex readline asciidoc rsync \
+	git tig gitg \
+	gawk sed markdown \
+	python3 scapy \
 	hping libnet net-tools axel wget curl tcpdump tcpreplay acl iw ethtool \
 	vim ghex ctags cscope tree \
 	minicom ntp tftp-hpa acpid \
 	zsh zsh-completions zsh-doc zsh-lovers zsh-syntax-highlighting \
-	bash-completion screenfetch cpupower
+	bash-completion screenfetch cpupower \
+    valgrind tcl pkgconf docker
 # zsh configure see: oh-my-zsh, theme: bira
 
-pushd /usr/bin/
-[ -f vim ] && { rm -fv vi; ln -sv vim vi; }
-popd
+gpasswd -a $NewUserName docker
+newgrp docker # flush groups
 
 #### wireshark & misc ####
 if [ -n "$DESKTOPNAME" ]; then
-	$archinstallcmd wireshark-cli libreoffice-fresh libreoffice-fresh-zh-CN
+	$archinstallcmd wireshark wireshark-cli
 	if [ "$DESKTOPNAME" = "gnome" ];then
 		$archinstallcmd wireshark-gtk meld
 	elif [ "$DESKTOPNAME" = "kde" ];then
