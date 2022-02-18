@@ -61,8 +61,8 @@
 	Include = /etc/pacman.d/mirrorlist
 
 10, install base system
-	$ pacstrap /mnt base linux linux-firmware \
-		vim wpa_supplicant    # wpa_supplicant for wireless connective.
+	$ pacstrap /mnt base linux linux-firmware vim \
+		wpa_supplicant    # For wireless connective.
 	$ genfstab -U -p /mnt >> /mnt/etc/fstab
 	$ arch-chroot /mnt /bin/bash
 
