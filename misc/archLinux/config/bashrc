@@ -93,3 +93,5 @@ fi
 if [ -f /etc/profile.d/vte.sh ]; then
     . /etc/profile.d/vte.sh
 fi
+
+alias man='man --locale zh_CN'
