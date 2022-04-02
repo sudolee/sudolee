@@ -1,19 +1,16 @@
 #!/bin/bash -e
 
-SOURCE_SUFFIX='*.c$|*.h$|*.S$|*.cpp$|*.java$|*.lds$|*.chh$|*.cc$|*.py$'
+SOURCE_SUFFIX="-name "*.c" -o -name "*.h" -o -name "*.S" -o -name "*.cpp" -o -name "*.java" -o -name "*.lds" -o -name "*.chh" -o -name "*.cc" -o -name "*.py""
 SOURCE_LIST="_source.list"
 
 if test -n "$1" -a -d "arch/$1";then
-    find -L . -path "./arch/" -name $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; > $SOURCE_LIST
-    find -L ./arch/$1         -name $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; >> $SOURCE_LIST
+    find -L . -path "./arch/" $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; > $SOURCE_LIST
+    find -L ./arch/$1         $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; >> $SOURCE_LIST
 else
-    find -L . -name $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; > $SOURCE_LIST
+    find -L . $SOURCE_SUFFIX -exec realpath --relative-to=. {} \; > $SOURCE_LIST
 fi
 
-# skip tmp file list
-sed -i '/\/build/d' $SOURCE_LIST
-sed -i '/\/oe-workdir/d' $SOURCE_LIST
-
+echo $SOURCE_LIST
 (echo "GEN cscope"; cscope -bq            -i $SOURCE_LIST)
 (echo "GEN ctags";  ctags -R --fields=+lS -L $SOURCE_LIST)
 rm -f $SOURCE_LIST
