@@ -24,7 +24,7 @@ sudo apt-get install \
 systemctl enable ssh.socket
 sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
-pip3 install j2cli
+pip3 install j2cli enum34 pyangbind
 
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo \
