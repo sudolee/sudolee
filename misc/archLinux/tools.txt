@@ -1,0 +1,19 @@
+AUR:
+    https://aur.archlinux.org/wps-office.git
+    https://aur.archlinux.org/wps-office-365.git
+    https://aur.archlinux.org/wemeet-bin.git
+    https://aur.archlinux.org/feishu-bin.git
+    https://aur.archlinux.org/wechat-universal-bwrap.git
+    https://aur.archlinux.org/todesk-bin.git
+    https://aur.archlinux.org/sunloginclient.git
+    https://aur.archlinux.org/qqmusic-bin.git
+    https://aur.archlinux.org/linuxqq.git
+
+terminal emulator:
+    terminator
+    kitty
+    alacritty
+
+
+> https://github.com/ihchiz/Awesome-Linux-Software-zh_CN
+> https://arch.icekylin.online/guide/rookie/graphic-driver.html

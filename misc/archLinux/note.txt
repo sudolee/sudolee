@@ -1,0 +1,132 @@
+1, download:
+	https://www.archlinux.org/download/
+
+2, create bootalbe USB strick:
+	dd bs=4M if=archlinux.iso of=/dev/sdx
+
+3, Is it UEFI ? 64-bit x64 or 32-bit IA32 UEFI ?
+    cat /sys/firmware/efi/fw_platform_size
+
+4, /etc/locale.gen
+	$ sed -i s/\#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+		uncomment #en_US.UTF-8 UTF-8
+	$ locale-gen
+	$ export LANG=en_US.UTF-8
+
+5, ping -c 3 www.baidu.com
+	If okay, skip step[6].
+
+6, set network
+	$ set /etc/resolv.conf
+		nameserver 223.5.5.5
+		nameserver 8.8.8.8
+
+	[wired]
+		$ ip addr show
+		$ ip link set enp0s25 up
+		--static
+			$ ip addr add 192.168.x.124/24 dev enp0s25
+			$ ip route add default via 192.168.x.1
+
+	[wireless]
+		$ iwconfig / iw dev
+		$ ip link set wlp3s0 up
+		$ iw dev wlp3s0 scan | grep SSID
+		--connect to WPA/WPA2 wifi
+			$ wpa_passphrase [ssid] [passphrase] > wl.pw
+			$ wpa_supplicant -B -iwlp3s0 -cwl.pw
+		--dynamic ip
+			$ dhcpcd wlp3s0
+
+7, partitions
+	$ fdisk /dev/sda
+        - g-> create new empty gpt talbe; n-> create new part; w-> write
+        - EFI partitin at least 100MiB, t-> change type to: EFI System
+            - 512MiB for old machine
+        - swap partition = memory size, at least 4GiB
+        - root partition at least 32GiB
+        - home partition all the free
+
+    $ mkfs.fat -F 32 /dev/efi_partition
+	$ mkfs.xfs /dev/root_partition
+	$ mkfs.xfs /dev/home_partition
+	$ mkswap /dev/swap_partition
+	$ swapon /dev/swap_partition
+
+8, mount
+	$ mount /dev/root_partition /mnt
+	$ mount --mkdir /dev/efi_partition /mnt/boot
+	$ mount --mkdir /dev/home_partition /mnt/home
+
+9, set /etc/pacman.d/mirrorlist
+	Server = http://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
+	$ pacman -Syy
+
+10, install base system
+    $ pacstrap -K /mnt base linux linux-firmware vim wpa_supplicant dhcpcd grub efibootmgr xfsprogs
+	$ genfstab -U /mnt >> /mnt/etc/fstab
+	$ arch-chroot /mnt /bin/bash
+
+11, configure dest system
+	- locale.gen + locale.conf
+		$ sed -i s/\#en_US.UTF-8/en_US.UTF-8/g /etc/locale.gen
+			uncomment #en_US.UTF-8 UTF-8
+		$ echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+		$ locale-gen
+	- set /etc/vconsole.conf
+		KEYMAP=us
+	- ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	- hwclock --systohc
+	- echo HostName > /etc/hostname
+	- mkinitcpio -P
+	- passwd
+	- GRUB
+        $ grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+        $ grub-mkconfig -o /boot/grub/grub.cfg
+        每次安装或者移除一个内核后，都需要重新运行一次 grub-mkconfig 命令
+	- $ exit; umount -R /mnt; reboot
+
+
+12, nivida
+    check am i using wayland or x11?
+    echo $XDG_SESSION_TYPE
+
+13, Input method & Fonts
+  - fcitx
+       Details -> https://wiki.archlinux.org/index.php/Fcitx_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
+  - 中文字体: https://aur.archlinux.org/packages/ttf-jf-openhuninn
+
+14, System setting
+    $ vim /etc/ssh/sshd_config
+        banner /path/of/banner       # for welcome message
+        PermitRootLogin no
+
+15, office
+    https://aur.archlinux.org/packages/wechat-universal-bwrap
+    https://aur.archlinux.org/packages/feishu-bin
+    https://www.wps.cn/product/wpslinux
+    https://aur.archlinux.org/packages/wemeet-bin
+
+16, Issues
+    [a]. grub-mkconfig : out of memory, syntax error (archlinux version=2013.12.01)
+        Add code below into /etc/default/grub:
+            "GRUB_DISABLE_SUBMENU=y"
+
+    [b]. private video driver for nvidia
+        - remove: xf86-video-nouveau lib32-nouveau-dri
+        - install: mesa lib32-mesa-libgl xf86-video-intel \
+            nvidia lib32-nvidia-utils bumblebee
+            [Note]: reinstall mesa lib32-mesa-libgl, and don't install lib32-nvidia-libgl
+        - gpasswd -a USERNAME bumblebee
+        - systemctl enable bumblebeed.service
+    Details: https://wiki.archlinux.org/index.php/NVIDIA
+
+    [c]. fcitx not work with gdm
+        - gsettings set org.gnome.settings-daemon.plugins.xsettings overrides "{'Gtk/IMModule':<'fcitx'>}"
+        Details:
+            https://bbs.archlinux.org/viewtopic.php?id=196069
+            https://bugzilla.gnome.org/show_bug.cgi?id=747825
+
+    [d]. archlinux libspeechd unknown trust:
+        pacman-key --init
+        pacman-key -populate archlinux
