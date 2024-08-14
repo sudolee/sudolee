@@ -22,20 +22,17 @@ read -p ":: Enter your new user name : " NewUserName
 [[ -z "$NewUserName" ]] && { echo ":: [Warning] - Cannot coutinue without new user name, :("; exit; }
 Confirm ":: Will create new user \"$NewUserName\"," || { echo ":: [Warning] - Cannot continue without new UserName. :("; exit; }
 
-useradd -m -g users,wheel -s /bin/bash $NewUserName
+useradd -m -g users -s /bin/bash $NewUserName
 echo ":: Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
 
-#### base package ####
-$archinstallcmd base-devel sudo
 # Uncomment to allow members of group wheel to execute any command
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL:ALL) ALL/g' /etc/sudoers
-
+gpasswd -a $NewUserName wheel
 
 #### fonts & input ####
-$archinstallcmd xf86-input-libinput fcitx ttf-fira-code ttf-firacode-nerd adobe-source-han-serif-cn-fonts
-# wqy-microhei
-
-#### desktop env ####
+$archinstallcmd xf86-input-libinput ttf-fira-code ttf-firacode-nerd adobe-source-han-serif-cn-fonts
+$archinstallcmd fcitx5-im fcitx5-configtool fcitx5-chinese-addons fcitx5-rime fcitx5-pinyin-zhwiki rime-pinyin-zhwiki \
+	fcitx5-breeze fcitx5-nord fcitx5-material-color 
 
 #### networkmanager & ssh ####
 $archinstallcmd networkmanager openssh
@@ -44,6 +41,7 @@ systemctl enable sshd.service
 
 #### development tools ####
 $archinstallcmd \
+    base-devel sudo \
     linux-headers \
     man-db man-pages man-pages-zh_cn \
     gcc binutils gcc-libs bison \
@@ -60,18 +58,15 @@ $archinstallcmd \
     bash-completion screenfetch cpupower \
     nodejs npm \
     docker
-    # zsh configure see: oh-my-zsh, theme: bira
-
-gpasswd -a $NewUserName docker
 
 #### wireshark & misc ####
+gpasswd -a $NewUserName docker
 gpasswd -a $NewUserName wireshark
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
 #### user config
 [ -f config/bashrc ] && cp config/bashrc /home/$NewUserName/.bashrc
 [ -f config/inputrc ] && cp config/inputrc /home/$NewUserName/.inputrc
-[ -f config/fcitx.sh ] && bash ./config/fcitx.sh
 
 #### life style ####
 $archinstallcmd fortune-mod figlet

@@ -1,5 +1,5 @@
 AUR:
-    https://aur.archlinux.org/wps-office.git
+    https://aur.archlinux.org/microsoft-edge-stable-bin.git
     https://aur.archlinux.org/wps-office-365.git
     https://aur.archlinux.org/wemeet-bin.git
     https://aur.archlinux.org/feishu-bin.git
