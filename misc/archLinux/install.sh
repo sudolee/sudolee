@@ -27,7 +27,7 @@ echo ":: Enter passwd for new user \"$NewUserName\"." && passwd $NewUserName
 
 # Uncomment to allow members of group wheel to execute any command
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL:ALL) ALL/g' /etc/sudoers
-gpasswd -a $NewUserName wheel
+gpasswd -a $NewUserName sudo
 
 #### fonts & input ####
 $archinstallcmd xf86-input-libinput ttf-fira-code ttf-firacode-nerd adobe-source-han-serif-cn-fonts
