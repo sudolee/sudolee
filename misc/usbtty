@@ -1,0 +1,5 @@
+#!/bin/bash
+
+USB_DEVICE=$(ls -1 /dev/tty.usb* 2>/dev/null | head -n 1)
+
+[ -n "$USB_DEVICE" ] && sudo minicom -D "$USB_DEVICE" || echo "没有找到USB设备"
