@@ -1,0 +1,54 @@
+" 启用语法高亮
+syntax on
+
+" 自动识别文件类型并加载相应插件
+filetype plugin indent on
+
+" 启用真彩色支持（需终端支持）
+set termguicolors
+
+" 设置编码
+set encoding=utf-8
+
+" 设置缩进与格式
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set autoindent
+
+" 行号
+set number
+set relativenumber
+
+" 高亮当前行
+set cursorline
+
+call plug#begin('~/.vim/plugged')
+
+" --- 前端语法高亮 ---
+Plug 'pangloss/vim-javascript'        " JS 语法增强
+Plug 'MaxMEllon/vim-jsx-pretty'       " JSX/React 支持
+Plug 'leafgarland/typescript-vim'     " TypeScript 支持
+Plug 'peitalin/vim-jsx-typescript'    " TSX 支持
+Plug 'othree/html5.vim'               " HTML5 支持
+Plug 'hail2u/vim-css3-syntax'         " CSS3 支持
+Plug 'ap/vim-css-color'               " 直接在 Vim 中显示 CSS 色块
+Plug 'jwalton512/vim-blade'           " 可选，支持模板语法
+Plug 'vim-python/python-syntax'       " Python 语法高亮增强
+Plug 'octol/vim-cpp-enhanced-highlight' " C/C++ 增强高亮
+Plug 'joshdick/onedark.vim'             " 主题
+
+
+" --- 视觉与配色 ---
+Plug 'dracula/vim', { 'as': 'dracula' }
+" 或 Plug 'morhetz/gruvbox'
+" 或 Plug 'sainnhe/everforest'
+
+call plug#end()
+
+" 让 .tsx 文件自动识别为 TypeScript React
+autocmd BufNewFile,BufRead *.tsx set filetype=typescriptreact
+autocmd BufNewFile,BufRead *.jsx set filetype=javascriptreact
+
+colorscheme onedark
+set background=dark
